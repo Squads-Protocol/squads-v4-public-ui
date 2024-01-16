@@ -82,7 +82,7 @@ const SendTokens = ({
       new PublicKey(mint),
       recipientATA,
       new PublicKey(vaultAddress),
-      amount,
+      amount * 10 ** decimals,
       decimals
     );
 
