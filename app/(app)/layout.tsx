@@ -32,6 +32,16 @@ const AppLayout = async ({ children }: { children: React.ReactNode }) => {
       icon: "",
       route: "/transactions",
     },
+    {
+      name: "Configuration",
+      icon: "",
+      route: "/config",
+    },
+    {
+      name: "Settings",
+      icon: "",
+      route: "/settings",
+    },
   ];
 
   const headersList = headers();
@@ -42,7 +52,7 @@ const AppLayout = async ({ children }: { children: React.ReactNode }) => {
   console.log(path);
 
   return (
-    <body className="w-screen h-screen">
+    <body>
       <div className="flex flex-col md:flex-row h-screen min-w-full bg-white">
         <aside
           id="sidebar"
@@ -53,15 +63,13 @@ const AppLayout = async ({ children }: { children: React.ReactNode }) => {
             <Link href="/">
               <div className="mb-10 flex items-center rounded-lg px-3 py-2 text-slate-900 dark:text-white">
                 <Image
-                  src="/mercure.png"
-                  width={30}
-                  height={30}
+                  src="https://drive.google.com/uc?export=download&id=1UjZG82vU6aQHiGxzZEzoTneP7TTSsKda"
+                  width={0}
+                  height={0}
+                  sizes="100vw"
+                  style={{ width: "150px", height: "auto" }}
                   alt="Mercure Logo"
                 />
-
-                <span className="ml-3 text-large font-semibold text-white">
-                  Squads
-                </span>
               </div>
             </Link>
             <ul className="space-y-2 text-sm font-medium">
@@ -79,7 +87,7 @@ const AppLayout = async ({ children }: { children: React.ReactNode }) => {
         }`}
                   >
                     {tab.icon}
-                    <span className="ml-3 flex-1 whitespace-nowrap text-base text-white">
+                    <span className="ml-3 flex-1 whitespace-nowrap text-base text-black">
                       {tab.name}
                     </span>
                   </a>
