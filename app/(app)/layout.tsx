@@ -50,7 +50,6 @@ const AppLayout = async ({ children }: { children: React.ReactNode }) => {
   const path = headersList.get("x-pathname");
   const multisigCookie = headersList.get("x-multisig");
   const multisig = await isValidPublicKey(multisigCookie!);
-  console.log(path);
 
   return (
     <body>

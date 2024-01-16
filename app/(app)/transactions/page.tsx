@@ -47,14 +47,10 @@ export default async function TransactionsPage({
   const transactionIndexBN = multisigInfo.transactionIndex;
   let transactionIndex = Number(transactionIndexBN);
 
-  console.log("regular tx index", transactionIndex);
-
   const transactionsPerPage = 10;
 
   let startingTransactionIndex =
     transactionIndex - (page - 1) * transactionsPerPage;
-
-  console.log("starting tx index", startingTransactionIndex);
 
   let latestTransactions = [];
   for (let i = 0; i < 10; i++) {
