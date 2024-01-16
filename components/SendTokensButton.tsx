@@ -25,6 +25,8 @@ import {
 } from "@solana/web3.js";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { Input } from "./ui/input";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 type SendTokensProps = {
   tokenAccount: string;
@@ -47,6 +49,7 @@ const SendTokens = ({
   const walletModal = useWalletModal();
   const [amount, setAmount] = useState(0);
   const [recipient, setRecipient] = useState("");
+  const router = useRouter();
 
   const transfer = async () => {
     if (!wallet.publicKey) {
@@ -115,9 +118,19 @@ const SendTokens = ({
       rentPayer: wallet.publicKey,
       vaultIndex: vaultIndex,
     });
-    wallet.sendTransaction(multisigTransaction, connection, {
-      skipPreflight: true,
-    });
+    const signature = await wallet.sendTransaction(
+      multisigTransaction,
+      connection,
+      {
+        skipPreflight: true,
+      }
+    );
+    console.log("Transaction signature", signature);
+    toast.info("Transaction submitted.");
+    await connection.confirmTransaction(signature, "confirmed");
+    toast.success("Proposal creation successful.");
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    router.refresh();
   };
 
   return (

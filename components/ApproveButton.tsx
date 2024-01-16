@@ -72,6 +72,7 @@ const ApproveButton = ({
     toast.success("Approval submitted");
     await connection.confirmTransaction(signature, "confirmed");
     toast.success("Proposal approved");
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     router.refresh();
   };
   return (
