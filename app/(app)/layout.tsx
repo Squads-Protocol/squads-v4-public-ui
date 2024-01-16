@@ -59,25 +59,27 @@ const AppLayout = async ({ children }: { children: React.ReactNode }) => {
           className="hidden md:block md:left-0 md:top-0 md:w-3/12 lg:w-3/12 z-40 h-auto md:h-screen md:fixed"
           aria-label="Sidebar"
         >
-          <div className="flex h-auto md:h-full flex-col overflow-y-auto md:border-r border-slate-200 px-3 py-4  bg-slate-200">
-            <Link href="/">
-              <div className="mb-10 flex items-center rounded-lg px-3 py-2 text-slate-900 dark:text-white">
-                <Image
-                  src="https://drive.google.com/uc?export=download&id=1UjZG82vU6aQHiGxzZEzoTneP7TTSsKda"
-                  width={0}
-                  height={0}
-                  sizes="100vw"
-                  style={{ width: "150px", height: "auto" }}
-                  alt="Mercure Logo"
-                />
-              </div>
-            </Link>
-            <ul className="space-y-2 text-sm font-medium">
-              {tabs.map((tab) => (
-                <li key={tab.route}>
-                  <a
-                    href={tab.route}
-                    className={`flex items-center rounded-lg px-4 py-3 text-slate-900 
+          <div className="flex h-auto md:h-full flex-col overflow-y-auto justify-between md:border-r border-slate-200 px-3 py-4  bg-slate-200">
+            <div>
+              {" "}
+              <Link href="/">
+                <div className="mb-10 flex items-center rounded-lg px-3 py-2 text-slate-900 dark:text-white">
+                  <Image
+                    src="https://drive.google.com/uc?export=download&id=1UjZG82vU6aQHiGxzZEzoTneP7TTSsKda"
+                    width={0}
+                    height={0}
+                    sizes="100vw"
+                    style={{ width: "150px", height: "auto" }}
+                    alt="Mercure Logo"
+                  />
+                </div>
+              </Link>
+              <ul className="space-y-2 text-sm font-medium">
+                {tabs.map((tab) => (
+                  <li key={tab.route}>
+                    <a
+                      href={tab.route}
+                      className={`flex items-center rounded-lg px-4 py-3 text-slate-900 
                     
         ${
           (path!.startsWith(`${tab.route}/`) && tab.route != "/") ||
@@ -85,15 +87,17 @@ const AppLayout = async ({ children }: { children: React.ReactNode }) => {
             ? "bg-slate-400"
             : "hover:bg-slate-400"
         }`}
-                  >
-                    {tab.icon}
-                    <span className="ml-3 flex-1 whitespace-nowrap text-base text-black">
-                      {tab.name}
-                    </span>
-                  </a>
-                </li>
-              ))}
-            </ul>
+                    >
+                      {tab.icon}
+                      <span className="ml-3 flex-1 whitespace-nowrap text-base text-black">
+                        {tab.name}
+                      </span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
             <ConnectWallet />
           </div>
         </aside>
