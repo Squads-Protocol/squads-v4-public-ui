@@ -20,6 +20,8 @@ import {
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import ApproveButton from "@/components/ApproveButton";
+import ExecuteButton from "@/components/ExecuteButton";
+import RejectButton from "@/components/RejectButton";
 
 export default async function TransactionsPage({
   params,
@@ -119,8 +121,18 @@ export default async function TransactionsPage({
                   transactionIndex={transactionIndex}
                   proposalStatus={transaction.proposal?.status.__kind || "None"}
                 />
-                <Button className="mr-2">Reject</Button>
-                <Button>Execute</Button>
+                <RejectButton
+                  rpcUrl={rpcUrl!}
+                  multisigPda={multisigCookie!}
+                  transactionIndex={transactionIndex}
+                  proposalStatus={transaction.proposal?.status.__kind || "None"}
+                />
+                <ExecuteButton
+                  rpcUrl={rpcUrl!}
+                  multisigPda={multisigCookie!}
+                  transactionIndex={transactionIndex}
+                  proposalStatus={transaction.proposal?.status.__kind || "None"}
+                />
               </TableCell>
             </TableRow>
           ))}
