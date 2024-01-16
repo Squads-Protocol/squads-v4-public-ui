@@ -28,9 +28,17 @@ export default async function Home() {
     <main className="">
       <div>
         <h1 className="text-3xl font-bold mb-4">Overview</h1>
-   
-  <VaultDisplayer multisigPdaString={multisigCookie!} vaultIndex={vaultIndex || 0}/>
-        <TokenList tokens={tokensInWallet}/>
+
+        <VaultDisplayer
+          multisigPdaString={multisigCookie!}
+          vaultIndex={vaultIndex || 0}
+        />
+        <TokenList
+          tokens={tokensInWallet}
+          rpcUrl={rpcUrl!}
+          multisigPda={multisigCookie!}
+          vaultIndex={vaultIndex || 0}
+        />
       </div>
     </main>
   );
