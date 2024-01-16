@@ -20,6 +20,8 @@ import {
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import ApproveButton from "@/components/ApproveButton";
+import ExecuteButton from "@/components/ExecuteButton";
+import RejectButton from "@/components/RejectButton";
 
 export default async function TransactionsPage({
   params,
@@ -45,14 +47,10 @@ export default async function TransactionsPage({
   const transactionIndexBN = multisigInfo.transactionIndex;
   let transactionIndex = Number(transactionIndexBN);
 
-  console.log("regular tx index", transactionIndex);
-
   const transactionsPerPage = 10;
 
   let startingTransactionIndex =
     transactionIndex - (page - 1) * transactionsPerPage;
-
-  console.log("starting tx index", startingTransactionIndex);
 
   let latestTransactions = [];
   for (let i = 0; i < 10; i++) {
@@ -114,13 +112,23 @@ export default async function TransactionsPage({
               </TableCell>
               <TableCell>
                 <ApproveButton
-                  connection={rpcUrl!}
+                  rpcUrl={rpcUrl!}
                   multisigPda={multisigCookie!}
                   transactionIndex={transactionIndex}
                   proposalStatus={transaction.proposal?.status.__kind || "None"}
                 />
-                <Button className="mr-2">Reject</Button>
-                <Button>Execute</Button>
+                <RejectButton
+                  rpcUrl={rpcUrl!}
+                  multisigPda={multisigCookie!}
+                  transactionIndex={transactionIndex}
+                  proposalStatus={transaction.proposal?.status.__kind || "None"}
+                />
+                <ExecuteButton
+                  rpcUrl={rpcUrl!}
+                  multisigPda={multisigCookie!}
+                  transactionIndex={transactionIndex}
+                  proposalStatus={transaction.proposal?.status.__kind || "None"}
+                />
               </TableCell>
             </TableRow>
           ))}

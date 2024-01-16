@@ -9,9 +9,13 @@ const ConnectWallet = () => {
   return (
     <div>
       {!publicKey ? (
-        <Button onClick={() => modal.setVisible(true)}>Connect</Button>
+        <Button onClick={() => modal.setVisible(true)} className="w-full h-12">
+          Connect Wallet
+        </Button>
       ) : (
-        <Button onClick={disconnect}>Disconnect</Button>
+        <Button onClick={disconnect} className="w-full h-12">
+          Disconnect Wallet
+        </Button>
       )}
     </div>
   );

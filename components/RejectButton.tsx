@@ -7,38 +7,40 @@ import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
-type ApproveButtonProps = {
+type RejectButtonProps = {
   rpcUrl: string;
   multisigPda: string;
   transactionIndex: number;
   proposalStatus: string;
 };
 
-const ApproveButton = ({
+const RejectButton = ({
   rpcUrl,
   multisigPda,
   transactionIndex,
   proposalStatus,
-}: ApproveButtonProps) => {
+}: RejectButtonProps) => {
   const wallet = useWallet();
   const walletModal = useWalletModal();
   const router = useRouter();
-  const validKinds = [
-    "Rejected",
-    "Approved",
-    "Executing",
-    "Executed",
-    "Cancelled",
-  ];
-  const isKindValid = validKinds.includes(proposalStatus || "None");
+
   const connection = new Connection(rpcUrl, { commitment: "confirmed" });
 
-  const approveProposal = async () => {
+  const validKinds = ["None", "Active", "Draft"];
+  const isKindValid = validKinds.includes(proposalStatus);
+
+  const rejectTransaction = async () => {
     if (!wallet.publicKey) {
       walletModal.setVisible(true);
       return;
     }
     let bigIntTransactionIndex = BigInt(transactionIndex);
+
+    if (!isKindValid) {
+      toast.error("You can't reject this proposal.");
+      return;
+    }
+
     const transaction = new Transaction();
     if (proposalStatus === "None") {
       const createProposalInstruction = multisig.instructions.proposalCreate({
@@ -59,27 +61,33 @@ const ApproveButton = ({
         });
       transaction.add(activateProposalInstruction);
     }
-    const approveProposalInstruction = multisig.instructions.proposalApprove({
+    const rejectProposalInstruction = multisig.instructions.proposalReject({
       multisigPda: new PublicKey(multisigPda),
       member: wallet.publicKey,
       transactionIndex: bigIntTransactionIndex,
     });
-    transaction.add(approveProposalInstruction);
+
+    transaction.add(rejectProposalInstruction);
+
     const signature = await wallet.sendTransaction(transaction, connection, {
       skipPreflight: true,
     });
     console.log("Transaction signature", signature);
-    toast.success("Approval submitted");
+    toast.success("Transaction submitted.");
     await connection.confirmTransaction(signature, "confirmed");
-    toast.success("Proposal approved");
+    toast.success("Transaction executed.");
     await new Promise((resolve) => setTimeout(resolve, 1000));
     router.refresh();
   };
   return (
-    <Button disabled={isKindValid} onClick={approveProposal} className="mr-2">
-      Approve
+    <Button
+      disabled={!isKindValid}
+      onClick={rejectTransaction}
+      className="mr-2"
+    >
+      Reject
     </Button>
   );
 };
 
-export default ApproveButton;
+export default RejectButton;
