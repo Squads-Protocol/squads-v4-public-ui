@@ -114,7 +114,7 @@ export default async function TransactionsPage({
               </TableCell>
               <TableCell>
                 <ApproveButton
-                  connection={rpcUrl!}
+                  rpcUrl={rpcUrl!}
                   multisigPda={multisigCookie!}
                   transactionIndex={transactionIndex}
                   proposalStatus={transaction.proposal?.status.__kind || "None"}
