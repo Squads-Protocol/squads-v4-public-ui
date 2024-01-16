@@ -5,22 +5,24 @@ import * as multisig from "@sqds/multisig";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 type ApproveButtonProps = {
-  connection: string;
+  rpcUrl: string;
   multisigPda: string;
   transactionIndex: number;
   proposalStatus: string;
 };
 
 const ApproveButton = ({
-  connection,
+  rpcUrl,
   multisigPda,
   transactionIndex,
   proposalStatus,
 }: ApproveButtonProps) => {
   const wallet = useWallet();
   const walletModal = useWalletModal();
+  const router = useRouter();
   const validKinds = [
     "Rejected",
     "Approved",
@@ -29,6 +31,7 @@ const ApproveButton = ({
     "Cancelled",
   ];
   const isKindValid = validKinds.includes(proposalStatus || "None");
+  const connection = new Connection(rpcUrl, { commitment: "confirmed" });
 
   const approveProposal = async () => {
     if (!wallet.publicKey) {
@@ -62,14 +65,14 @@ const ApproveButton = ({
       transactionIndex: bigIntTransactionIndex,
     });
     transaction.add(approveProposalInstruction);
-    const signature = await wallet.sendTransaction(
-      transaction,
-      new Connection(connection, { commitment: "confirmed" }),
-      {
-        skipPreflight: true,
-      }
-    );
+    const signature = await wallet.sendTransaction(transaction, connection, {
+      skipPreflight: true,
+    });
     console.log("Transaction signature", signature);
+    toast.success("Approval submitted");
+    await connection.confirmTransaction(signature, "confirmed");
+    toast.success("Proposal approved");
+    router.refresh();
   };
   return (
     <Button disabled={isKindValid} onClick={approveProposal} className="mr-2">
