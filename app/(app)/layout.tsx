@@ -19,27 +19,28 @@ import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
 import * as multisig from "@sqds/multisig";
 import { Toaster } from "@/components/ui/sonner";
 import ConnectWallet from "@/components/ConnectWalletButton";
+import { LucideHome, ArrowDownUp, Users, Settings } from "lucide-react";
 
 const AppLayout = async ({ children }: { children: React.ReactNode }) => {
   const tabs = [
     {
       name: "Home",
-      icon: "",
+      icon: <LucideHome />,
       route: "/",
     },
     {
       name: "Transactions",
-      icon: "",
+      icon: <ArrowDownUp />,
       route: "/transactions",
     },
     {
       name: "Configuration",
-      icon: "",
+      icon: <Users />,
       route: "/config",
     },
     {
       name: "Settings",
-      icon: "",
+      icon: <Settings />,
       route: "/settings",
     },
   ];
@@ -104,10 +105,10 @@ const AppLayout = async ({ children }: { children: React.ReactNode }) => {
 
         <aside
           id="mobile-navbar"
-          className="block md:hidden inset-x-0 bottom-0 z-50 bg-slate-20 p-2 fixed"
+          className="block md:hidden inset-x-0 bottom-0 z-50 bg-slate-20 p-2 fixed bg-slate-300"
           aria-label="Mobile navbar"
         >
-          <div className="grid h-full max-w-lg grid-cols-5 mx-auto font-medium mt-1">
+          <div className="grid h-full max-w-lg grid-cols-4 mx-auto font-medium mt-1 ">
             {tabs.map((tab) => (
               <Link href={tab.route} key={tab.route}>
                 <button
