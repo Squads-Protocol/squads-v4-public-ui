@@ -95,22 +95,24 @@ const ConfigurationPage = async () => {
           </CardContent>
         </Card>
       </div>
-      <Card className="mt-4 w-1/2">
-        <CardHeader>
-          <CardTitle>Change program Upgrade authority</CardTitle>
-          <CardDescription>
-            Change the upgrade authority of one of your programs.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ChangeUpgradeAuthorityInput
-            multisigPda={multisigCookie!}
-            rpcUrl={rpcUrl || clusterApiUrl("mainnet-beta")}
-            transactionIndex={Number(multisigInfo.transactionIndex) + 1}
-            vaultIndex={vaultIndex}
-          />
-        </CardContent>
-      </Card>
+      <div className="pb-4">
+        <Card className="w-1/2">
+          <CardHeader>
+            <CardTitle>Change program Upgrade authority</CardTitle>
+            <CardDescription>
+              Change the upgrade authority of one of your programs.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ChangeUpgradeAuthorityInput
+              multisigPda={multisigCookie!}
+              rpcUrl={rpcUrl || clusterApiUrl("mainnet-beta")}
+              transactionIndex={Number(multisigInfo.transactionIndex) + 1}
+              vaultIndex={vaultIndex}
+            />
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
