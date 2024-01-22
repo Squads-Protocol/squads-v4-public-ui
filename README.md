@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Squads V4 public UI
 
-## Getting Started
+This repository contains the code for an open source Squads user interface.
 
-First, run the development server:
+## Usage on local device
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### Requirements
+
+- [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
+- [NodeJS](https://nodejs.org/en/download)
+- [Yarn](https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable)
+
+### Installation
+
+First, clone this repository to a folder on your device.
+
+```
+git clone https://github.com/Squads-Protocol/squads-v4-public-ui.git .
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then, install the required dependencies and build the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+yarn && yarn build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+### Start app locally
 
-## Learn More
+```
+yarn start
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Configuration
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+There are multiple configuration options available which are stored in the cookies of the application, but can also be set via the UI.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+- RPC url
 
-## Deploy on Vercel
+Default: https://api.mainnet-beta.solana.com
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Cookie name: x-rpc-url
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- Multisig address
+
+Cookie name: x-multisig
+
+- Vault Index
+
+Cookie name: x-vault-index
+
+## Disclaimer
+
+Use this code at your own risk. 
+
+By using the provided code, you agree that the maintainer of this repository will not be help responsible for any type of issue that may have occured.
