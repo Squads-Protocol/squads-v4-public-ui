@@ -6,9 +6,9 @@ import { Wallet } from "@/components/Wallet";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Squads Open Source Frontend",
+  title: "Squads Simplified",
   description:
-    "This is a simple version of the Squads frontend made for use in development and in case of emergencies.",
+    "Squads v4 program user interface.",
 };
 
 export default function RootLayout({
