@@ -47,9 +47,8 @@ export function TokenList({
                     Mint: {token.account.data.parsed.info.mint}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Amount:
-                    {token.account.data.parsed.info.tokenAmount.uiAmount *
-                      10 ** token.account.data.parsed.info.tokenAmount.decimals}
+                    Amount:{" "}
+                    {token.account.data.parsed.info.tokenAmount.uiAmount}
                   </p>
                 </div>
                 <div className="ml-auto">
@@ -63,9 +62,6 @@ export function TokenList({
                     multisigPda={multisigPda}
                     vaultIndex={vaultIndex}
                   />
-                </div>
-                <div className="ml-auto font-medium">
-                  Amount: {token.account.data.parsed.info.tokenAmount.uiAmount}
                 </div>
               </div>
               <hr className="mt-2" />

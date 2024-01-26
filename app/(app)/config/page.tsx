@@ -1,5 +1,6 @@
 import AddMemberInput from "@/components/AddMemberInput";
 import ChangeThresholdInput from "@/components/ChangeThresholdInput";
+import ChangeUpgradeAuthorityInput from "@/components/ChangeUpgradeAuthorityInput";
 import RemoveMemberButton from "@/components/RemoveMemberButton";
 import {
   Card,
@@ -90,6 +91,24 @@ const ConfigurationPage = async () => {
               multisigPda={multisigCookie!}
               rpcUrl={rpcUrl || clusterApiUrl("mainnet-beta")}
               transactionIndex={Number(multisigInfo.transactionIndex) + 1}
+            />
+          </CardContent>
+        </Card>
+      </div>
+      <div className="pb-4">
+        <Card className="w-1/2">
+          <CardHeader>
+            <CardTitle>Change program Upgrade authority</CardTitle>
+            <CardDescription>
+              Change the upgrade authority of one of your programs.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ChangeUpgradeAuthorityInput
+              multisigPda={multisigCookie!}
+              rpcUrl={rpcUrl || clusterApiUrl("mainnet-beta")}
+              transactionIndex={Number(multisigInfo.transactionIndex) + 1}
+              vaultIndex={vaultIndex}
             />
           </CardContent>
         </Card>
