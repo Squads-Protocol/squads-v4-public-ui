@@ -1,6 +1,6 @@
 # Squads V4 public UI
 
-This repository contains the code for an open source Squads user interface.
+This repository contains the code for a source available Squads V4 user interface.
 
 ## Usage on local device
 
