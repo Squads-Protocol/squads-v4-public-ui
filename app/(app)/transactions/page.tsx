@@ -22,6 +22,7 @@ import Link from "next/link";
 import ApproveButton from "@/components/ApproveButton";
 import ExecuteButton from "@/components/ExecuteButton";
 import RejectButton from "@/components/RejectButton";
+import { Suspense } from "react";
 
 export default async function TransactionsPage({
   params,
@@ -47,13 +48,13 @@ export default async function TransactionsPage({
   const transactionIndexBN = multisigInfo.transactionIndex;
   let transactionIndex = Number(transactionIndexBN);
 
-  const transactionsPerPage = 10;
+  const transactionsPerPage = 4;
 
   let startingTransactionIndex =
     transactionIndex - (page - 1) * transactionsPerPage;
 
   let latestTransactions = [];
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < transactionsPerPage; i++) {
     let usingTransactionIndex = startingTransactionIndex - i;
     let index = BigInt(usingTransactionIndex);
     const transactionPda = multisig.getTransactionPda({
@@ -82,58 +83,68 @@ export default async function TransactionsPage({
   return (
     <div>
       <h1 className="text-3xl font-bold mb-4">Transactions</h1>
-      <Table>
-        <TableCaption>A list of your recent transactions.</TableCaption>
-        <TableCaption>Page: {searchParams.page || 1}.</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Index</TableHead>
-            <TableHead>Public Key</TableHead>
-            <TableHead>Proposal Status</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {latestTransactions.map((transaction, index) => (
-            <TableRow key={index}>
-              <TableCell>{Number(transaction.index)}</TableCell>
-              <TableCell className="text-blue-500">
-                <Link
-                  href={createSolanaExplorerUrl(
-                    transaction.transactionPda[0].toBase58(),
-                    rpcUrl || clusterApiUrl("mainnet-beta")
-                  )}
-                >
-                  {transaction.transactionPda[0].toBase58()}
-                </Link>
-              </TableCell>
-              <TableCell>
-                {transaction.proposal?.status.__kind || "None"}
-              </TableCell>
-              <TableCell>
-                <ApproveButton
-                  rpcUrl={rpcUrl!}
-                  multisigPda={multisigCookie!}
-                  transactionIndex={transactionIndex}
-                  proposalStatus={transaction.proposal?.status.__kind || "None"}
-                />
-                <RejectButton
-                  rpcUrl={rpcUrl!}
-                  multisigPda={multisigCookie!}
-                  transactionIndex={transactionIndex}
-                  proposalStatus={transaction.proposal?.status.__kind || "None"}
-                />
-                <ExecuteButton
-                  rpcUrl={rpcUrl!}
-                  multisigPda={multisigCookie!}
-                  transactionIndex={transactionIndex}
-                  proposalStatus={transaction.proposal?.status.__kind || "None"}
-                />
-              </TableCell>
+
+      <Suspense fallback={<div>Loading...</div>}>
+        <Table>
+          <TableCaption>A list of your recent transactions.</TableCaption>
+          <TableCaption>Page: {searchParams.page || 1}.</TableCaption>
+
+          <TableHeader>
+            <TableRow>
+              <TableHead>Index</TableHead>
+              <TableHead>Public Key</TableHead>
+              <TableHead>Proposal Status</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {latestTransactions.map((transaction, index) => (
+              <TableRow key={index}>
+                <TableCell>{Number(transaction.index)}</TableCell>
+                <TableCell className="text-blue-500">
+                  <Link
+                    href={createSolanaExplorerUrl(
+                      transaction.transactionPda[0].toBase58(),
+                      rpcUrl || clusterApiUrl("mainnet-beta")
+                    )}
+                  >
+                    {transaction.transactionPda[0].toBase58()}
+                  </Link>
+                </TableCell>
+                <TableCell>
+                  {transaction.proposal?.status.__kind || "None"}
+                </TableCell>
+                <TableCell>
+                  <ApproveButton
+                    rpcUrl={rpcUrl!}
+                    multisigPda={multisigCookie!}
+                    transactionIndex={transactionIndex}
+                    proposalStatus={
+                      transaction.proposal?.status.__kind || "None"
+                    }
+                  />
+                  <RejectButton
+                    rpcUrl={rpcUrl!}
+                    multisigPda={multisigCookie!}
+                    transactionIndex={transactionIndex}
+                    proposalStatus={
+                      transaction.proposal?.status.__kind || "None"
+                    }
+                  />
+                  <ExecuteButton
+                    rpcUrl={rpcUrl!}
+                    multisigPda={multisigCookie!}
+                    transactionIndex={transactionIndex}
+                    proposalStatus={
+                      transaction.proposal?.status.__kind || "None"
+                    }
+                  />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Suspense>
 
       <Pagination>
         <PaginationContent>

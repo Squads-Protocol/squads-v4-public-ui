@@ -1,5 +1,10 @@
 "use client";
-import { Connection, PublicKey, Transaction } from "@solana/web3.js";
+import {
+  Connection,
+  PublicKey,
+  Transaction,
+  clusterApiUrl,
+} from "@solana/web3.js";
 import { Button } from "./ui/button";
 import * as multisig from "@sqds/multisig";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -24,7 +29,9 @@ const RejectButton = ({
   const walletModal = useWalletModal();
   const router = useRouter();
 
-  const connection = new Connection(rpcUrl, { commitment: "confirmed" });
+  const connection = new Connection(rpcUrl || clusterApiUrl("mainnet-beta"), {
+    commitment: "confirmed",
+  });
 
   const validKinds = ["None", "Active", "Draft"];
   const isKindValid = validKinds.includes(proposalStatus);

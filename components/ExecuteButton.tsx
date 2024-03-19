@@ -1,5 +1,12 @@
 "use client";
-import { ComputeBudgetInstruction, ComputeBudgetProgram, Connection, PublicKey, Transaction } from "@solana/web3.js";
+import {
+  ComputeBudgetInstruction,
+  ComputeBudgetProgram,
+  Connection,
+  PublicKey,
+  Transaction,
+  clusterApiUrl,
+} from "@solana/web3.js";
 import { Button } from "./ui/button";
 import * as multisig from "@sqds/multisig";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -28,11 +35,13 @@ const ExecuteButton = ({
   const wallet = useWallet();
   const walletModal = useWalletModal();
   const router = useRouter();
-  const [priorityFeeLamports, setPriorityFeeLamports] = useState<number>(5000)
-  const [computeUnitBudget, setComputeUnitBudget] = useState<number>(200_000)
+  const [priorityFeeLamports, setPriorityFeeLamports] = useState<number>(5000);
+  const [computeUnitBudget, setComputeUnitBudget] = useState<number>(200_000);
 
   const isTransactionReady = proposalStatus === "Approved";
-  const connection = new Connection(rpcUrl, { commitment: "confirmed" });
+  const connection = new Connection(rpcUrl || clusterApiUrl("mainnet-beta"), {
+    commitment: "confirmed",
+  });
 
   const executeTransaction = async () => {
     if (!wallet.publicKey) {
@@ -55,13 +64,23 @@ const ExecuteButton = ({
         transactionIndex: bigIntTransactionIndex,
       });
 
-      const priorityFeeInstruction = ComputeBudgetProgram.setComputeUnitPrice({microLamports: priorityFeeLamports});
-      const computeUnitInstruction = ComputeBudgetProgram.setComputeUnitLimit({units: computeUnitBudget});
+    const priorityFeeInstruction = ComputeBudgetProgram.setComputeUnitPrice({
+      microLamports: priorityFeeLamports,
+    });
+    const computeUnitInstruction = ComputeBudgetProgram.setComputeUnitLimit({
+      units: computeUnitBudget,
+    });
 
-      executeTransaction.add(computeUnitInstruction, priorityFeeInstruction, executeInstruction.instruction)
+    executeTransaction.add(
+      computeUnitInstruction,
+      priorityFeeInstruction,
+      executeInstruction.instruction
+    );
 
-      executeTransaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
-      executeTransaction.feePayer = wallet.publicKey;
+    executeTransaction.recentBlockhash = (
+      await connection.getLatestBlockhash()
+    ).blockhash;
+    executeTransaction.feePayer = wallet.publicKey;
 
     const signature = await wallet.sendTransaction(
       executeTransaction,
@@ -80,23 +99,31 @@ const ExecuteButton = ({
   return (
     <Dialog>
       <DialogTrigger disabled={!isTransactionReady}>
-        <Button
-          disabled={!isTransactionReady}
-          className="mr-2"
-        >Execute</Button>
+        <Button disabled={!isTransactionReady} className="mr-2">
+          Execute
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Execute Transaction</DialogTitle>
           <DialogDescription>
-            Select custom priority fees and compute unit limits and execute transaction.
+            Select custom priority fees and compute unit limits and execute
+            transaction.
           </DialogDescription>
         </DialogHeader>
         <h3>Priority Fee in lamports</h3>
-        <Input placeholder="Priority Fee" onChange={(e) => setPriorityFeeLamports(Number(e.target.value))} value={priorityFeeLamports} />
+        <Input
+          placeholder="Priority Fee"
+          onChange={(e) => setPriorityFeeLamports(Number(e.target.value))}
+          value={priorityFeeLamports}
+        />
 
         <h3>Compute Unit Budget</h3>
-        <Input placeholder="Priority Fee" onChange={(e) => setComputeUnitBudget(Number(e.target.value))} value={computeUnitBudget} />
+        <Input
+          placeholder="Priority Fee"
+          onChange={(e) => setComputeUnitBudget(Number(e.target.value))}
+          value={computeUnitBudget}
+        />
         <Button
           disabled={!isTransactionReady}
           onClick={executeTransaction}
@@ -106,7 +133,7 @@ const ExecuteButton = ({
         </Button>
       </DialogContent>
     </Dialog>
-  )
+  );
 };
 
 export default ExecuteButton;
