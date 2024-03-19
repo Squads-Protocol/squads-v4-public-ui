@@ -32,9 +32,7 @@ export default async function TransactionsPage({
   searchParams: { page: string };
 }) {
   const page = searchParams.page ? parseInt(searchParams.page) : 1;
-
   const rpcUrl = headers().get("x-rpc-url");
-
   const connection = new Connection(rpcUrl || clusterApiUrl("mainnet-beta"));
   const multisigCookie = headers().get("x-multisig");
   const multisigPda = new PublicKey(multisigCookie!);
@@ -47,15 +45,21 @@ export default async function TransactionsPage({
 
   const transactionIndexBN = multisigInfo.transactionIndex;
   let transactionIndex = Number(transactionIndexBN);
-
   const transactionsPerPage = 4;
 
-  let startingTransactionIndex =
-    transactionIndex - (page - 1) * transactionsPerPage;
+  // Ensure startingTransactionIndex is at least 1
+  let startingTransactionIndex = Math.max(
+    1,
+    transactionIndex - (page - 1) * transactionsPerPage
+  );
 
   let latestTransactions = [];
   for (let i = 0; i < transactionsPerPage; i++) {
     let usingTransactionIndex = startingTransactionIndex - i;
+
+    // Ensure usingTransactionIndex does not go below 1
+    if (usingTransactionIndex < 1) break; // Stop fetching if the index is out of valid range
+
     let index = BigInt(usingTransactionIndex);
     const transactionPda = multisig.getTransactionPda({
       multisigPda,
@@ -67,7 +71,6 @@ export default async function TransactionsPage({
     });
 
     let proposal;
-
     try {
       proposal = await multisig.accounts.Proposal.fromAccountAddress(
         connection,
