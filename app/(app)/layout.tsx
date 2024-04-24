@@ -1,26 +1,11 @@
-import {
-  CommandIcon,
-  HomeIcon,
-  UsersIcon,
-  Package2Icon,
-  SettingsIcon,
-  PackageIcon,
-  ArrowLeftRightIcon,
-  InfoIcon,
-  Settings2Icon,
-  PiggyBankIcon,
-  WalletCardsIcon,
-} from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import Image from "next/image";
-import MultisigInput from "@/components/MultisigInput";
 import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
 import * as multisig from "@sqds/multisig";
 import { Toaster } from "@/components/ui/sonner";
 import ConnectWallet from "@/components/ConnectWalletButton";
 import { LucideHome, ArrowDownUp, Users, Settings } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
 import RenderMultisigRoute from "@/components/RenderMultisigRoute";
 
 const AppLayout = async ({ children }: { children: React.ReactNode }) => {
