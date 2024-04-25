@@ -1,25 +1,12 @@
-import {
-  CommandIcon,
-  HomeIcon,
-  UsersIcon,
-  Package2Icon,
-  SettingsIcon,
-  PackageIcon,
-  ArrowLeftRightIcon,
-  InfoIcon,
-  Settings2Icon,
-  PiggyBankIcon,
-  WalletCardsIcon,
-} from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import Image from "next/image";
-import MultisigInput from "@/components/MultisigInput";
 import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
 import * as multisig from "@sqds/multisig";
 import { Toaster } from "@/components/ui/sonner";
 import ConnectWallet from "@/components/ConnectWalletButton";
 import { LucideHome, ArrowDownUp, Users, Settings } from "lucide-react";
+import RenderMultisigRoute from "@/components/RenderMultisigRoute";
 
 const AppLayout = async ({ children }: { children: React.ReactNode }) => {
   const tabs = [
@@ -124,9 +111,7 @@ const AppLayout = async ({ children }: { children: React.ReactNode }) => {
           </div>
         </aside>
 
-        <div className="md:w-9/12 md:ml-auto space-y-2 p-3 pt-4 mt-1 md:space-y-4 md:p-8 md:pt-6 pb-24">
-          {multisig ? <div>{children} </div> : <MultisigInput />}
-        </div>
+        <RenderMultisigRoute multisig={multisig} children={children} />
       </div>
       <Toaster />
     </body>

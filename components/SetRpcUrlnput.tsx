@@ -24,11 +24,10 @@ const SetRpcUrlInput = () => {
   const onSubmit = async () => {
     if (isValidUrl(rpcUrl)) {
       document.cookie = `x-rpc-url=${rpcUrl}`;
-      toast.success("RPC Url set successfully.");
       setRpcUrl("");
       router.refresh();
     } else {
-      toast.error("Please enter a valid URL.");
+      throw "Please enter a valid URL.";
     }
   };
 
@@ -37,14 +36,21 @@ const SetRpcUrlInput = () => {
       <Input
         onChange={(e) => setRpcUrl(e.target.value)}
         placeholder="https://api.mainnet-beta.solana.com"
+        defaultValue={rpcUrl}
         className=""
-        value={rpcUrl}
       />
       {!isValidUrl(rpcUrl) && rpcUrl.length > 0 && (
         <p className="text-xs mt-2">Please enter a valid URL.</p>
       )}
       <Button
-        onClick={onSubmit}
+        onClick={() => toast.promise(
+          onSubmit(),
+          {
+            loading: "Loading...",
+            success: "RPC URL set successfully.",
+            error: (err) => `${err}`
+          }
+        )}
         disabled={!isValidUrl(rpcUrl) && rpcUrl.length > 0}
         className="mt-2"
       >
