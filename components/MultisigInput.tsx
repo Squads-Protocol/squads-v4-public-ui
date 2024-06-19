@@ -27,6 +27,7 @@ const MultisigInput = () => {
           className="w-full border border-gray-300 rounded-md shadow-sm px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200 sm:text-sm mt-2"
           onChange={(e) => setMultisig(e.target.value)}
         />
+        <p className="mt-1 text-gray-500 text-xs">*This needs to be your multisig account (found in &quot;Settings&quot; {'>'} &quot;Multisig Account&quot;)</p>
         <Button onClick={setMultisigCookie} className="mt-4">
           Set Multisig
         </Button>
