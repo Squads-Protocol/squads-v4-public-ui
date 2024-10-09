@@ -8,7 +8,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "./ui/button";
-import { use, useEffect, useState } from "react";
+import { useState } from "react";
 import {
   createAssociatedTokenAccountIdempotentInstruction,
   createTransferCheckedInstruction,
@@ -19,7 +19,6 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import {
   Connection,
   PublicKey,
-  Transaction,
   TransactionMessage,
   clusterApiUrl,
 } from "@solana/web3.js";
@@ -27,6 +26,7 @@ import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { Input } from "./ui/input";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { isPublickey } from "@/lib/isPublickey";
 
 type SendTokensProps = {
   tokenAccount: string;
@@ -35,6 +35,7 @@ type SendTokensProps = {
   rpcUrl: string;
   multisigPda: string;
   vaultIndex: number;
+  programId?: string;
 };
 
 const SendTokens = ({
@@ -44,6 +45,7 @@ const SendTokens = ({
   rpcUrl,
   multisigPda,
   vaultIndex,
+  programId,
 }: SendTokensProps) => {
   const wallet = useWallet();
   const walletModal = useWalletModal();
@@ -66,6 +68,7 @@ const SendTokens = ({
       .getVaultPda({
         index: vaultIndex,
         multisigPda: new PublicKey(multisigPda),
+        programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
       })[0]
       .toBase58();
 
@@ -150,7 +153,7 @@ const SendTokens = ({
           type="text"
           onChange={(e) => setRecipient(e.target.value)}
         />
-        {isValidPublicKey(recipient) ? null : (
+        {isPublickey(recipient) ? null : (
           <p className="text-xs">Invalid recipient address</p>
         )}
         <Input
@@ -158,7 +161,7 @@ const SendTokens = ({
           type="number"
           onChange={(e) => setAmount(parseInt(e.target.value))}
         />
-        <Button onClick={transfer} disabled={!isValidPublicKey(recipient)}>
+        <Button onClick={transfer} disabled={!isPublickey(recipient)}>
           Transfer
         </Button>
       </DialogContent>
@@ -167,12 +170,3 @@ const SendTokens = ({
 };
 
 export default SendTokens;
-
-const isValidPublicKey = (value: string) => {
-  try {
-    new PublicKey(value);
-    return true;
-  } catch (e) {
-    return false;
-  }
-};

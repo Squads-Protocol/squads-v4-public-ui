@@ -24,6 +24,7 @@ type ExecuteButtonProps = {
   multisigPda: string;
   transactionIndex: number;
   proposalStatus: string;
+  programId: string;
 };
 
 const ExecuteButton = ({
@@ -31,6 +32,7 @@ const ExecuteButton = ({
   multisigPda,
   transactionIndex,
   proposalStatus,
+  programId,
 }: ExecuteButtonProps) => {
   const wallet = useWallet();
   const walletModal = useWalletModal();
@@ -62,6 +64,7 @@ const ExecuteButton = ({
         connection,
         member: wallet.publicKey,
         transactionIndex: bigIntTransactionIndex,
+        programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
       });
 
     const priorityFeeInstruction = ComputeBudgetProgram.setComputeUnitPrice({

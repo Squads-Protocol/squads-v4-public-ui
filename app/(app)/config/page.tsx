@@ -19,6 +19,8 @@ const ConfigurationPage = async () => {
   const multisigCookie = headers().get("x-multisig");
   const multisigPda = new PublicKey(multisigCookie!);
   const vaultIndex = Number(headers().get("x-vault-index"));
+  const programIdCookie = headers().get("x-program-id");
+  const programId = new PublicKey(programIdCookie!);
 
   const multisigInfo = await multisig.accounts.Multisig.fromAccountAddress(
     connection,
@@ -56,6 +58,11 @@ const ConfigurationPage = async () => {
                       transactionIndex={
                         Number(multisigInfo.transactionIndex) + 1
                       }
+                      programId={
+                        programIdCookie
+                          ? programIdCookie
+                          : multisig.PROGRAM_ID.toBase58()
+                      }
                     />
                   </div>
                 </div>
@@ -76,6 +83,11 @@ const ConfigurationPage = async () => {
               multisigPda={multisigCookie!}
               rpcUrl={rpcUrl || clusterApiUrl("mainnet-beta")}
               transactionIndex={Number(multisigInfo.transactionIndex) + 1}
+              programId={
+                programIdCookie
+                  ? programIdCookie
+                  : multisig.PROGRAM_ID.toBase58()
+              }
             />
           </CardContent>
         </Card>
@@ -91,6 +103,11 @@ const ConfigurationPage = async () => {
               multisigPda={multisigCookie!}
               rpcUrl={rpcUrl || clusterApiUrl("mainnet-beta")}
               transactionIndex={Number(multisigInfo.transactionIndex) + 1}
+              programId={
+                programIdCookie
+                  ? programIdCookie
+                  : multisig.PROGRAM_ID.toBase58()
+              }
             />
           </CardContent>
         </Card>
@@ -109,6 +126,11 @@ const ConfigurationPage = async () => {
               rpcUrl={rpcUrl || clusterApiUrl("mainnet-beta")}
               transactionIndex={Number(multisigInfo.transactionIndex) + 1}
               vaultIndex={vaultIndex}
+              globalProgramId={
+                programIdCookie
+                  ? programIdCookie
+                  : multisig.PROGRAM_ID.toBase58()
+              }
             />
           </CardContent>
         </Card>

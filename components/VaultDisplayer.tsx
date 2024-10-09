@@ -1,33 +1,23 @@
 import * as multisig from "@sqds/multisig";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "./ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { PublicKey } from "@solana/web3.js";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
 import { VaultSelector } from "./VaultSelector";
 
 type VaultDisplayerProps = {
   multisigPdaString: string;
   vaultIndex: number;
+  programId?: string;
 };
 
 export function VaultDisplayer({
   multisigPdaString,
   vaultIndex,
+  programId,
 }: VaultDisplayerProps) {
   const vaultAddress = multisig.getVaultPda({
     multisigPda: new PublicKey(multisigPdaString),
     index: vaultIndex,
+    programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
   });
 
   return (

@@ -17,7 +17,6 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import ApproveButton from "@/components/ApproveButton";
 import ExecuteButton from "@/components/ExecuteButton";
@@ -37,6 +36,8 @@ export default async function TransactionsPage({
   const multisigCookie = headers().get("x-multisig");
   const multisigPda = new PublicKey(multisigCookie!);
   const vaultIndex = Number(headers().get("x-vault-index"));
+  const programIdCookie = headers().get("x-program-id");
+  const programId = new PublicKey(programIdCookie!);
 
   const multisigInfo = await multisig.accounts.Multisig.fromAccountAddress(
     connection,
@@ -64,10 +65,12 @@ export default async function TransactionsPage({
     const transactionPda = multisig.getTransactionPda({
       multisigPda,
       index,
+      programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
     });
     const proposalPda = multisig.getProposalPda({
       multisigPda,
       transactionIndex: index,
+      programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
     });
 
     let proposal;
@@ -125,6 +128,11 @@ export default async function TransactionsPage({
                     proposalStatus={
                       transaction.proposal?.status.__kind || "None"
                     }
+                    programId={
+                      programIdCookie
+                        ? programIdCookie
+                        : multisig.PROGRAM_ID.toBase58()
+                    }
                   />
                   <RejectButton
                     rpcUrl={rpcUrl!}
@@ -133,6 +141,11 @@ export default async function TransactionsPage({
                     proposalStatus={
                       transaction.proposal?.status.__kind || "None"
                     }
+                    programId={
+                      programIdCookie
+                        ? programIdCookie
+                        : multisig.PROGRAM_ID.toBase58()
+                    }
                   />
                   <ExecuteButton
                     rpcUrl={rpcUrl!}
@@ -140,6 +153,11 @@ export default async function TransactionsPage({
                     transactionIndex={transactionIndex}
                     proposalStatus={
                       transaction.proposal?.status.__kind || "None"
+                    }
+                    programId={
+                      programIdCookie
+                        ? programIdCookie
+                        : multisig.PROGRAM_ID.toBase58()
                     }
                   />
                 </TableCell>

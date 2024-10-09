@@ -1,5 +1,5 @@
 "use client";
-import { Connection, PublicKey, Transaction } from "@solana/web3.js";
+import { Connection, PublicKey } from "@solana/web3.js";
 import { Button } from "./ui/button";
 import * as multisig from "@sqds/multisig";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -12,6 +12,7 @@ type RemoveMemberButtonProps = {
   multisigPda: string;
   transactionIndex: number;
   memberKey: string;
+  programId: string;
 };
 
 const RemoveMemberButton = ({
@@ -19,6 +20,7 @@ const RemoveMemberButton = ({
   multisigPda,
   transactionIndex,
   memberKey,
+  programId,
 }: RemoveMemberButtonProps) => {
   const wallet = useWallet();
   const walletModal = useWalletModal();
@@ -49,6 +51,7 @@ const RemoveMemberButton = ({
         rentPayer: wallet.publicKey,
         blockhash: (await connection.getLatestBlockhash()).blockhash,
         feePayer: wallet.publicKey,
+        programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
       });
 
     const signature = await wallet.sendTransaction(

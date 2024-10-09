@@ -13,12 +13,14 @@ type ChangeThresholdInputProps = {
   multisigPda: string;
   transactionIndex: number;
   rpcUrl: string;
+  programId: string;
 };
 
 const ChangeThresholdInput = ({
   multisigPda,
   transactionIndex,
   rpcUrl,
+  programId,
 }: ChangeThresholdInputProps) => {
   const [threshold, setThreshold] = useState("");
   const wallet = useWallet();
@@ -48,6 +50,7 @@ const ChangeThresholdInput = ({
         rentPayer: wallet.publicKey,
         blockhash: (await connection.getLatestBlockhash()).blockhash,
         feePayer: wallet.publicKey,
+        programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
       });
 
     const signature = await wallet.sendTransaction(

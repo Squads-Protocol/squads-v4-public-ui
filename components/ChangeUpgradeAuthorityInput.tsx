@@ -14,12 +14,14 @@ import {
   TransactionMessage,
 } from "@solana/web3.js";
 import { toast } from "sonner";
+import { isPublickey } from "@/lib/isPublickey";
 
 type ChangeUpgradeAuthorityInputProps = {
   multisigPda: string;
   transactionIndex: number;
   rpcUrl: string;
   vaultIndex: number;
+  globalProgramId: string;
 };
 
 const ChangeUpgradeAuthorityInput = ({
@@ -27,6 +29,7 @@ const ChangeUpgradeAuthorityInput = ({
   transactionIndex,
   rpcUrl,
   vaultIndex,
+  globalProgramId,
 }: ChangeUpgradeAuthorityInputProps) => {
   const [programId, setProgramId] = useState("");
   const [newAuthority, setNewAuthority] = useState("");
@@ -40,6 +43,9 @@ const ChangeUpgradeAuthorityInput = ({
   const vaultAddress = multisig.getVaultPda({
     index: vaultIndex,
     multisigPda: new PublicKey(multisigPda),
+    programId: globalProgramId
+      ? new PublicKey(globalProgramId)
+      : multisig.PROGRAM_ID,
   })[0];
 
   const changeThreshold = async () => {
@@ -102,6 +108,9 @@ const ChangeUpgradeAuthorityInput = ({
       addressLookupTableAccounts: [],
       rentPayer: wallet.publicKey,
       vaultIndex: vaultIndex,
+      programId: globalProgramId
+        ? new PublicKey(globalProgramId)
+        : multisig.PROGRAM_ID,
     });
 
     const signature = await wallet.sendTransaction(
@@ -134,9 +143,7 @@ const ChangeUpgradeAuthorityInput = ({
       />
       <Button
         onClick={changeThreshold}
-        disabled={
-          !isValidPublicKey(programId) || !isValidPublicKey(newAuthority)
-        }
+        disabled={!isPublickey(programId) || !isPublickey(newAuthority)}
       >
         Change Authority
       </Button>
@@ -145,12 +152,3 @@ const ChangeUpgradeAuthorityInput = ({
 };
 
 export default ChangeUpgradeAuthorityInput;
-
-const isValidPublicKey = (value: string) => {
-  try {
-    new PublicKey(value);
-    return true;
-  } catch (e) {
-    return false;
-  }
-};

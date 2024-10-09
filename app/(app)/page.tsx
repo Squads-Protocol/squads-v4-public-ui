@@ -12,9 +12,12 @@ export default async function Home() {
   const multisigCookie = headers().get("x-multisig");
   const multisigPda = new PublicKey(multisigCookie!);
   const vaultIndex = Number(headers().get("x-vault-index"));
+  const programIdCookie = headers().get("x-program-id");
+  const programId = new PublicKey(programIdCookie!);
   const multisigVault = multisig.getVaultPda({
     multisigPda,
     index: vaultIndex || 0,
+    programId: programId ? programId : multisig.PROGRAM_ID,
   })[0];
 
   const tokensInWallet = await connection.getParsedTokenAccountsByOwner(
@@ -32,12 +35,14 @@ export default async function Home() {
         <VaultDisplayer
           multisigPdaString={multisigCookie!}
           vaultIndex={vaultIndex || 0}
+          programId={programIdCookie!}
         />
         <TokenList
           tokens={tokensInWallet}
           rpcUrl={rpcUrl!}
           multisigPda={multisigCookie!}
           vaultIndex={vaultIndex || 0}
+          programId={programIdCookie!}
         />
       </div>
     </main>

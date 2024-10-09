@@ -8,17 +8,20 @@ import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import * as multisig from "@sqds/multisig";
 import { Connection, PublicKey } from "@solana/web3.js";
 import { toast } from "sonner";
+import { isPublickey } from "@/lib/isPublickey";
 
 type AddMemberInputProps = {
   multisigPda: string;
   transactionIndex: number;
   rpcUrl: string;
+  programId: string;
 };
 
 const AddMemberInput = ({
   multisigPda,
   transactionIndex,
   rpcUrl,
+  programId,
 }: AddMemberInputProps) => {
   const [member, setMember] = useState("");
   const wallet = useWallet();
@@ -52,6 +55,7 @@ const AddMemberInput = ({
       rentPayer: wallet.publicKey,
       blockhash: (await connection.getLatestBlockhash()).blockhash,
       feePayer: wallet.publicKey,
+      programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
     });
 
     const signature = await wallet.sendTransaction(
@@ -75,7 +79,7 @@ const AddMemberInput = ({
         onChange={(e) => setMember(e.target.value)}
         className="mb-3"
       />
-      <Button onClick={addMember} disabled={!isValidPublicKey(member)}>
+      <Button onClick={addMember} disabled={!isPublickey(member)}>
         Add Member
       </Button>
     </div>
@@ -83,12 +87,3 @@ const AddMemberInput = ({
 };
 
 export default AddMemberInput;
-
-const isValidPublicKey = (value: string) => {
-  try {
-    new PublicKey(value);
-    return true;
-  } catch (e) {
-    return false;
-  }
-};

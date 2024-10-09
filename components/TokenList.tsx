@@ -1,3 +1,4 @@
+import * as multisig from "@sqds/multisig";
 import {
   AccountInfo,
   ParsedAccountData,
@@ -23,6 +24,7 @@ type TokenListProps = {
   rpcUrl: string;
   multisigPda: string;
   vaultIndex: number;
+  programId?: string;
 };
 
 export function TokenList({
@@ -30,6 +32,7 @@ export function TokenList({
   rpcUrl,
   multisigPda,
   vaultIndex,
+  programId,
 }: TokenListProps) {
   return (
     <Card>
@@ -61,6 +64,7 @@ export function TokenList({
                     rpcUrl={rpcUrl}
                     multisigPda={multisigPda}
                     vaultIndex={vaultIndex}
+                    programId={programId}
                   />
                 </div>
               </div>
