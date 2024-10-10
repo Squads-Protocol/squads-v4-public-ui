@@ -12,6 +12,7 @@ import {
   PublicKey,
   TransactionInstruction,
   TransactionMessage,
+  VersionedTransaction,
 } from "@solana/web3.js";
 import { toast } from "sonner";
 import { isPublickey } from "@/lib/isPublickey";
@@ -48,7 +49,7 @@ const ChangeUpgradeAuthorityInput = ({
       : multisig.PROGRAM_ID,
   })[0];
 
-  const changeThreshold = async () => {
+  const changeUpgradeAuth = async () => {
     if (!wallet.publicKey) {
       walletModal.setVisible(true);
       return;
@@ -97,12 +98,10 @@ const ChangeUpgradeAuthorityInput = ({
 
     const transactionIndexBN = BigInt(transactionIndex);
 
-    const multisigTransaction = multisig.transactions.vaultTransactionCreate({
+    const multisigTransactionIx = multisig.instructions.vaultTransactionCreate({
       multisigPda: new PublicKey(multisigPda),
-      blockhash,
       creator: wallet.publicKey,
       ephemeralSigners: 0,
-      feePayer: wallet.publicKey,
       transactionMessage,
       transactionIndex: transactionIndexBN,
       addressLookupTableAccounts: [],
@@ -112,18 +111,37 @@ const ChangeUpgradeAuthorityInput = ({
         ? new PublicKey(globalProgramId)
         : multisig.PROGRAM_ID,
     });
+    const proposalIx = multisig.instructions.proposalCreate({
+      multisigPda: new PublicKey(multisigPda),
+      creator: wallet.publicKey,
+      isDraft: false,
+      transactionIndex: bigIntTransactionIndex,
+      rentPayer: wallet.publicKey,
+      programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
+    });
+    const approveIx = multisig.instructions.proposalApprove({
+      multisigPda: new PublicKey(multisigPda),
+      member: wallet.publicKey,
+      transactionIndex: bigIntTransactionIndex,
+      programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
+    });
 
-    const signature = await wallet.sendTransaction(
-      multisigTransaction,
-      connection,
-      {
-        skipPreflight: true,
-      }
-    );
+    const message = new TransactionMessage({
+      instructions: [multisigTransactionIx, proposalIx, approveIx],
+      payerKey: wallet.publicKey,
+      recentBlockhash: (await connection.getLatestBlockhash()).blockhash,
+    }).compileToV0Message();
+
+    const transaction = new VersionedTransaction(message);
+
+    const signature = await wallet.sendTransaction(transaction, connection, {
+      skipPreflight: true,
+    });
     console.log("Transaction signature", signature);
-    toast.info("Transaction submitted.");
+    toast.loading("Confirming...", {
+      id: "transaction",
+    });
     await connection.confirmTransaction(signature, "confirmed");
-    toast.success("Transaction created.");
     await new Promise((resolve) => setTimeout(resolve, 1000));
     router.refresh();
   };
@@ -142,7 +160,14 @@ const ChangeUpgradeAuthorityInput = ({
         className="mb-3"
       />
       <Button
-        onClick={changeThreshold}
+        onClick={() =>
+          toast.promise(changeUpgradeAuth, {
+            id: "transaction",
+            loading: "Loading...",
+            success: "Upgrade authority change proposed.",
+            error: (e) => `Failed to propose: ${e}`,
+          })
+        }
         disabled={!isPublickey(programId) || !isPublickey(newAuthority)}
       >
         Change Authority

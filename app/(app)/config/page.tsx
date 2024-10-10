@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
 import * as multisig from "@sqds/multisig";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 const ConfigurationPage = async () => {
   const rpcUrl = headers().get("x-rpc-url");
 
@@ -19,8 +19,10 @@ const ConfigurationPage = async () => {
   const multisigCookie = headers().get("x-multisig");
   const multisigPda = new PublicKey(multisigCookie!);
   const vaultIndex = Number(headers().get("x-vault-index"));
-  const programIdCookie = headers().get("x-program-id");
-  const programId = new PublicKey(programIdCookie!);
+  const programIdCookie = cookies().get("x-programid")?.value;
+  const programId = programIdCookie
+    ? new PublicKey(programIdCookie!)
+    : multisig.PROGRAM_ID;
 
   const multisigInfo = await multisig.accounts.Multisig.fromAccountAddress(
     connection,
@@ -59,8 +61,8 @@ const ConfigurationPage = async () => {
                         Number(multisigInfo.transactionIndex) + 1
                       }
                       programId={
-                        programIdCookie
-                          ? programIdCookie
+                        programId.toBase58()
+                          ? programId.toBase58()
                           : multisig.PROGRAM_ID.toBase58()
                       }
                     />

@@ -81,14 +81,26 @@ const ApproveButton = ({
       skipPreflight: true,
     });
     console.log("Transaction signature", signature);
-    toast.success("Approval submitted");
+    toast.loading("Confirming...", {
+      id: "transaction",
+    });
     await connection.confirmTransaction(signature, "confirmed");
-    toast.success("Proposal approved");
     await new Promise((resolve) => setTimeout(resolve, 1000));
     router.refresh();
   };
   return (
-    <Button disabled={isKindValid} onClick={approveProposal} className="mr-2">
+    <Button
+      disabled={isKindValid}
+      onClick={() =>
+        toast.promise(approveProposal, {
+          id: "transaction",
+          loading: "Loading...",
+          success: "Transaction approved.",
+          error: (e) => `Failed to approve: ${e}`,
+        })
+      }
+      className="mr-2"
+    >
       Approve
     </Button>
   );

@@ -1,6 +1,6 @@
-import * as multisig from "@sqds/multisig";
 import {
   AccountInfo,
+  LAMPORTS_PER_SOL,
   ParsedAccountData,
   PublicKey,
   RpcResponseAndContext,
@@ -13,8 +13,10 @@ import {
   CardTitle,
 } from "./ui/card";
 import SendTokens from "./SendTokensButton";
+import SendSol from "./SendSolButton";
 
 type TokenListProps = {
+  solBalance: number;
   tokens: RpcResponseAndContext<
     {
       pubkey: PublicKey;
@@ -28,6 +30,7 @@ type TokenListProps = {
 };
 
 export function TokenList({
+  solBalance,
   tokens,
   rpcUrl,
   multisigPda,
@@ -42,6 +45,25 @@ export function TokenList({
       </CardHeader>
       <CardContent>
         <div className="space-y-8">
+          <div>
+            <div className="flex items-center">
+              <div className="ml-4 space-y-1">
+                <p className="text-sm font-medium leading-none">SOL</p>
+                <p className="text-sm text-muted-foreground">
+                  Amount: {solBalance / LAMPORTS_PER_SOL}
+                </p>
+              </div>
+              <div className="ml-auto">
+                <SendSol
+                  rpcUrl={rpcUrl}
+                  multisigPda={multisigPda}
+                  vaultIndex={vaultIndex}
+                  programId={programId}
+                />
+              </div>
+            </div>
+            {tokens.value.length > 0 ? <hr className="mt-2" /> : null}
+          </div>
           {tokens.value.map((token) => (
             <div key={token.account.data.parsed.info.mint}>
               <div className="flex items-center">

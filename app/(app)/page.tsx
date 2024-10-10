@@ -1,6 +1,5 @@
 import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
-import { headers } from "next/headers";
-import Image from "next/image";
+import { cookies, headers } from "next/headers";
 import * as multisig from "@sqds/multisig";
 import { TokenList } from "@/components/TokenList";
 import { VaultDisplayer } from "@/components/VaultDisplayer";
@@ -12,13 +11,18 @@ export default async function Home() {
   const multisigCookie = headers().get("x-multisig");
   const multisigPda = new PublicKey(multisigCookie!);
   const vaultIndex = Number(headers().get("x-vault-index"));
-  const programIdCookie = headers().get("x-program-id");
-  const programId = new PublicKey(programIdCookie!);
+  const programIdCookie = cookies().get("x-program-id")?.value;
+  const programId = programIdCookie
+    ? new PublicKey(programIdCookie!)
+    : multisig.PROGRAM_ID;
+
   const multisigVault = multisig.getVaultPda({
     multisigPda,
     index: vaultIndex || 0,
     programId: programId ? programId : multisig.PROGRAM_ID,
   })[0];
+
+  const solBalance = await connection.getBalance(multisigVault);
 
   const tokensInWallet = await connection.getParsedTokenAccountsByOwner(
     multisigVault,
@@ -38,6 +42,7 @@ export default async function Home() {
           programId={programIdCookie!}
         />
         <TokenList
+          solBalance={solBalance}
           tokens={tokensInWallet}
           rpcUrl={rpcUrl!}
           multisigPda={multisigCookie!}

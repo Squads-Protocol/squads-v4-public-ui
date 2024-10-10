@@ -1,5 +1,5 @@
 import * as multisig from "@sqds/multisig";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
 import {
   Table,
@@ -23,6 +23,16 @@ import ExecuteButton from "@/components/ExecuteButton";
 import RejectButton from "@/components/RejectButton";
 import { Suspense } from "react";
 
+const TRANSACTIONS_PER_PAGE = 10;
+
+interface ActionButtonsProps {
+  rpcUrl: string;
+  multisigPda: string;
+  transactionIndex: number;
+  proposalStatus: string;
+  programId: PublicKey;
+}
+
 export default async function TransactionsPage({
   params,
   searchParams,
@@ -36,55 +46,37 @@ export default async function TransactionsPage({
   const multisigCookie = headers().get("x-multisig");
   const multisigPda = new PublicKey(multisigCookie!);
   const vaultIndex = Number(headers().get("x-vault-index"));
-  const programIdCookie = headers().get("x-program-id");
-  const programId = new PublicKey(programIdCookie!);
+  const programIdCookie = cookies().get("x-program-id")?.value;
+  const programId = programIdCookie
+    ? new PublicKey(programIdCookie!)
+    : multisig.PROGRAM_ID;
 
   const multisigInfo = await multisig.accounts.Multisig.fromAccountAddress(
     connection,
     multisigPda
   );
+  const totalTransactions = Number(multisigInfo.transactionIndex);
+  const totalPages = Math.ceil(totalTransactions / TRANSACTIONS_PER_PAGE);
 
-  const transactionIndexBN = multisigInfo.transactionIndex;
-  let transactionIndex = Number(transactionIndexBN);
-  const transactionsPerPage = 4;
-
-  // Ensure startingTransactionIndex is at least 1
-  let startingTransactionIndex = Math.max(
-    1,
-    transactionIndex - (page - 1) * transactionsPerPage
-  );
-
-  let latestTransactions = [];
-  for (let i = 0; i < transactionsPerPage; i++) {
-    let usingTransactionIndex = startingTransactionIndex - i;
-
-    // Ensure usingTransactionIndex does not go below 1
-    if (usingTransactionIndex < 1) break; // Stop fetching if the index is out of valid range
-
-    let index = BigInt(usingTransactionIndex);
-    const transactionPda = multisig.getTransactionPda({
-      multisigPda,
-      index,
-      programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
-    });
-    const proposalPda = multisig.getProposalPda({
-      multisigPda,
-      transactionIndex: index,
-      programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
-    });
-
-    let proposal;
-    try {
-      proposal = await multisig.accounts.Proposal.fromAccountAddress(
-        connection,
-        proposalPda[0]
-      );
-    } catch (error) {
-      proposal = null;
-    }
-
-    latestTransactions.push({ transactionPda, proposal, index });
+  if (page > totalPages) {
+    // Redirect to the last valid page if the requested page is out of range
+    return {
+      redirect: {
+        destination: `/transactions?page=${totalPages}`,
+        permanent: false,
+      },
+    };
   }
+
+  const startIndex = totalTransactions - (page - 1) * TRANSACTIONS_PER_PAGE;
+  const endIndex = Math.max(startIndex - TRANSACTIONS_PER_PAGE + 1, 1);
+
+  const latestTransactions = await Promise.all(
+    Array.from({ length: startIndex - endIndex + 1 }, (_, i) => {
+      const index = BigInt(startIndex - i);
+      return fetchTransactionData(connection, multisigPda, index, programId);
+    })
+  );
 
   return (
     <div>
@@ -93,7 +85,9 @@ export default async function TransactionsPage({
       <Suspense fallback={<div>Loading...</div>}>
         <Table>
           <TableCaption>A list of your recent transactions.</TableCaption>
-          <TableCaption>Page: {searchParams.page || 1}.</TableCaption>
+          <TableCaption>
+            Page: {page} of {totalPages}
+          </TableCaption>
 
           <TableHeader>
             <TableRow>
@@ -104,82 +98,120 @@ export default async function TransactionsPage({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {latestTransactions.map((transaction, index) => (
-              <TableRow key={index}>
-                <TableCell>{Number(transaction.index)}</TableCell>
-                <TableCell className="text-blue-500">
-                  <Link
-                    href={createSolanaExplorerUrl(
-                      transaction.transactionPda[0].toBase58(),
-                      rpcUrl || clusterApiUrl("mainnet-beta")
-                    )}
-                  >
-                    {transaction.transactionPda[0].toBase58()}
-                  </Link>
-                </TableCell>
-                <TableCell>
-                  {transaction.proposal?.status.__kind || "None"}
-                </TableCell>
-                <TableCell>
-                  <ApproveButton
-                    rpcUrl={rpcUrl!}
-                    multisigPda={multisigCookie!}
-                    transactionIndex={transactionIndex}
-                    proposalStatus={
-                      transaction.proposal?.status.__kind || "None"
-                    }
-                    programId={
-                      programIdCookie
-                        ? programIdCookie
-                        : multisig.PROGRAM_ID.toBase58()
-                    }
-                  />
-                  <RejectButton
-                    rpcUrl={rpcUrl!}
-                    multisigPda={multisigCookie!}
-                    transactionIndex={transactionIndex}
-                    proposalStatus={
-                      transaction.proposal?.status.__kind || "None"
-                    }
-                    programId={
-                      programIdCookie
-                        ? programIdCookie
-                        : multisig.PROGRAM_ID.toBase58()
-                    }
-                  />
-                  <ExecuteButton
-                    rpcUrl={rpcUrl!}
-                    multisigPda={multisigCookie!}
-                    transactionIndex={transactionIndex}
-                    proposalStatus={
-                      transaction.proposal?.status.__kind || "None"
-                    }
-                    programId={
-                      programIdCookie
-                        ? programIdCookie
-                        : multisig.PROGRAM_ID.toBase58()
-                    }
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
+            {latestTransactions.map((transaction, index) => {
+              return (
+                <TableRow key={index}>
+                  <TableCell>{Number(transaction.index)}</TableCell>
+                  <TableCell className="text-blue-500">
+                    <Link
+                      href={createSolanaExplorerUrl(
+                        transaction.transactionPda[0].toBase58(),
+                        rpcUrl!
+                      )}
+                    >
+                      {transaction.transactionPda[0].toBase58()}
+                    </Link>
+                  </TableCell>
+                  <TableCell>
+                    {transaction.proposal?.status.__kind || "Active"}
+                  </TableCell>
+                  <TableCell>
+                    <ActionButtons
+                      rpcUrl={rpcUrl!}
+                      multisigPda={multisigCookie!}
+                      transactionIndex={Number(transaction.index)}
+                      proposalStatus={
+                        transaction.proposal?.status.__kind || "Active"
+                      }
+                      programId={programId}
+                    />
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </Suspense>
 
       <Pagination>
         <PaginationContent>
-          {searchParams.page != "1" && (
+          {page > 1 && (
             <PaginationItem>
               <PaginationPrevious href={`/transactions?page=${page - 1}`} />
             </PaginationItem>
           )}
-          <PaginationItem>
-            <PaginationNext href={`/transactions?page=${page + 1}`} />
-          </PaginationItem>
+          {page < totalPages && (
+            <PaginationItem>
+              <PaginationNext href={`/transactions?page=${page + 1}`} />
+            </PaginationItem>
+          )}
         </PaginationContent>
       </Pagination>
     </div>
+  );
+}
+
+async function fetchTransactionData(
+  connection: Connection,
+  multisigPda: PublicKey,
+  index: bigint,
+  programId: PublicKey
+) {
+  const transactionPda = multisig.getTransactionPda({
+    multisigPda,
+    index,
+    programId,
+  });
+  const proposalPda = multisig.getProposalPda({
+    multisigPda,
+    transactionIndex: index,
+    programId,
+  });
+
+  let proposal;
+  try {
+    proposal = await multisig.accounts.Proposal.fromAccountAddress(
+      connection,
+      proposalPda[0]
+    );
+  } catch (error) {
+    proposal = null;
+  }
+
+  return { transactionPda, proposal, index };
+}
+
+function ActionButtons({
+  rpcUrl,
+  multisigPda,
+  transactionIndex,
+  proposalStatus,
+  programId,
+}: ActionButtonsProps) {
+  return (
+    <>
+      <ApproveButton
+        rpcUrl={rpcUrl}
+        multisigPda={multisigPda}
+        transactionIndex={transactionIndex}
+        proposalStatus={proposalStatus}
+        programId={programId.toBase58()}
+      />
+      <RejectButton
+        rpcUrl={rpcUrl}
+        multisigPda={multisigPda}
+        transactionIndex={transactionIndex}
+        proposalStatus={proposalStatus}
+        programId={programId.toBase58()}
+      />
+      <ExecuteButton
+        rpcUrl={rpcUrl}
+        multisigPda={multisigPda}
+        transactionIndex={transactionIndex}
+        proposalStatus={proposalStatus}
+        programId={programId.toBase58()}
+      />
+    </>
   );
 }
 

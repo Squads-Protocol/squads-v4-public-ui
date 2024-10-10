@@ -85,16 +85,24 @@ const RejectButton = ({
       skipPreflight: true,
     });
     console.log("Transaction signature", signature);
-    toast.success("Transaction submitted.");
+    toast.loading("Confirming...", {
+      id: "transaction",
+    });
     await connection.confirmTransaction(signature, "confirmed");
-    toast.success("Transaction executed.");
     await new Promise((resolve) => setTimeout(resolve, 1000));
     router.refresh();
   };
   return (
     <Button
       disabled={!isKindValid}
-      onClick={rejectTransaction}
+      onClick={() =>
+        toast.promise(rejectTransaction, {
+          id: "transaction",
+          loading: "Loading...",
+          success: "Transaction rejected.",
+          error: (e) => `Failed to reject: ${e}`,
+        })
+      }
       className="mr-2"
     >
       Reject

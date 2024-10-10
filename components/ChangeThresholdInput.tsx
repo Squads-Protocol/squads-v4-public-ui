@@ -6,7 +6,12 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useState } from "react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import * as multisig from "@sqds/multisig";
-import { Connection, PublicKey } from "@solana/web3.js";
+import {
+  Connection,
+  PublicKey,
+  TransactionMessage,
+  VersionedTransaction,
+} from "@solana/web3.js";
 import { toast } from "sonner";
 
 type ChangeThresholdInputProps = {
@@ -36,34 +41,50 @@ const ChangeThresholdInput = ({
       return;
     }
 
-    const changeThresholdTransaction =
-      multisig.transactions.configTransactionCreate({
-        multisigPda: new PublicKey(multisigPda),
-        actions: [
-          {
-            __kind: "ChangeThreshold",
-            newThreshold: parseInt(threshold),
-          },
-        ],
-        creator: wallet.publicKey,
-        transactionIndex: bigIntTransactionIndex,
-        rentPayer: wallet.publicKey,
-        blockhash: (await connection.getLatestBlockhash()).blockhash,
-        feePayer: wallet.publicKey,
-        programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
-      });
+    const changeThresholdIx = multisig.instructions.configTransactionCreate({
+      multisigPda: new PublicKey(multisigPda),
+      actions: [
+        {
+          __kind: "ChangeThreshold",
+          newThreshold: parseInt(threshold),
+        },
+      ],
+      creator: wallet.publicKey,
+      transactionIndex: bigIntTransactionIndex,
+      rentPayer: wallet.publicKey,
+      programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
+    });
+    const proposalIx = multisig.instructions.proposalCreate({
+      multisigPda: new PublicKey(multisigPda),
+      creator: wallet.publicKey,
+      isDraft: false,
+      transactionIndex: bigIntTransactionIndex,
+      rentPayer: wallet.publicKey,
+      programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
+    });
+    const approveIx = multisig.instructions.proposalApprove({
+      multisigPda: new PublicKey(multisigPda),
+      member: wallet.publicKey,
+      transactionIndex: bigIntTransactionIndex,
+      programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
+    });
 
-    const signature = await wallet.sendTransaction(
-      changeThresholdTransaction,
-      connection,
-      {
-        skipPreflight: true,
-      }
-    );
+    const message = new TransactionMessage({
+      instructions: [changeThresholdIx, proposalIx, approveIx],
+      payerKey: wallet.publicKey,
+      recentBlockhash: (await connection.getLatestBlockhash()).blockhash,
+    }).compileToV0Message();
+
+    const transaction = new VersionedTransaction(message);
+
+    const signature = await wallet.sendTransaction(transaction, connection, {
+      skipPreflight: true,
+    });
     console.log("Transaction signature", signature);
-    toast.info("Transaction submitted.");
+    toast.loading("Confirming...", {
+      id: "transaction",
+    });
     await connection.confirmTransaction(signature, "confirmed");
-    toast.success("Transaction created.");
     await new Promise((resolve) => setTimeout(resolve, 1000));
     router.refresh();
   };
@@ -75,7 +96,17 @@ const ChangeThresholdInput = ({
         onChange={(e) => setThreshold(e.target.value)}
         className="mb-3"
       />
-      <Button onClick={changeThreshold} disabled={!threshold}>
+      <Button
+        onClick={() =>
+          toast.promise(changeThreshold, {
+            id: "transaction",
+            loading: "Loading...",
+            success: "Threshold change proposed.",
+            error: (e) => `Failed to propose: ${e}`,
+          })
+        }
+        disabled={!threshold}
+      >
         Change Threshold
       </Button>
     </div>
