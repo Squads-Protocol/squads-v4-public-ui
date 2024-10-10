@@ -19,7 +19,7 @@ const ConfigurationPage = async () => {
   const multisigCookie = headers().get("x-multisig");
   const multisigPda = new PublicKey(multisigCookie!);
   const vaultIndex = Number(headers().get("x-vault-index"));
-  const programIdCookie = cookies().get("x-programid")?.value;
+  const programIdCookie = cookies().get("x-program-id")?.value;
   const programId = programIdCookie
     ? new PublicKey(programIdCookie!)
     : multisig.PROGRAM_ID;
