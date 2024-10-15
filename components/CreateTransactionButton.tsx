@@ -204,7 +204,7 @@ const CreateTransaction = ({
       toast.loading("Confirming...", {
         id: "transaction",
       });
-      await connection.confirmTransaction(signature, "confirmed");
+      await connection.getSignatureStatuses([signature]);
       await new Promise((resolve) => setTimeout(resolve, 1000));
       router.refresh();
     } catch (error) {
