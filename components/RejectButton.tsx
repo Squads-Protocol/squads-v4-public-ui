@@ -17,6 +17,7 @@ type RejectButtonProps = {
   multisigPda: string;
   transactionIndex: number;
   proposalStatus: string;
+  programId: string;
 };
 
 const RejectButton = ({
@@ -24,6 +25,7 @@ const RejectButton = ({
   multisigPda,
   transactionIndex,
   proposalStatus,
+  programId,
 }: RejectButtonProps) => {
   const wallet = useWallet();
   const walletModal = useWalletModal();
@@ -56,6 +58,7 @@ const RejectButton = ({
         isDraft: false,
         transactionIndex: bigIntTransactionIndex,
         rentPayer: wallet.publicKey,
+        programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
       });
       transaction.add(createProposalInstruction);
     }
@@ -65,6 +68,7 @@ const RejectButton = ({
           multisigPda: new PublicKey(multisigPda),
           member: wallet.publicKey,
           transactionIndex: bigIntTransactionIndex,
+          programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
         });
       transaction.add(activateProposalInstruction);
     }
@@ -72,6 +76,7 @@ const RejectButton = ({
       multisigPda: new PublicKey(multisigPda),
       member: wallet.publicKey,
       transactionIndex: bigIntTransactionIndex,
+      programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
     });
 
     transaction.add(rejectProposalInstruction);
@@ -80,16 +85,24 @@ const RejectButton = ({
       skipPreflight: true,
     });
     console.log("Transaction signature", signature);
-    toast.success("Transaction submitted.");
+    toast.loading("Confirming...", {
+      id: "transaction",
+    });
     await connection.confirmTransaction(signature, "confirmed");
-    toast.success("Transaction executed.");
     await new Promise((resolve) => setTimeout(resolve, 1000));
     router.refresh();
   };
   return (
     <Button
       disabled={!isKindValid}
-      onClick={rejectTransaction}
+      onClick={() =>
+        toast.promise(rejectTransaction, {
+          id: "transaction",
+          loading: "Loading...",
+          success: "Transaction rejected.",
+          error: (e) => `Failed to reject: ${e}`,
+        })
+      }
       className="mr-2"
     >
       Reject

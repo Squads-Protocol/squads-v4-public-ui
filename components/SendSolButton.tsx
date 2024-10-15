@@ -9,16 +9,13 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "./ui/button";
 import { useState } from "react";
-import {
-  createAssociatedTokenAccountIdempotentInstruction,
-  createTransferCheckedInstruction,
-  getAssociatedTokenAddressSync,
-} from "@solana/spl-token";
 import * as multisig from "@sqds/multisig";
 import { useWallet } from "@solana/wallet-adapter-react";
 import {
   Connection,
+  LAMPORTS_PER_SOL,
   PublicKey,
+  SystemProgram,
   TransactionMessage,
   VersionedTransaction,
   clusterApiUrl,
@@ -29,25 +26,19 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { isPublickey } from "@/lib/isPublickey";
 
-type SendTokensProps = {
-  tokenAccount: string;
-  mint: string;
-  decimals: number;
+type SendSolProps = {
   rpcUrl: string;
   multisigPda: string;
   vaultIndex: number;
   programId?: string;
 };
 
-const SendTokens = ({
-  tokenAccount,
-  mint,
-  decimals,
+const SendSol = ({
   rpcUrl,
   multisigPda,
   vaultIndex,
   programId,
-}: SendTokensProps) => {
+}: SendSolProps) => {
   const wallet = useWallet();
   const walletModal = useWalletModal();
   const [amount, setAmount] = useState(0);
@@ -59,36 +50,18 @@ const SendTokens = ({
       walletModal.setVisible(true);
       return;
     }
-    const recipientATA = getAssociatedTokenAddressSync(
-      new PublicKey(mint),
-      new PublicKey(recipient),
-      true
-    );
 
-    const vaultAddress = multisig
-      .getVaultPda({
-        index: vaultIndex,
-        multisigPda: new PublicKey(multisigPda),
-        programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
-      })[0]
-      .toBase58();
+    const vaultAddress = multisig.getVaultPda({
+      index: vaultIndex,
+      multisigPda: new PublicKey(multisigPda),
+      programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
+    })[0];
 
-    const createRecipientATAInstruction =
-      createAssociatedTokenAccountIdempotentInstruction(
-        new PublicKey(vaultAddress),
-        recipientATA,
-        new PublicKey(recipient),
-        new PublicKey(mint)
-      );
-
-    const transferInstruction = createTransferCheckedInstruction(
-      new PublicKey(tokenAccount),
-      new PublicKey(mint),
-      recipientATA,
-      new PublicKey(vaultAddress),
-      amount * 10 ** decimals,
-      decimals
-    );
+    const transferInstruction = SystemProgram.transfer({
+      fromPubkey: vaultAddress,
+      toPubkey: new PublicKey(recipient),
+      lamports: amount * LAMPORTS_PER_SOL,
+    });
 
     const connection = new Connection(rpcUrl || clusterApiUrl("mainnet-beta"), {
       commitment: "confirmed",
@@ -102,7 +75,7 @@ const SendTokens = ({
     const blockhash = (await connection.getLatestBlockhash()).blockhash;
 
     const transferMessage = new TransactionMessage({
-      instructions: [createRecipientATAInstruction, transferInstruction],
+      instructions: [transferInstruction],
       payerKey: wallet.publicKey,
       recentBlockhash: blockhash,
     });
@@ -119,6 +92,7 @@ const SendTokens = ({
       addressLookupTableAccounts: [],
       rentPayer: wallet.publicKey,
       vaultIndex: vaultIndex,
+      programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
     });
     const proposalIx = multisig.instructions.proposalCreate({
       multisigPda: new PublicKey(multisigPda),
@@ -158,13 +132,13 @@ const SendTokens = ({
   return (
     <Dialog>
       <DialogTrigger>
-        <Button>Send Tokens</Button>
+        <Button>Send SOL</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Transfer tokens</DialogTitle>
+          <DialogTitle>Transfer SOL</DialogTitle>
           <DialogDescription>
-            Create a proposal to transfer tokens to another address.
+            Create a proposal to transfer SOL to another address.
           </DialogDescription>
         </DialogHeader>
         <Input
@@ -198,4 +172,4 @@ const SendTokens = ({
   );
 };
 
-export default SendTokens;
+export default SendSol;
