@@ -36,8 +36,6 @@ export default function CreateSquadForm({ rpc }: { rpc: string }) {
 
   const connection = new Connection(rpc || clusterApiUrl("mainnet-beta"));
 
-  if (!wallet) return null;
-
   const [form, setForm] = useState<CreateSquadFormData>({
     threshold: 1,
     rentCollector: "",
@@ -143,6 +141,8 @@ export default function CreateSquadForm({ rpc }: { rpc: string }) {
       }));
     }
   }, [wallet]);
+
+  if (!wallet) return null;
 
   return (
     <>

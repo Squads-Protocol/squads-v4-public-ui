@@ -22,6 +22,7 @@ import ApproveButton from "@/components/ApproveButton";
 import ExecuteButton from "@/components/ExecuteButton";
 import RejectButton from "@/components/RejectButton";
 import { Suspense } from "react";
+import CreateTransaction from "@/components/CreateTransactionButton";
 
 const TRANSACTIONS_PER_PAGE = 10;
 
@@ -80,7 +81,14 @@ export default async function TransactionsPage({
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-4">Transactions</h1>
+      <div className="mb-4 flex items-center justify-between">
+        <h1 className="text-3xl font-bold">Transactions</h1>
+        <CreateTransaction
+          multisigPda={multisigCookie!}
+          vaultIndex={vaultIndex}
+          programId={programIdCookie}
+        />
+      </div>
 
       <Suspense fallback={<div>Loading...</div>}>
         <Table>
