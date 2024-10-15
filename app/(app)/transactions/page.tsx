@@ -23,6 +23,7 @@ import ExecuteButton from "@/components/ExecuteButton";
 import RejectButton from "@/components/RejectButton";
 import { Suspense } from "react";
 import CreateTransaction from "@/components/CreateTransactionButton";
+import { redirect } from "next/navigation";
 
 const TRANSACTIONS_PER_PAGE = 10;
 
@@ -47,7 +48,9 @@ export default async function TransactionsPage({
   const multisigCookie = headers().get("x-multisig");
   const multisigPda = new PublicKey(multisigCookie!);
   const vaultIndex = Number(headers().get("x-vault-index"));
-  const programIdCookie = cookies().get("x-program-id")?.value;
+  const programIdCookie = cookies().get("x-program-id")
+    ? cookies().get("x-program-id")?.value
+    : multisig.PROGRAM_ID.toString();
   const programId = programIdCookie
     ? new PublicKey(programIdCookie!)
     : multisig.PROGRAM_ID;
@@ -61,12 +64,7 @@ export default async function TransactionsPage({
 
   if (page > totalPages) {
     // Redirect to the last valid page if the requested page is out of range
-    return {
-      redirect: {
-        destination: `/transactions?page=${totalPages}`,
-        permanent: false,
-      },
-    };
+    redirect(`/transactions?page=${totalPages}`);
   }
 
   const startIndex = totalTransactions - (page - 1) * TRANSACTIONS_PER_PAGE;
@@ -84,6 +82,7 @@ export default async function TransactionsPage({
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-3xl font-bold">Transactions</h1>
         <CreateTransaction
+          rpcUrl={rpcUrl}
           multisigPda={multisigCookie!}
           vaultIndex={vaultIndex}
           programId={programIdCookie}
@@ -105,39 +104,47 @@ export default async function TransactionsPage({
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
-            {latestTransactions.map((transaction, index) => {
-              return (
-                <TableRow key={index}>
-                  <TableCell>{Number(transaction.index)}</TableCell>
-                  <TableCell className="text-blue-500">
-                    <Link
-                      href={createSolanaExplorerUrl(
-                        transaction.transactionPda[0].toBase58(),
-                        rpcUrl!
-                      )}
-                    >
-                      {transaction.transactionPda[0].toBase58()}
-                    </Link>
-                  </TableCell>
-                  <TableCell>
-                    {transaction.proposal?.status.__kind || "Active"}
-                  </TableCell>
-                  <TableCell>
-                    <ActionButtons
-                      rpcUrl={rpcUrl!}
-                      multisigPda={multisigCookie!}
-                      transactionIndex={Number(transaction.index)}
-                      proposalStatus={
-                        transaction.proposal?.status.__kind || "Active"
-                      }
-                      programId={programId}
-                    />
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
+          {latestTransactions.length > 0 ? (
+            <TableBody>
+              {latestTransactions.map((transaction, index) => {
+                return (
+                  <TableRow key={index}>
+                    <TableCell>{Number(transaction.index)}</TableCell>
+                    <TableCell className="text-blue-500">
+                      <Link
+                        href={createSolanaExplorerUrl(
+                          transaction.transactionPda[0].toBase58(),
+                          rpcUrl!
+                        )}
+                      >
+                        {transaction.transactionPda[0].toBase58()}
+                      </Link>
+                    </TableCell>
+                    <TableCell>
+                      {transaction.proposal?.status.__kind || "Active"}
+                    </TableCell>
+                    <TableCell>
+                      <ActionButtons
+                        rpcUrl={rpcUrl!}
+                        multisigPda={multisigCookie!}
+                        transactionIndex={Number(transaction.index)}
+                        proposalStatus={
+                          transaction.proposal?.status.__kind || "Active"
+                        }
+                        programId={programId}
+                      />
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          ) : (
+            <TableBody>
+              <TableRow>
+                <TableCell colSpan={5}>No transactions found.</TableCell>
+              </TableRow>
+            </TableBody>
+          )}
         </Table>
       </Suspense>
 
