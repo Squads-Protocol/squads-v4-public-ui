@@ -17,6 +17,7 @@ type ApproveButtonProps = {
   multisigPda: string;
   transactionIndex: number;
   proposalStatus: string;
+  programId: string;
 };
 
 const ApproveButton = ({
@@ -24,6 +25,7 @@ const ApproveButton = ({
   multisigPda,
   transactionIndex,
   proposalStatus,
+  programId,
 }: ApproveButtonProps) => {
   const wallet = useWallet();
   const walletModal = useWalletModal();
@@ -54,6 +56,7 @@ const ApproveButton = ({
         isDraft: false,
         transactionIndex: bigIntTransactionIndex,
         rentPayer: wallet.publicKey,
+        programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
       });
       transaction.add(createProposalInstruction);
     }
@@ -63,6 +66,7 @@ const ApproveButton = ({
           multisigPda: new PublicKey(multisigPda),
           member: wallet.publicKey,
           transactionIndex: bigIntTransactionIndex,
+          programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
         });
       transaction.add(activateProposalInstruction);
     }
@@ -70,20 +74,33 @@ const ApproveButton = ({
       multisigPda: new PublicKey(multisigPda),
       member: wallet.publicKey,
       transactionIndex: bigIntTransactionIndex,
+      programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
     });
     transaction.add(approveProposalInstruction);
     const signature = await wallet.sendTransaction(transaction, connection, {
       skipPreflight: true,
     });
     console.log("Transaction signature", signature);
-    toast.success("Approval submitted");
+    toast.loading("Confirming...", {
+      id: "transaction",
+    });
     await connection.confirmTransaction(signature, "confirmed");
-    toast.success("Proposal approved");
     await new Promise((resolve) => setTimeout(resolve, 1000));
     router.refresh();
   };
   return (
-    <Button disabled={isKindValid} onClick={approveProposal} className="mr-2">
+    <Button
+      disabled={isKindValid}
+      onClick={() =>
+        toast.promise(approveProposal, {
+          id: "transaction",
+          loading: "Loading...",
+          success: "Transaction approved.",
+          error: (e) => `Failed to approve: ${e}`,
+        })
+      }
+      className="mr-2"
+    >
       Approve
     </Button>
   );

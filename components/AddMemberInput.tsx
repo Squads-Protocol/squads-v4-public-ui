@@ -6,19 +6,27 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useState } from "react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import * as multisig from "@sqds/multisig";
-import { Connection, PublicKey } from "@solana/web3.js";
+import {
+  Connection,
+  PublicKey,
+  TransactionMessage,
+  VersionedTransaction,
+} from "@solana/web3.js";
 import { toast } from "sonner";
+import { isPublickey } from "@/lib/isPublickey";
 
 type AddMemberInputProps = {
   multisigPda: string;
   transactionIndex: number;
   rpcUrl: string;
+  programId: string;
 };
 
 const AddMemberInput = ({
   multisigPda,
   transactionIndex,
   rpcUrl,
+  programId,
 }: AddMemberInputProps) => {
   const [member, setMember] = useState("");
   const wallet = useWallet();
@@ -34,7 +42,7 @@ const AddMemberInput = ({
       return;
     }
 
-    const addMemberTransaction = multisig.transactions.configTransactionCreate({
+    const addMemberIx = multisig.instructions.configTransactionCreate({
       multisigPda: new PublicKey(multisigPda),
       actions: [
         {
@@ -50,21 +58,39 @@ const AddMemberInput = ({
       creator: wallet.publicKey,
       transactionIndex: bigIntTransactionIndex,
       rentPayer: wallet.publicKey,
-      blockhash: (await connection.getLatestBlockhash()).blockhash,
-      feePayer: wallet.publicKey,
+      programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
+    });
+    const proposalIx = multisig.instructions.proposalCreate({
+      multisigPda: new PublicKey(multisigPda),
+      creator: wallet.publicKey,
+      isDraft: false,
+      transactionIndex: bigIntTransactionIndex,
+      rentPayer: wallet.publicKey,
+      programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
+    });
+    const approveIx = multisig.instructions.proposalApprove({
+      multisigPda: new PublicKey(multisigPda),
+      member: wallet.publicKey,
+      transactionIndex: bigIntTransactionIndex,
+      programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
     });
 
-    const signature = await wallet.sendTransaction(
-      addMemberTransaction,
-      connection,
-      {
-        skipPreflight: true,
-      }
-    );
+    const message = new TransactionMessage({
+      instructions: [addMemberIx, proposalIx, approveIx],
+      payerKey: wallet.publicKey,
+      recentBlockhash: (await connection.getLatestBlockhash()).blockhash,
+    }).compileToV0Message();
+
+    const transaction = new VersionedTransaction(message);
+
+    const signature = await wallet.sendTransaction(transaction, connection, {
+      skipPreflight: true,
+    });
     console.log("Transaction signature", signature);
-    toast.info("Transaction submitted.");
+    toast.loading("Confirming...", {
+      id: "transaction",
+    });
     await connection.confirmTransaction(signature, "confirmed");
-    toast.success("Transaction created.");
     await new Promise((resolve) => setTimeout(resolve, 1000));
     router.refresh();
   };
@@ -75,7 +101,17 @@ const AddMemberInput = ({
         onChange={(e) => setMember(e.target.value)}
         className="mb-3"
       />
-      <Button onClick={addMember} disabled={!isValidPublicKey(member)}>
+      <Button
+        onClick={() =>
+          toast.promise(addMember, {
+            id: "transaction",
+            loading: "Loading...",
+            success: "Add member action proposed.",
+            error: (e) => `Failed to propose: ${e}`,
+          })
+        }
+        disabled={!isPublickey(member)}
+      >
         Add Member
       </Button>
     </div>
@@ -83,12 +119,3 @@ const AddMemberInput = ({
 };
 
 export default AddMemberInput;
-
-const isValidPublicKey = (value: string) => {
-  try {
-    new PublicKey(value);
-    return true;
-  } catch (e) {
-    return false;
-  }
-};

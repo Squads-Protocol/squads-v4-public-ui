@@ -1,10 +1,12 @@
 "use client";
 import {
-  ComputeBudgetInstruction,
+  AddressLookupTableAccount,
   ComputeBudgetProgram,
   Connection,
   PublicKey,
-  Transaction,
+  TransactionInstruction,
+  TransactionMessage,
+  VersionedTransaction,
   clusterApiUrl,
 } from "@solana/web3.js";
 import { Button } from "./ui/button";
@@ -19,11 +21,17 @@ import { DialogContent, DialogTitle } from "./ui/dialog";
 import { useState } from "react";
 import { Input } from "./ui/input";
 
+type WithALT = {
+  instruction: TransactionInstruction;
+  lookupTableAccounts: AddressLookupTableAccount[];
+};
+
 type ExecuteButtonProps = {
   rpcUrl: string;
   multisigPda: string;
   transactionIndex: number;
   proposalStatus: string;
+  programId: string;
 };
 
 const ExecuteButton = ({
@@ -31,6 +39,7 @@ const ExecuteButton = ({
   multisigPda,
   transactionIndex,
   proposalStatus,
+  programId,
 }: ExecuteButtonProps) => {
   const wallet = useWallet();
   const walletModal = useWalletModal();
@@ -55,14 +64,67 @@ const ExecuteButton = ({
       return;
     }
 
-    let executeTransaction = new Transaction();
-    const executeInstruction =
-      await multisig.instructions.vaultTransactionExecute({
+    console.log({
+      multisigPda: multisigPda,
+      connection,
+      member: wallet.publicKey.toBase58(),
+      transactionIndex: bigIntTransactionIndex,
+      programId: programId ? programId : multisig.PROGRAM_ID.toBase58(),
+    });
+
+    const [transactionPda] = multisig.getTransactionPda({
+      multisigPda: new PublicKey(multisigPda),
+      index: bigIntTransactionIndex,
+      programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
+    });
+
+    let txType;
+    try {
+      await multisig.accounts.VaultTransaction.fromAccountAddress(
+        connection,
+        transactionPda
+      );
+      txType = "vault";
+    } catch (error) {
+      txType = await multisig.accounts.ConfigTransaction.fromAccountAddress(
+        connection,
+        transactionPda
+      );
+      txType = "config";
+    }
+    console.log(txType);
+
+    let executeInstruction;
+    let altAccounts;
+    if (txType == "vault") {
+      const resp = await multisig.instructions.vaultTransactionExecute({
         multisigPda: new PublicKey(multisigPda),
         connection,
         member: wallet.publicKey,
         transactionIndex: bigIntTransactionIndex,
+        programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
       });
+      executeInstruction = resp.instruction;
+      altAccounts = resp.lookupTableAccounts;
+    } else if (txType == "config") {
+      executeInstruction = multisig.instructions.configTransactionExecute({
+        multisigPda: new PublicKey(multisigPda),
+        member: wallet.publicKey,
+        rentPayer: wallet.publicKey,
+        transactionIndex: bigIntTransactionIndex,
+        programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
+      });
+    } else {
+      const resp = await multisig.instructions.vaultTransactionExecute({
+        multisigPda: new PublicKey(multisigPda),
+        connection,
+        member: wallet.publicKey,
+        transactionIndex: bigIntTransactionIndex,
+        programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
+      });
+      executeInstruction = resp.instruction;
+      altAccounts = resp.lookupTableAccounts;
+    }
 
     const priorityFeeInstruction = ComputeBudgetProgram.setComputeUnitPrice({
       microLamports: priorityFeeLamports,
@@ -71,28 +133,28 @@ const ExecuteButton = ({
       units: computeUnitBudget,
     });
 
-    executeTransaction.add(
-      computeUnitInstruction,
-      priorityFeeInstruction,
-      executeInstruction.instruction
-    );
+    let blockhash = (await connection.getLatestBlockhash()).blockhash;
 
-    executeTransaction.recentBlockhash = (
-      await connection.getLatestBlockhash()
-    ).blockhash;
-    executeTransaction.feePayer = wallet.publicKey;
+    const executeMessage = new TransactionMessage({
+      instructions: [
+        priorityFeeInstruction,
+        computeUnitInstruction,
+        executeInstruction,
+      ],
+      payerKey: wallet.publicKey,
+      recentBlockhash: blockhash,
+    }).compileToV0Message(altAccounts && altAccounts);
 
-    const signature = await wallet.sendTransaction(
-      executeTransaction,
-      connection,
-      {
-        skipPreflight: true,
-      }
-    );
+    const execTx = new VersionedTransaction(executeMessage);
+
+    const signature = await wallet.sendTransaction(execTx, connection, {
+      skipPreflight: true,
+    });
     console.log("Transaction signature", signature);
-    toast.success("Transaction submitted.");
+    toast.loading("Confirming...", {
+      id: "transaction",
+    });
     await connection.confirmTransaction(signature, "confirmed");
-    toast.success("Transaction executed.");
     await new Promise((resolve) => setTimeout(resolve, 1000));
     router.refresh();
   };
@@ -126,7 +188,14 @@ const ExecuteButton = ({
         />
         <Button
           disabled={!isTransactionReady}
-          onClick={executeTransaction}
+          onClick={() =>
+            toast.promise(executeTransaction, {
+              id: "transaction",
+              loading: "Loading...",
+              success: "Transaction executed.",
+              error: "Failed to execute. Check console for info.",
+            })
+          }
           className="mr-2"
         >
           Execute

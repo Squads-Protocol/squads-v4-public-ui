@@ -30,7 +30,6 @@ export function VaultSelector() {
 
   const router = useRouter();
 
-  // useEffect hook to trigger an action when value changes
   React.useEffect(() => {
     document.cookie = `x-vault-index=${value}; path=/`;
     router.refresh();
