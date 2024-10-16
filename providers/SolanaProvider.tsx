@@ -7,23 +7,22 @@ import {
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { clusterApiUrl } from "@solana/web3.js";
+import { headers } from "next/headers";
 
 require("@solana/wallet-adapter-react-ui/styles.css");
 
-type Props = {
+type SolanaProviderProps = {
+  rpc: string | null;
   children?: React.ReactNode;
 };
 
-export const Wallet: FC<Props> = ({ children }) => {
+export const SolanaProvider: FC<SolanaProviderProps> = ({ rpc, children }) => {
   const network = WalletAdapterNetwork.Devnet;
-
-  const endpoint = useMemo(() => clusterApiUrl(network), [network]);
-
-  const wallets = useMemo(
-    () => [],
-
-    [network]
+  const endpoint = useMemo(
+    () => rpc || clusterApiUrl(network),
+    [rpc || network]
   );
+  const wallets = useMemo(() => [], [network]);
 
   return (
     <ConnectionProvider endpoint={endpoint}>

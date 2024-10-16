@@ -1,12 +1,11 @@
-import { headers } from "next/headers";
-import Link from "next/link";
-import Image from "next/image";
-import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
 import * as multisig from "@sqds/multisig";
-import { Toaster } from "@/components/ui/sonner";
-import ConnectWallet from "@/components/ConnectWalletButton";
+import { headers } from "next/headers";
+import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
 import { LucideHome, ArrowDownUp, Users, Settings } from "lucide-react";
 import RenderMultisigRoute from "@/components/RenderMultisigRoute";
+import Header from "@/components/ui/layout/header";
+import { ThemeProvider } from "next-themes";
+import { CustomToaster } from "@/components/ui/layout/custom-toaster";
 
 const AppLayout = async ({ children }: { children: React.ReactNode }) => {
   const tabs = [
@@ -39,82 +38,15 @@ const AppLayout = async ({ children }: { children: React.ReactNode }) => {
   const multisig = await isValidPublicKey(multisigCookie!);
 
   return (
-    <body>
-      <div className="flex flex-col md:flex-row h-screen min-w-full bg-white">
-        <aside
-          id="sidebar"
-          className="hidden md:block md:left-0 md:top-0 md:w-3/12 lg:w-3/12 z-40 h-auto md:h-screen md:fixed"
-          aria-label="Sidebar"
-        >
-          <div className="flex h-auto md:h-full flex-col overflow-y-auto justify-between md:border-r border-slate-200 px-3 py-4  bg-slate-200">
-            <div>
-              {" "}
-              <Link href="/">
-                <div className="mb-10 flex items-center rounded-lg px-3 py-2 text-slate-900 dark:text-white">
-                  <Image
-                    src="https://drive.google.com/uc?export=download&id=1UjZG82vU6aQHiGxzZEzoTneP7TTSsKda"
-                    width={0}
-                    height={0}
-                    sizes="100vw"
-                    style={{ width: "150px", height: "auto" }}
-                    alt="Mercure Logo"
-                  />
-                </div>
-              </Link>
-              <ul className="space-y-2 text-sm font-medium">
-                {tabs.map((tab) => (
-                  <li key={tab.route}>
-                    <a
-                      href={tab.route}
-                      className={`flex items-center rounded-lg px-4 py-3 text-slate-900 
-                    
-        ${
-          (path!.startsWith(`${tab.route}/`) && tab.route != "/") ||
-          tab.route === path
-            ? "bg-slate-400"
-            : "hover:bg-slate-400"
-        }`}
-                    >
-                      {tab.icon}
-                      <span className="ml-3 flex-1 whitespace-nowrap text-base text-black">
-                        {tab.name}
-                      </span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <ConnectWallet />
-          </div>
-        </aside>
-
-        <aside
-          id="mobile-navbar"
-          className="block md:hidden inset-x-0 bottom-0 z-50 bg-slate-20 p-2 fixed bg-slate-300"
-          aria-label="Mobile navbar"
-        >
-          <div className="grid h-full max-w-lg grid-cols-4 mx-auto font-medium mt-1 ">
-            {tabs.map((tab) => (
-              <Link href={tab.route} key={tab.route}>
-                <button
-                  type="button"
-                  className="inline-flex flex-col items-center justify-center px-5 hover:bg-slate-400 rounded-md py-2 group"
-                >
-                  {tab.icon}
-                  <span className="flex-1 whitespace-nowrap text-sm text-slate-900">
-                    {tab.name}
-                  </span>
-                </button>
-              </Link>
-            ))}
-          </div>
-        </aside>
-
-        <RenderMultisigRoute multisig={multisig} children={children} />
-      </div>
-      <Toaster />
-    </body>
+    <ThemeProvider defaultTheme="dark" attribute="class">
+      <body>
+        <Header />
+        <main className="flex flex-col md:flex-row h-screen min-w-full">
+          <RenderMultisigRoute multisig={multisig} children={children} />
+        </main>
+        <CustomToaster />
+      </body>
+    </ThemeProvider>
   );
 };
 

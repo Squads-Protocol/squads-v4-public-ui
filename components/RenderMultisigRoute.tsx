@@ -14,7 +14,7 @@ export default function RenderMultisigRoute({
   const pathname = usePathname();
 
   return (
-    <div className="md:w-9/12 md:ml-auto space-y-2 p-3 pt-4 mt-1 md:space-y-4 md:p-8 md:pt-6 pb-24">
+    <main className="mt-24 px-8 w-full">
       {multisig ? (
         <div>{children} </div>
       ) : (
@@ -26,6 +26,6 @@ export default function RenderMultisigRoute({
           )}
         </>
       )}
-    </div>
+    </main>
   );
 }

@@ -1,14 +1,11 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
-import { Wallet } from "@/components/Wallet";
-
-const inter = Inter({ subsets: ["latin"] });
+import { SolanaProvider } from "@/providers/SolanaProvider";
+import { headers } from "next/headers";
 
 export const metadata: Metadata = {
   title: "Squads Simplified",
-  description:
-    "Squads v4 program user interface.",
+  description: "Squads v4 program user interface.",
 };
 
 export default function RootLayout({
@@ -16,11 +13,10 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const rpcUrl = headers().get("x-rpc-url");
   return (
     <html lang="en">
-      <Wallet>
-        <body>{children}</body>
-      </Wallet>
+      <SolanaProvider rpc={rpcUrl}>{children}</SolanaProvider>
     </html>
   );
 }

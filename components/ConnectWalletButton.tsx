@@ -1,6 +1,6 @@
 "use client";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import { Button } from "./ui/button";
+import { Button } from "./ui/primitives/button";
 import { useWallet } from "@solana/wallet-adapter-react";
 
 const ConnectWallet = () => {
