@@ -54,12 +54,6 @@ const CreateTransaction = ({
       programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
     })[0];
 
-    let alt = await connection
-      .getAddressLookupTable(
-        new PublicKey("8YdCE6tJAAjwr5jYUQVUKwTMWCKiptTE1u2MRVmt3o7D")
-      )
-      .then((res) => res.value);
-
     const dummyMessage = new TransactionMessage({
       instructions: [
         new TransactionInstruction({
@@ -78,7 +72,7 @@ const CreateTransaction = ({
       ],
       payerKey: vaultAddress,
       recentBlockhash: (await connection.getLatestBlockhash()).blockhash,
-    }).compileToV0Message(alt ? [alt] : undefined);
+    }).compileToV0Message();
 
     const encoded = bs58.default.encode(dummyMessage.serialize());
 
