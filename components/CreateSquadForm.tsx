@@ -36,8 +36,6 @@ export default function CreateSquadForm({ rpc }: { rpc: string }) {
 
   const connection = new Connection(rpc || clusterApiUrl("mainnet-beta"));
 
-  if (!wallet) return null;
-
   const [form, setForm] = useState<CreateSquadFormData>({
     threshold: 1,
     rentCollector: "",
@@ -118,7 +116,7 @@ export default function CreateSquadForm({ rpc }: { rpc: string }) {
     });
     console.log("Transaction signature", signature);
     toast.info("Transaction submitted.");
-    await connection.confirmTransaction(signature, "confirmed");
+    await connection.getSignatureStatuses([signature]);
     toast.success(`New Squad created: ${multisig.toBase58()}`);
     document.cookie = `x-multisig=${multisig.toBase58()}; path=/`;
     await new Promise((resolve) => setTimeout(resolve, 10000));
@@ -143,6 +141,8 @@ export default function CreateSquadForm({ rpc }: { rpc: string }) {
       }));
     }
   }, [wallet]);
+
+  if (!wallet) return null;
 
   return (
     <>
