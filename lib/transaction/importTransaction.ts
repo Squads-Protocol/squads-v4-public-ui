@@ -8,6 +8,7 @@ import {
 import { decodeAndDeserialize } from "./decodeAndDeserialize";
 import { WalletContextState } from "@solana/wallet-adapter-react";
 import { toast } from "sonner";
+import { loadLookupTables } from "./getAccountsForSimulation";
 
 export const importTransaction = async (
   tx: string,
@@ -21,14 +22,22 @@ export const importTransaction = async (
     throw "Please connect your wallet.";
   }
   try {
-    const decoded = decodeAndDeserialize(tx);
+    const { message, version } = decodeAndDeserialize(tx);
 
     const multisigInfo = await multisig.accounts.Multisig.fromAccountAddress(
       connection,
       new PublicKey(multisigPda)
     );
 
-    const transactionMessage = TransactionMessage.decompile(decoded);
+    const transactionMessage = TransactionMessage.decompile(message);
+
+    const addressLookupTableAccounts =
+      version === 0
+        ? await loadLookupTables(
+            connection,
+            transactionMessage.compileToV0Message()
+          )
+        : [];
 
     const transactionIndex = Number(multisigInfo.transactionIndex) + 1;
     const transactionIndexBN = BigInt(transactionIndex);
@@ -39,7 +48,7 @@ export const importTransaction = async (
       ephemeralSigners: 0,
       transactionMessage: transactionMessage,
       transactionIndex: transactionIndexBN,
-      addressLookupTableAccounts: [],
+      addressLookupTableAccounts,
       rentPayer: wallet.publicKey,
       vaultIndex: vaultIndex,
       programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
@@ -61,13 +70,13 @@ export const importTransaction = async (
 
     const blockhash = (await connection.getLatestBlockhash()).blockhash;
 
-    const message = new TransactionMessage({
+    const wrappedMessage = new TransactionMessage({
       instructions: [multisigTransactionIx, proposalIx, approveIx],
       payerKey: wallet.publicKey,
       recentBlockhash: blockhash,
     }).compileToV0Message();
 
-    const transaction = new VersionedTransaction(message);
+    const transaction = new VersionedTransaction(wrappedMessage);
 
     const signature = await wallet.sendTransaction(transaction, connection, {
       skipPreflight: true,

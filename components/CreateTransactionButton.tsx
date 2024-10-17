@@ -53,6 +53,13 @@ const CreateTransaction = ({
       multisigPda: new PublicKey(multisigPda),
       programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
     })[0];
+
+    let alt = await connection
+      .getAddressLookupTable(
+        new PublicKey("8YdCE6tJAAjwr5jYUQVUKwTMWCKiptTE1u2MRVmt3o7D")
+      )
+      .then((res) => res.value);
+
     const dummyMessage = new TransactionMessage({
       instructions: [
         new TransactionInstruction({
@@ -71,7 +78,7 @@ const CreateTransaction = ({
       ],
       payerKey: vaultAddress,
       recentBlockhash: (await connection.getLatestBlockhash()).blockhash,
-    }).compileToV0Message();
+    }).compileToV0Message(alt ? [alt] : undefined);
 
     const encoded = bs58.default.encode(dummyMessage.serialize());
 
@@ -88,7 +95,7 @@ const CreateTransaction = ({
           <DialogTitle>Import Transaction</DialogTitle>
           <DialogDescription>
             Propose a transaction from a base58 encoded transaction message (not
-            a transaction). Does not support v0 messages with lookup tables.
+            a transaction).
           </DialogDescription>
         </DialogHeader>
         <Input

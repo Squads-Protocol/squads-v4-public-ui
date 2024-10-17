@@ -1,11 +1,8 @@
 import { toast } from "sonner";
 import { decodeAndDeserialize } from "./decodeAndDeserialize";
-import {
-  Connection,
-  SystemProgram,
-  VersionedTransaction,
-} from "@solana/web3.js";
+import { Connection, VersionedTransaction } from "@solana/web3.js";
 import { WalletContextState } from "@solana/wallet-adapter-react";
+import { getAccountsForSimulation } from "./getAccountsForSimulation";
 
 export const simulateEncodedTransaction = async (
   tx: string,
@@ -16,13 +13,15 @@ export const simulateEncodedTransaction = async (
     throw "Please connect your wallet.";
   }
   try {
-    const decoded = decodeAndDeserialize(tx);
+    const { message, version } = decodeAndDeserialize(tx);
 
-    const keys = decoded.staticAccountKeys
-      .map((key) => key.toString())
-      .filter((address) => address !== SystemProgram.programId.toBase58());
+    const transaction = new VersionedTransaction(message);
 
-    const transaction = new VersionedTransaction(decoded);
+    const keys = await getAccountsForSimulation(
+      connection,
+      transaction,
+      version === "legacy"
+    );
 
     toast.loading("Simulating...", {
       id: "simulation",

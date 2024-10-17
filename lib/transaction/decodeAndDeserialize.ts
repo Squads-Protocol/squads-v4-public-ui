@@ -1,10 +1,16 @@
 import * as bs58 from "bs58";
-import { VersionedMessage, VersionedTransaction } from "@solana/web3.js";
+import { VersionedMessage } from "@solana/web3.js";
 
-export function decodeAndDeserialize(tx: string): VersionedMessage {
+export function decodeAndDeserialize(tx: string): {
+  message: VersionedMessage;
+  version: number | "legacy";
+} {
   try {
     const messageBytes = bs58.default.decode(tx);
-    return VersionedMessage.deserialize(messageBytes);
+    const version = VersionedMessage.deserializeMessageVersion(messageBytes);
+    const message = VersionedMessage.deserialize(messageBytes);
+
+    return { version, message };
   } catch (error) {
     console.error(error);
     throw new Error("Failed to decode transaction.");
