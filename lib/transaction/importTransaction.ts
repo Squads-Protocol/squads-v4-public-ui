@@ -89,7 +89,7 @@ export const importTransaction = async (
     let sent = false;
     const maxAttempts = 10;
     const delayMs = 1000;
-    for (let attempt = 0; attempt < maxAttempts && !sent; attempt++) {
+    for (let attempt = 0; attempt <= maxAttempts && !sent; attempt++) {
       const status = await connection.getSignatureStatus(signature);
       if (status?.value?.confirmationStatus === "confirmed") {
         await new Promise((resolve) => setTimeout(resolve, delayMs));
