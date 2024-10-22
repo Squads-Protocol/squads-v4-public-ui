@@ -3,9 +3,7 @@ import { cookies, headers } from "next/headers";
 import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
 import {
   Table,
-  TableBody,
   TableCaption,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
@@ -17,13 +15,9 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import Link from "next/link";
-import ApproveButton from "@/components/ApproveButton";
-import ExecuteButton from "@/components/ExecuteButton";
-import RejectButton from "@/components/RejectButton";
 import { Suspense } from "react";
 import CreateTransaction from "@/components/CreateTransactionButton";
-import { redirect } from "next/navigation";
+import TransactionTable from "@/components/TransactionTable";
 
 const TRANSACTIONS_PER_PAGE = 10;
 
@@ -44,8 +38,11 @@ export default async function TransactionsPage({
 }) {
   const page = searchParams.page ? parseInt(searchParams.page) : 1;
   const rpcUrl = headers().get("x-rpc-url");
-  const connection = new Connection(rpcUrl || clusterApiUrl("mainnet-beta"));
-  const multisigCookie = headers().get("x-multisig");
+  const connection = new Connection(
+    rpcUrl || clusterApiUrl("mainnet-beta"),
+    "confirmed"
+  );
+  const multisigCookie = cookies().get("x-multisig")?.value;
   const multisigPda = new PublicKey(multisigCookie!);
   const vaultIndex = Number(headers().get("x-vault-index"));
   const programIdCookie = cookies().get("x-program-id")
@@ -59,13 +56,15 @@ export default async function TransactionsPage({
     connection,
     multisigPda
   );
+
   const totalTransactions = Number(multisigInfo.transactionIndex);
   const totalPages = Math.ceil(totalTransactions / TRANSACTIONS_PER_PAGE);
 
+  /*
   if (page > totalPages) {
-    // Redirect to the last valid page if the requested page is out of range
-    redirect(`/transactions?page=${totalPages}`);
+    redirect(`/transactions?page=0`);
   }
+  */
 
   const startIndex = totalTransactions - (page - 1) * TRANSACTIONS_PER_PAGE;
   const endIndex = Math.max(startIndex - TRANSACTIONS_PER_PAGE + 1, 1);
@@ -76,6 +75,13 @@ export default async function TransactionsPage({
       return fetchTransactionData(connection, multisigPda, index, programId);
     })
   );
+
+  const transactions = latestTransactions.map((transaction) => {
+    return {
+      ...transaction,
+      transactionPda: transaction.transactionPda[0].toBase58(),
+    };
+  });
 
   return (
     <div>
@@ -93,7 +99,7 @@ export default async function TransactionsPage({
         <Table>
           <TableCaption>A list of your recent transactions.</TableCaption>
           <TableCaption>
-            Page: {page} of {totalPages}
+            Page: {totalPages > 0 ? page + 1 : 0} of {totalPages}
           </TableCaption>
 
           <TableHeader>
@@ -104,47 +110,14 @@ export default async function TransactionsPage({
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
-          {latestTransactions.length > 0 ? (
-            <TableBody>
-              {latestTransactions.map((transaction, index) => {
-                return (
-                  <TableRow key={index}>
-                    <TableCell>{Number(transaction.index)}</TableCell>
-                    <TableCell className="text-blue-500">
-                      <Link
-                        href={createSolanaExplorerUrl(
-                          transaction.transactionPda[0].toBase58(),
-                          rpcUrl!
-                        )}
-                      >
-                        {transaction.transactionPda[0].toBase58()}
-                      </Link>
-                    </TableCell>
-                    <TableCell>
-                      {transaction.proposal?.status.__kind || "Active"}
-                    </TableCell>
-                    <TableCell>
-                      <ActionButtons
-                        rpcUrl={rpcUrl!}
-                        multisigPda={multisigCookie!}
-                        transactionIndex={Number(transaction.index)}
-                        proposalStatus={
-                          transaction.proposal?.status.__kind || "Active"
-                        }
-                        programId={programId}
-                      />
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          ) : (
-            <TableBody>
-              <TableRow>
-                <TableCell colSpan={5}>No transactions found.</TableCell>
-              </TableRow>
-            </TableBody>
-          )}
+          <Suspense fallback={<div>Loading...</div>}>
+            <TransactionTable
+              multisigPda={multisigCookie!}
+              rpcUrl={rpcUrl!}
+              transactions={transactions}
+              programId={programIdCookie!}
+            />
+          </Suspense>
         </Table>
       </Suspense>
 
@@ -194,46 +167,4 @@ async function fetchTransactionData(
   }
 
   return { transactionPda, proposal, index };
-}
-
-function ActionButtons({
-  rpcUrl,
-  multisigPda,
-  transactionIndex,
-  proposalStatus,
-  programId,
-}: ActionButtonsProps) {
-  return (
-    <>
-      <ApproveButton
-        rpcUrl={rpcUrl}
-        multisigPda={multisigPda}
-        transactionIndex={transactionIndex}
-        proposalStatus={proposalStatus}
-        programId={programId.toBase58()}
-      />
-      <RejectButton
-        rpcUrl={rpcUrl}
-        multisigPda={multisigPda}
-        transactionIndex={transactionIndex}
-        proposalStatus={proposalStatus}
-        programId={programId.toBase58()}
-      />
-      <ExecuteButton
-        rpcUrl={rpcUrl}
-        multisigPda={multisigPda}
-        transactionIndex={transactionIndex}
-        proposalStatus={proposalStatus}
-        programId={programId.toBase58()}
-      />
-    </>
-  );
-}
-
-function createSolanaExplorerUrl(publicKey: string, rpcUrl: string): string {
-  const baseUrl = "https://explorer.solana.com/address/";
-  const clusterQuery = "?cluster=custom&customUrl=";
-  const encodedRpcUrl = encodeURIComponent(rpcUrl);
-
-  return `${baseUrl}${publicKey}${clusterQuery}${encodedRpcUrl}`;
 }

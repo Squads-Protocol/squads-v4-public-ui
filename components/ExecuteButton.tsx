@@ -160,10 +160,11 @@ const ExecuteButton = ({
   };
   return (
     <Dialog>
-      <DialogTrigger disabled={!isTransactionReady}>
-        <Button disabled={!isTransactionReady} className="mr-2">
-          Execute
-        </Button>
+      <DialogTrigger
+        disabled={!isTransactionReady}
+        className="mr-2 h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md"
+      >
+        Execute
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
