@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../primitives/card";
+import { Wifi } from "lucide-react";
 
 export default function RPCConfig() {
   return (
@@ -23,10 +24,13 @@ export default function RPCConfig() {
         ease: "easeInOut",
       }}
     >
-      <Card className="dark:bg-darkforeground dark:border-darkborder/30">
-        <CardHeader>
-          <CardTitle className="font-neuemedium">RPC Endpoint</CardTitle>
-          <CardDescription className="font-neue text-muted-foreground dark:text-white/50">
+      <Card className="font-neue dark:bg-darkforeground dark:border-darkborder/30">
+        <CardHeader className="space-y-3">
+          <CardTitle className="inline-flex gap-2 items-center tracking-wide">
+            <Wifi size={24} />
+            RPC Endpoint
+          </CardTitle>
+          <CardDescription className="text-stone-500 dark:text-white/50">
             Change the default RPC Url for this app.
           </CardDescription>
         </CardHeader>

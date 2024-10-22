@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/primitives/card";
 import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
 import * as multisig from "@sqds/multisig";
+import { ArrowUp01, Code2, User, UserPlus, Users } from "lucide-react";
 import { cookies, headers } from "next/headers";
 const ConfigurationPage = async () => {
   const rpcUrl = headers().get("x-rpc-url");
@@ -35,16 +36,22 @@ const ConfigurationPage = async () => {
     <div className="font-neue">
       <PageHeader heading="Squad Config" />
       <Card className="dark:bg-darkforeground dark:border-darkborder/30">
-        <CardHeader>
-          <CardTitle>Members</CardTitle>
+        <CardHeader className="space-y-3">
+          <CardTitle className="inline-flex gap-2 items-center tracking-wide">
+            <Users size={24} />
+            Members
+          </CardTitle>
           <CardDescription className="text-stone-500 dark:text-white/50">
             List of members in the multisig as well as their permissions.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="mt-3 space-y-8">
-            {multisigInfo.members.map((member) => (
+          <div className="mt-3">
+            {multisigInfo.members.map((member, i) => (
               <div key={member.key.toBase58()}>
+                {i > 0 && i < multisigInfo.members.length && (
+                  <hr className="my-6 dark:border-darkborder/30" />
+                )}
                 <div className="flex items-center">
                   <div className="ml-4 space-y-3">
                     <div className="flex items-center gap-2">
@@ -84,16 +91,18 @@ const ConfigurationPage = async () => {
                     />
                   </div>
                 </div>
-                <hr className="mt-2 dark:border-darkborder/30" />
               </div>
             ))}
           </div>
         </CardContent>
       </Card>
-      <div className="flex pb-4">
-        <Card className="mt-4 w-1/2 mr-2 dark:bg-darkforeground dark:border-darkborder/30">
-          <CardHeader>
-            <CardTitle>Add Member</CardTitle>
+      <div className="mt-4 pb-4 flex gap-4">
+        <Card className="w-1/2 dark:bg-darkforeground dark:border-darkborder/30">
+          <CardHeader className="space-y-3">
+            <CardTitle className="inline-flex gap-2 items-center tracking-wide">
+              <UserPlus size={24} />
+              Add Member
+            </CardTitle>
             <CardDescription className="text-stone-500 dark:text-white/50">
               Add a member to the Multisig
             </CardDescription>
@@ -111,9 +120,12 @@ const ConfigurationPage = async () => {
             />
           </CardContent>
         </Card>
-        <Card className="mt-4 w-1/2 dark:bg-darkforeground dark:border-darkborder/30">
-          <CardHeader>
-            <CardTitle>Change Threshold</CardTitle>
+        <Card className="w-1/2 dark:bg-darkforeground dark:border-darkborder/30">
+          <CardHeader className="space-y-3">
+            <CardTitle className="inline-flex gap-2 items-center tracking-wide">
+              <ArrowUp01 size={24} />
+              Change Threshold
+            </CardTitle>
             <CardDescription className="text-stone-500 dark:text-white/50">
               Change the threshold required to execute a multisig transaction.
             </CardDescription>
@@ -124,29 +136,6 @@ const ConfigurationPage = async () => {
               rpcUrl={rpcUrl || clusterApiUrl("mainnet-beta")}
               transactionIndex={Number(multisigInfo.transactionIndex) + 1}
               programId={
-                programIdCookie
-                  ? programIdCookie
-                  : multisig.PROGRAM_ID.toBase58()
-              }
-            />
-          </CardContent>
-        </Card>
-      </div>
-      <div className="pb-4">
-        <Card className="w-1/2 dark:bg-darkforeground dark:border-darkborder/30">
-          <CardHeader>
-            <CardTitle>Change Program Upgrade Authority</CardTitle>
-            <CardDescription className="text-stone-500 dark:text-white/50">
-              Change the upgrade authority of one of your programs.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ChangeUpgradeAuthorityInput
-              multisigPda={multisigCookie!}
-              rpcUrl={rpcUrl || clusterApiUrl("mainnet-beta")}
-              transactionIndex={Number(multisigInfo.transactionIndex) + 1}
-              vaultIndex={vaultIndex}
-              globalProgramId={
                 programIdCookie
                   ? programIdCookie
                   : multisig.PROGRAM_ID.toBase58()

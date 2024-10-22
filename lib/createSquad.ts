@@ -1,10 +1,6 @@
 import * as web3 from "@solana/web3.js";
 import * as multisig from "@sqds/multisig";
-
-export interface Member {
-  key: web3.PublicKey | null;
-  permissions: multisig.generated.Permissions;
-}
+import { Member } from "./types";
 
 export async function createMultisig(
   connection: web3.Connection,
@@ -37,7 +33,7 @@ export async function createMultisig(
       multisigPda: multisigPda,
       createKey: createKey,
       creator: user,
-      members: members as any,
+      members: members as Member[],
       threshold: threshold,
       configAuthority: configAuthority ? configAuthority : null,
       treasury: configTreasury,

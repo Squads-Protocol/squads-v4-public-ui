@@ -1,9 +1,7 @@
 "use client";
 import { useWallet } from "@solana/wallet-adapter-react";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { MultisigInfo } from "@/lib/types";
-import { nFormatter } from "@/lib/nFormatter";
 import Link from "next/link";
 import { getCachedSquads } from "@/lib/helpers/getCachedMultisigs";
 import { toast } from "sonner";
@@ -13,10 +11,9 @@ import { AlertOctagon, RefreshCw } from "lucide-react";
 import Loading from "./primitives/loading";
 import { Button } from "./primitives/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./primitives/card";
-import { useRouter } from "next/navigation";
+import SquadRow from "./squads/squad-row";
 
 export default function MyMultisigs({ rpc }: { rpc: string }) {
-  const router = useRouter();
   const { publicKey, connected } = useWallet();
   const [loading, setLoading] = useState<boolean>(false);
   const [accounts, setAccounts] = useState<MultisigInfo[]>([]);
@@ -76,11 +73,6 @@ export default function MyMultisigs({ rpc }: { rpc: string }) {
     }
   }
 
-  const setMultisigCookie = (multisig: string) => {
-    document.cookie = `x-multisig=${multisig}; path=/`;
-    router.refresh();
-  };
-
   useEffect(() => {
     getAccounts();
   }, [publicKey]);
@@ -122,7 +114,7 @@ export default function MyMultisigs({ rpc }: { rpc: string }) {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex gap-4 items-center">
-            <CardTitle>My Squads</CardTitle>
+            <CardTitle className="tracking-wide">My Squads</CardTitle>
             <button
               onClick={async () => await refresh()}
               className="bg-stone-500/10 dark:bg-white/[0.03] rounded-full p-1"
@@ -139,53 +131,13 @@ export default function MyMultisigs({ rpc }: { rpc: string }) {
       </CardHeader>
       <CardContent>
         {accounts.length != 0 && connected ? (
-          <>
-            <div className="w-full h-[25rem] bg-stone-500/10 dark:bg-white/[0.03] rounded-md p-4">
-              {accounts
-                .sort((a, b) => b.balance.total - a.balance.total)
-                .map((acc, i) => (
-                  <>
-                    {i > 0 && i < accounts.length && (
-                      <hr className="my-2 border-stone-500/25 dark:border-white/[0.25]" />
-                    )}
-                    <button
-                      key={i}
-                      onClick={() =>
-                        setMultisigCookie(acc.publicKey.toString())
-                      }
-                      className="w-full flex items-center justify-between p-2 dark:hover:bg-white/[0.04] rounded-md"
-                    >
-                      <div className="flex gap-4 items-center">
-                        <Image
-                          src="/default_image.svg"
-                          width={50}
-                          height={50}
-                          alt="Squads Multisig"
-                          className="rounded-xl"
-                        />
-                        <div className="flex flex-col space-y-0.5 justify-start items-start">
-                          <p className="font-neue text-stone-700 dark:text-white">
-                            {acc.vault.slice(0, 4) +
-                              "..." +
-                              acc.vault.slice(40, 44)}
-                          </p>
-                          <p className="font-neue text-xs text-stone-400 dark:text-white/25">
-                            Members: {acc.data.members.length}
-                          </p>
-                        </div>
-                      </div>
-                      <p className="font-neuemedium text-lg dark:text-white">
-                        ${nFormatter(acc.balance.total)}{" "}
-                        <span className="ml-1 text-xs font-neue dark:text-white/50">
-                          {" "}
-                          balance
-                        </span>
-                      </p>
-                    </button>
-                  </>
-                ))}
-            </div>
-          </>
+          <div className="w-full h-[25rem] bg-stone-500/10 dark:bg-white/[0.03] rounded-md p-4">
+            {accounts
+              .sort((a, b) => b.balance.total - a.balance.total)
+              .map((acc, i) => (
+                <SquadRow key={i} index={i} accounts={accounts} squad={acc} />
+              ))}
+          </div>
         ) : (
           <div className="w-full h-[25rem] flex items-center justify-center bg-stone-500/10 dark:bg-white/[0.03] rounded-md p-4">
             <div className="w-full flex-col justify-center">

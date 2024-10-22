@@ -1,11 +1,12 @@
-import type { Metadata } from "next";
 import "./globals.css";
-import { SolanaProvider } from "@/providers/SolanaProvider";
-import { headers } from "next/headers";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Squads Simplified",
   description: "Squads v4 program user interface.",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({
@@ -13,10 +14,9 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const rpcUrl = headers().get("x-rpc-url");
   return (
     <html lang="en">
-      <SolanaProvider rpc={rpcUrl}>{children}</SolanaProvider>
+      <body>{children}</body>
     </html>
   );
 }

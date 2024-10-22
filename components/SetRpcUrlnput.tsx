@@ -23,7 +23,7 @@ const SetRpcUrlInput = () => {
 
   const onSubmit = async () => {
     if (isValidUrl(rpcUrl)) {
-      document.cookie = `x-rpc-url=${rpcUrl}`;
+      document.cookie = `x-rpc-url=${rpcUrl}; path=/; SameSite=Strict;`;
       setRpcUrl("");
       router.refresh();
     } else {

@@ -52,19 +52,17 @@ function ConnectedState({
   return (
     <Menu as="div" className="relative inline-block text-left">
       <div>
-        <MenuButton>
-          <button className="px-6 py-2 inline-flex gap-2 font-neue items-center rounded-lg bg-gradient-to-br from-stone-700 to-stone-800 text-white dark:bg-gradient-to-br dark:from-white/[0.03] dark:to-white/[0.03] hover:bg-gradient-to-br hover:from-stone-600 hover:to-stone-700 transition duration-200">
-            <Image
-              src={wallet?.adapter.icon as string}
-              alt=""
-              width={10}
-              height={10}
-              className="w-4 h-4 rounded-lg"
-            />
-            {publicKey?.toString().slice(0, 4) +
-              "..." +
-              publicKey?.toString().slice(-4)}
-          </button>
+        <MenuButton className="px-6 py-2 inline-flex gap-2 font-neue items-center rounded-lg bg-gradient-to-br from-stone-700 to-stone-800 text-white dark:bg-gradient-to-br dark:from-white/[0.03] dark:to-white/[0.03] hover:bg-gradient-to-br hover:from-stone-600 hover:to-stone-700 transition duration-200">
+          <Image
+            src={wallet?.adapter.icon as string}
+            alt=""
+            width={10}
+            height={10}
+            className="w-4 h-4 rounded-lg"
+          />
+          {publicKey?.toString().slice(0, 4) +
+            "..." +
+            publicKey?.toString().slice(-4)}
         </MenuButton>
       </div>
       <Transition

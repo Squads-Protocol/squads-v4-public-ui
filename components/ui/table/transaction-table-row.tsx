@@ -8,6 +8,7 @@ import RejectButton from "@/components/RejectButton";
 import ExecuteButton from "@/components/ExecuteButton";
 import Chip from "../chip";
 import CopyTextButton from "../misc/copy-text";
+import { MultiProgress } from "../primitives/multi-progress";
 
 interface TransactionTableRowProps {
   rpcUrl: string;
@@ -18,6 +19,7 @@ interface TransactionTableRowProps {
     proposal: multisig.generated.Proposal | null;
     index: bigint;
   };
+  threshold: number;
 }
 
 export default function TransactionTableRow({
@@ -25,10 +27,8 @@ export default function TransactionTableRow({
   multisigPda,
   programId,
   transaction,
+  threshold,
 }: TransactionTableRowProps) {
-  const copyText = async (text: string) => {
-    await navigator.clipboard.writeText(text);
-  };
   return (
     <TableRow className="border-darkborder/30 hover:bg-white/[0.03]">
       <TableCell className="font-neuemedium">
@@ -50,8 +50,12 @@ export default function TransactionTableRow({
         </div>
       </TableCell>
       <TableCell className="font-neue">
-        {transaction.proposal?.approved.length || 0} /{" "}
-        {transaction.proposal?.rejected.length || 0}
+        <MultiProgress
+          approved={transaction.proposal?.approved.length || 0}
+          rejected={transaction.proposal?.rejected.length || 0}
+          max={threshold}
+          className="w-64"
+        />
       </TableCell>
       <TableCell className="font-neue">
         {showStatusChip(transaction.proposal?.status.__kind || "None")}

@@ -8,23 +8,21 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useTheme } from "next-themes";
 import LightDarkButton from "./light-dark-button";
 
-export default function Header() {
+export default function Header({ multisig }: { multisig: string | null }) {
   const pathname = usePathname();
   const { connected } = useWallet();
   const { theme } = useTheme();
+
+  const logo = theme == "dark" ? "/squads-light.png" : "/logo.svg";
+
+  console.log(multisig);
 
   return (
     <>
       <div className="fixed w-full bg-lightbackground/25 dark:bg-darkbackground/25 backdrop-blur-2xl z-[50] border border-transparent border-b-stone-300/75 dark:border-b-stone-800">
         <div className="w-full h-fit flex justify-between items-center py-3 px-6">
           <Link href="https://app.squads.so/" passHref>
-            <Image
-              src={theme == "dark" ? "/squads-light.png" : "/logo.svg"}
-              alt=""
-              width={100}
-              height={50}
-              className="w-32"
-            />
+            <Image src={logo} alt="" width={100} height={50} className="w-32" />
           </Link>
           <div className="flex gap-10 items-center">
             <div className="flex gap-4 items-center">
@@ -66,8 +64,11 @@ export default function Header() {
             </div>
             <div className="flex gap-4 items-center">
               <div className="flex gap-3 items-center">
-                {connected && (
-                  <Pill label="SOL" value="1" image="/solana-logo.png" />
+                {connected && multisig && (
+                  <Pill
+                    label={multisig.slice(0, 4) + "..." + multisig.slice(-4)}
+                    image="/default_image_light.svg"
+                  />
                 )}
               </div>
               <ConnectButton />

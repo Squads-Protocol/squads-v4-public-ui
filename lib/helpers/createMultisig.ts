@@ -1,5 +1,6 @@
 import * as web3 from "@solana/web3.js";
 import * as multisig from "@sqds/multisig";
+// Sometimes this errors, will fix in next SDK version
 import { Member } from "@sqds/multisig/lib/generated";
 
 export async function createMultisig(

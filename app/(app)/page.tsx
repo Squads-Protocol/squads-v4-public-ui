@@ -1,13 +1,13 @@
 import * as multisig from "@sqds/multisig";
 import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
 import { cookies, headers } from "next/headers";
-import Image from "next/image";
 import { TokenList } from "@/components/TokenList";
 import { VaultDisplayer } from "@/components/VaultDisplayer";
 import PageHeader from "@/components/ui/layout/page-header";
 import MyMultisigs from "@/components/ui/my-multisigs";
 import { lookupAddress } from "@/lib/helpers/tokenAddresses";
 import { FilteredToken } from "@/lib/types";
+import ChangeUpgradeAuth from "@/components/ui/change-upgrade-auth";
 
 export default async function Home() {
   const rpcUrl = headers().get("x-rpc-url");
@@ -26,6 +26,11 @@ export default async function Home() {
     index: vaultIndex || 0,
     programId: programId ? programId : multisig.PROGRAM_ID,
   })[0];
+
+  const multisigInfo = await multisig.accounts.Multisig.fromAccountAddress(
+    connection,
+    multisigPda
+  );
 
   const solBalance = await connection.getBalance(multisigVault);
 
@@ -68,13 +73,26 @@ export default async function Home() {
           />
           <MyMultisigs rpc={rpcUrl!} />
         </div>
-        <div className="w-1/2 flex-col gap-4">
+        <div className="w-1/2 flex-col space-y-4">
           <TokenList
             solBalance={solBalance}
             tokens={tokens}
             rpcUrl={rpcUrl!}
             multisigPda={multisigCookie!}
             vaultIndex={vaultIndex || 0}
+          />
+          <ChangeUpgradeAuth
+            multisigPda={multisigCookie!}
+            rpcUrl={rpcUrl || clusterApiUrl("mainnet-beta")}
+            transactionIndex={
+              multisigInfo.transactionIndex
+                ? Number(multisigInfo.transactionIndex) + 1
+                : 1
+            }
+            vaultIndex={vaultIndex}
+            programId={
+              programIdCookie ? programIdCookie : multisig.PROGRAM_ID.toBase58()
+            }
           />
         </div>
       </div>

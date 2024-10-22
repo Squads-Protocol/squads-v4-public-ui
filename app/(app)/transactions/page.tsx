@@ -40,6 +40,7 @@ export default async function TransactionsPage({
       <TransactionsTable
         rpcUrl={rpcUrl!}
         multisigPda={multisigCookie!}
+        multisigInfo={multisigInfo}
         programId={programIdCookie}
         searchParams={searchParams}
         transactions={latestTransactions}

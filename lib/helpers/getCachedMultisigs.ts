@@ -1,8 +1,7 @@
 import * as multisig from "@sqds/multisig";
 import { Connection, PublicKey } from "@solana/web3.js";
-import { CachedData, MultisigInfo } from "../types";
+import { CachedData, Member, MultisigInfo } from "../types";
 import { getTotalBalance } from "./getTotalBalances";
-import { Member } from "@sqds/multisig/lib/generated";
 
 export async function getCachedSquads(
   connection: Connection,

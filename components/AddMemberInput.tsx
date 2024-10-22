@@ -13,7 +13,7 @@ import {
   VersionedTransaction,
 } from "@solana/web3.js";
 import { toast } from "sonner";
-import { isPublickey } from "@/lib/isPublickey";
+import { isPublickey } from "@/lib/checks/isPublickey";
 
 type AddMemberInputProps = {
   multisigPda: string;

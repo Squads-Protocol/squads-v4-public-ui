@@ -1,12 +1,13 @@
 import { AccountInfo, Connection, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { PublicKey } from "@solana/web3.js";
 import { USDC_MINT } from "../consts";
+import { TotalBalancesReturn } from "../types";
 
 export async function getTotalBalance(
   connection: Connection,
   key: PublicKey,
   account: AccountInfo<Buffer>
-) {
+): Promise<TotalBalancesReturn> {
   try {
     const solanaPriceData = await fetch(
       `https://price.jup.ag/v6/price?ids=SOL`,
@@ -14,12 +15,14 @@ export async function getTotalBalance(
         method: "GET",
       }
     ).then((res) => res.json());
-    console.log(
-      account.lamports / LAMPORTS_PER_SOL,
-      solanaPriceData.data.SOL.price
-    );
-    let solanaUsdBalance =
-      (account.lamports / LAMPORTS_PER_SOL) * solanaPriceData.data.SOL.price;
+
+    let solanaUsdBalance;
+    if (!solanaPriceData.data) {
+      solanaUsdBalance = 0;
+    } else {
+      solanaUsdBalance =
+        (account.lamports / LAMPORTS_PER_SOL) * solanaPriceData.data.SOL.price;
+    }
 
     const usdcAccount = await connection.getParsedTokenAccountsByOwner(key, {
       mint: new PublicKey(USDC_MINT),

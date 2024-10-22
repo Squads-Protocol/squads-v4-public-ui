@@ -10,6 +10,7 @@ import { Skeleton } from "../primitives/skeleton";
 interface TransactionsTableProps {
   rpcUrl: string;
   multisigPda: string;
+  multisigInfo: multisig.generated.Multisig;
   programId: string;
   searchParams: { page: string };
   transactions: {
@@ -22,6 +23,7 @@ interface TransactionsTableProps {
 export default function TransactionsTable({
   rpcUrl,
   multisigPda,
+  multisigInfo,
   programId,
   searchParams,
   transactions,
@@ -40,6 +42,7 @@ export default function TransactionsTable({
                   multisigPda={multisigPda!}
                   programId={programId}
                   transaction={transaction}
+                  threshold={multisigInfo.threshold}
                 />
               ))}
             </TableBody>
