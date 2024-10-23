@@ -4,7 +4,13 @@ import { Input } from "./ui/primitives/input";
 import { createMultisig } from "@/lib/createSquad";
 import { Connection, Keypair, PublicKey, clusterApiUrl } from "@solana/web3.js";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { PlusCircleIcon, XIcon } from "lucide-react";
+import {
+  CheckSquare,
+  Copy,
+  ExternalLink,
+  PlusCircleIcon,
+  XIcon,
+} from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -32,27 +38,35 @@ interface CreateSquadFormData {
   createKey: string;
 }
 
-export default function CreateSquadForm({ rpc }: { rpc: string }) {
+export default function CreateSquadForm({
+  rpc,
+  programId,
+}: {
+  rpc: string;
+  programId: string;
+}) {
   const router = useRouter();
   const { publicKey, connected, sendTransaction } = useWallet();
 
   const connection = new Connection(rpc || clusterApiUrl("mainnet-beta"));
   const validationRules = getValidationRules();
 
-  const { formState, handleChange, handleAddMember, onSubmit } =
-    useSquadForm<string>(
-      {
-        threshold: 1,
-        rentCollector: "",
-        configAuthority: "",
-        createKey: "",
-        members: {
-          count: 0,
-          memberData: [],
-        },
+  const { formState, handleChange, handleAddMember, onSubmit } = useSquadForm<{
+    signature: string;
+    multisig: string;
+  }>(
+    {
+      threshold: 1,
+      rentCollector: "",
+      configAuthority: "",
+      createKey: "",
+      members: {
+        count: 0,
+        memberData: [],
       },
-      validationRules
-    );
+    },
+    validationRules
+  );
 
   async function submitHandler() {
     if (!connected) throw new Error("Please connect your wallet.");
@@ -66,7 +80,8 @@ export default function CreateSquadForm({ rpc }: { rpc: string }) {
         formState.values.threshold,
         createKey.publicKey,
         formState.values.rentCollector,
-        formState.values.configAuthority
+        formState.values.configAuthority,
+        programId
       );
 
       const signature = await sendTransaction(transaction, connection, {
@@ -78,10 +93,22 @@ export default function CreateSquadForm({ rpc }: { rpc: string }) {
         id: "create",
       });
 
-      await connection.getSignatureStatuses([signature]);
+      let sent = false;
+      const maxAttempts = 10;
+      const delayMs = 1000;
+      for (let attempt = 0; attempt <= maxAttempts && !sent; attempt++) {
+        const status = await connection.getSignatureStatus(signature);
+        if (status?.value?.confirmationStatus === "confirmed") {
+          await new Promise((resolve) => setTimeout(resolve, delayMs));
+          sent = true;
+        } else {
+          await new Promise((resolve) => setTimeout(resolve, delayMs));
+        }
+      }
+
       document.cookie = `x-multisig=${multisig.toBase58()}; path=/`;
 
-      return signature;
+      return { signature, multisig: multisig.toBase58() };
     } catch (error: any) {
       console.error(error);
       return error;
@@ -111,9 +138,23 @@ export default function CreateSquadForm({ rpc }: { rpc: string }) {
                         memberData: formState.values.members.memberData.map(
                           (member: Member, index: number) => {
                             if (index === i) {
+                              let newKey = null;
+                              try {
+                                if (
+                                  e.target.value &&
+                                  PublicKey.isOnCurve(e.target.value)
+                                ) {
+                                  newKey = new PublicKey(e.target.value);
+                                }
+                              } catch (error) {
+                                console.error(
+                                  "Invalid public key input:",
+                                  error
+                                );
+                              }
                               return {
                                 ...member,
-                                key: new PublicKey(e.target.value),
+                                key: newKey,
                               };
                             }
                             return member;
@@ -270,8 +311,45 @@ export default function CreateSquadForm({ rpc }: { rpc: string }) {
         onClick={() =>
           toast.promise(onSubmit(submitHandler), {
             id: "create",
+            duration: 10000,
             loading: "Building Transaction...",
-            success: "Squad created.",
+            success: (res) => (
+              <div className="w-full flex items-center justify-between">
+                <div className="flex gap-4 items-center">
+                  <CheckSquare className="w-4 h-4 text-green-600" />
+                  <div className="flex flex-col space-y-0.5">
+                    <p className="font-semibold">
+                      Squad Created:{" "}
+                      <span className="font-normal">
+                        {res.multisig.slice(0, 4) +
+                          "..." +
+                          res.multisig.slice(-4)}
+                      </span>
+                    </p>
+                    <p className="font-light">
+                      Your new Squad has been set as active.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2 items-center">
+                  <Copy
+                    onClick={() => {
+                      navigator.clipboard.writeText(res.multisig);
+                      toast.success("Copied address!");
+                    }}
+                    className="w-4 h-4 hover:text-stone-500"
+                  />
+                  <Link
+                    href={`https://explorer.solana.com/address/${res.multisig}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    passHref
+                  >
+                    <ExternalLink className="w-4 h-4 hover:text-stone-500" />
+                  </Link>
+                </div>
+              </div>
+            ),
             error: (e) => `Failed to create squad: ${e}`,
           })
         }
@@ -290,12 +368,12 @@ function getValidationRules(): ValidationRules {
     },
     rentCollector: async (value: string) => {
       const valid = isPublickey(value);
-      if (!valid) return "Invalid Multisig Key";
+      if (!valid) return "Rent collector must be a valid public key";
       return null;
     },
     configAuthority: async (value: string) => {
       const valid = isPublickey(value);
-      if (!valid) return "Invalid Multisig Key";
+      if (!valid) return "Config authority must be a valid public key";
       return null;
     },
     members: async (value: { count: number; memberData: Member[] }) => {

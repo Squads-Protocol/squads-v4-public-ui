@@ -9,16 +9,21 @@ export async function createMultisig(
   threshold: number,
   createKey: web3.PublicKey,
   rentCollector?: web3.PublicKey,
-  configAuthority?: web3.PublicKey
+  configAuthority?: web3.PublicKey,
+  programId?: string
 ) {
   try {
     const multisigPda = multisig.getMultisigPda({
       createKey,
-      programId: multisig.PROGRAM_ID,
+      programId: programId
+        ? new web3.PublicKey(programId)
+        : multisig.PROGRAM_ID,
     })[0];
 
     const [programConfig] = multisig.getProgramConfigPda({
-      programId: multisig.PROGRAM_ID,
+      programId: programId
+        ? new web3.PublicKey(programId)
+        : multisig.PROGRAM_ID,
     });
 
     const programConfigInfo =
@@ -39,7 +44,9 @@ export async function createMultisig(
       treasury: configTreasury,
       rentCollector: rentCollector ? rentCollector : null,
       timeLock: 0,
-      programId: multisig.PROGRAM_ID,
+      programId: programId
+        ? new web3.PublicKey(programId)
+        : multisig.PROGRAM_ID,
     });
 
     const tx = new web3.Transaction().add(ix);
