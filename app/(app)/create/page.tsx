@@ -1,5 +1,6 @@
 import CreateSquadForm from "@/components/CreateSquadForm";
 import PageHeader from "@/components/ui/layout/page-header";
+import { Card, CardContent } from "@/components/ui/primitives/card";
 import { PROGRAM_ID } from "@sqds/multisig";
 import { cookies, headers } from "next/headers";
 
