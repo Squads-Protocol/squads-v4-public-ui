@@ -1,6 +1,6 @@
 import * as web3 from "@solana/web3.js";
 import * as multisig from "@sqds/multisig";
-import { Member } from "./types";
+import { Member } from "../types";
 
 export async function createMultisig(
   connection: web3.Connection,

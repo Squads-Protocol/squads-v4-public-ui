@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "./ui/primitives/button";
 import { Input } from "./ui/primitives/input";
-import { createMultisig } from "@/lib/createSquad";
+import { createMultisig } from "@/lib/helpers/createSquad";
 import { Connection, Keypair, PublicKey, clusterApiUrl } from "@solana/web3.js";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { PlusCircleIcon, XIcon } from "lucide-react";
@@ -18,19 +18,6 @@ import { useRouter } from "next/navigation";
 import { Member, ValidationRules } from "@/lib/types";
 import { useSquadForm } from "@/lib/hooks/useSquadForm";
 import { isPublickey } from "@/lib/checks/isPublickey";
-
-interface MemberAddresses {
-  count: number;
-  memberData: Member[];
-}
-
-interface CreateSquadFormData {
-  members: MemberAddresses;
-  threshold: number;
-  rentCollector: string;
-  configAuthority: string;
-  createKey: string;
-}
 
 export default function CreateSquadForm({ rpc }: { rpc: string }) {
   const router = useRouter();
