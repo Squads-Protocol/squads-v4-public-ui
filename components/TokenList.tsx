@@ -45,25 +45,23 @@ export function TokenList({
       </CardHeader>
       <CardContent>
         <div className="flex flex-col space-y-6">
-          <div className="flex items-center">
-            <div className="">
-              <div className="flex items-center gap-2">
-                <Image
-                  src={"/tokens/SOL.webp"}
-                  width={30}
-                  height={30}
-                  alt="SOL Icon"
-                  className="w-8 h-8 rounded-full"
-                />
-                <div className="flex flex-col space-y-0.5 items-start justify-start">
-                  <p className="text-sm font-neuemedium leading-none text-stone-700 dark:text-white">
-                    SOL
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Image
+                src={"/tokens/SOL.webp"}
+                width={30}
+                height={30}
+                alt="SOL Icon"
+                className="w-8 h-8 rounded-full"
+              />
+              <div className="flex flex-col space-y-0.5 items-start justify-start">
+                <p className="text-sm font-neuemedium leading-none text-stone-700 dark:text-white">
+                  SOL
+                </p>
+                <div className="flex items-baseline gap-1">
+                  <p className="text-xs text-stone-500 dark:text-white/50 font-neue">
+                    Amount: {solBalance / LAMPORTS_PER_SOL}
                   </p>
-                  <div className="flex items-baseline gap-1">
-                    <p className="text-xs text-stone-500 dark:text-white/50 font-neue">
-                      Amount: {solBalance / LAMPORTS_PER_SOL}
-                    </p>
-                  </div>
                 </div>
               </div>
             </div>

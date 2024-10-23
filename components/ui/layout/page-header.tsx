@@ -6,6 +6,7 @@ export default function PageHeader({ heading }: { heading: string }) {
     <motion.div
       initial={{ opacity: 0.5, x: 25 }}
       whileInView={{ opacity: 1, x: 0 }}
+      viewport={{ once: true }}
       transition={{
         delay: 0.1,
         duration: 0.4,

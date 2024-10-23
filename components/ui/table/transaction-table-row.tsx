@@ -155,7 +155,7 @@ function showStatusChip(proposalStatus: string) {
     case "Rejected":
       return <Chip label="Rejected" color="red" />;
     case "Approved":
-      return <Chip label="Approved" color="green" />;
+      return <Chip label="Ready" color="yellow" />;
     case "Executing":
       return <Chip label="Executing" color="orange" />;
     case "Executed":
