@@ -1,15 +1,6 @@
 "use client";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import * as bs58 from "bs58";
-import { Button } from "./ui/button";
 import { useState } from "react";
+import * as bs58 from "bs58";
 import * as multisig from "@sqds/multisig";
 import { useWallet } from "@solana/wallet-adapter-react";
 import {
@@ -19,10 +10,19 @@ import {
   TransactionMessage,
   clusterApiUrl,
 } from "@solana/web3.js";
-import { Input } from "./ui/input";
 import { toast } from "sonner";
 import { simulateEncodedTransaction } from "@/lib/transaction/simulateEncodedTransaction";
 import { importTransaction } from "@/lib/transaction/importTransaction";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/primitives/dialog";
+import { Input } from "./ui/primitives/input";
+import { Button } from "./ui/primitives/button";
 
 type CreateTransactionProps = {
   rpcUrl: string | null;

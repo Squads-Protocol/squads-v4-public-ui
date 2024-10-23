@@ -5,7 +5,7 @@ import {
   Transaction,
   clusterApiUrl,
 } from "@solana/web3.js";
-import { Button } from "./ui/button";
+import { Button } from "./ui/primitives/button";
 import * as multisig from "@sqds/multisig";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
@@ -99,7 +99,7 @@ const ApproveButton = ({
           error: (e) => `Failed to approve: ${e}`,
         })
       }
-      className="mr-2"
+      className="font-neue bg-gradient-to-br from-stone-600 to-stone-800 text-white dark:bg-gradient-to-br dark:from-white dark:to-stone-400 dark:text-stone-700 hover:bg-gradient-to-br hover:from-stone-600 hover:to-stone-700 disabled:text-stone-500 disabled:bg-gradient-to-br disabled:from-stone-800 disabled:to-stone-900 dark:disabled:bg-gradient-to-br dark:disabled:from-stone-300 dark:disabled:to-stone-500 dark:disabled:text-stone-700/50 dark:hover:bg-stone-100 transition duration-200"
     >
       Approve
     </Button>

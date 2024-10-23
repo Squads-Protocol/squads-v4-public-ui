@@ -1,7 +1,7 @@
 "use client";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Member, createMultisig } from "@/lib/createSquad";
+import { Button } from "./ui/primitives/button";
+import { Input } from "./ui/primitives/input";
+import { createMultisig } from "@/lib/helpers/createSquad";
 import { Connection, Keypair, PublicKey, clusterApiUrl } from "@solana/web3.js";
 import { useWallet } from "@solana/wallet-adapter-react";
 import {
@@ -18,25 +18,13 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
+} from "./ui/primitives/select";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { isPublickey } from "@/lib/isPublickey";
-import { ValidationRules, useSquadForm } from "@/lib/hooks/useSquadForm";
+import { Member, ValidationRules } from "@/lib/types";
+import { useSquadForm } from "@/lib/hooks/useSquadForm";
+import { isPublickey } from "@/lib/checks/isPublickey";
 import Link from "next/link";
-
-interface MemberAddresses {
-  count: number;
-  memberData: Member[];
-}
-
-interface CreateSquadFormData {
-  members: MemberAddresses;
-  threshold: number;
-  rentCollector: string;
-  configAuthority: string;
-  createKey: string;
-}
 
 export default function CreateSquadForm({
   rpc,
@@ -119,15 +107,15 @@ export default function CreateSquadForm({
   }
 
   return (
-    <>
-      <div className="grid grid-cols-8 gap-4 mb-6">
-        <div className="col-span-6 flex-col space-y-2">
+    <div className="w-full">
+      <div className="grid grid-cols-8 gap-6 mb-6">
+        <div className="col-span-6 flex-col space-y-4">
           <label htmlFor="members" className="font-medium">
             Members <span className="text-red-600">*</span>
           </label>
           {formState.values.members.memberData.map(
             (member: Member, i: number) => (
-              <div key={i} className="grid grid-cols-4 items-center gap-2">
+              <div key={i} className="grid grid-cols-4 items-center gap-4">
                 <div className="relative col-span-3">
                   <Input
                     defaultValue={member.key ? member.key.toBase58() : ""}
@@ -199,16 +187,41 @@ export default function CreateSquadForm({
                     });
                   }}
                 >
-                  <SelectTrigger className="col-span-1">
-                    <SelectValue placeholder="Select permissions" />
+                  <SelectTrigger className="col-span-1 bg-gradient-to-br from-stone-600 to-stone-800 text-white dark:bg-gradient-to-br dark:from-white dark:to-stone-400 dark:text-stone-700">
+                    <SelectValue placeholder="Select Permissions" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-gradient-to-br from-stone-600 to-stone-800 text-white dark:bg-gradient-to-br dark:from-white dark:to-stone-400 dark:text-stone-700 ">
                     <SelectGroup>
-                      <SelectItem value="0">None</SelectItem>
-                      <SelectItem value="1">Proposer</SelectItem>
-                      <SelectItem value="2">Voter</SelectItem>
-                      <SelectItem value="4">Executor</SelectItem>
-                      <SelectItem value="7">All</SelectItem>
+                      <SelectItem
+                        value="0"
+                        className="aria-selected:bg-white/50 aria-selected:text-stone-700 dark:hover:bg-stone-500/50 dark:aria-selected:bg-stone-500/50"
+                      >
+                        None
+                      </SelectItem>
+                      <SelectItem
+                        value="1"
+                        className="aria-selected:bg-white/50 aria-selected:text-stone-700 dark:hover:bg-stone-500/50 dark:aria-selected:bg-stone-500/50"
+                      >
+                        Proposer
+                      </SelectItem>
+                      <SelectItem
+                        value="2"
+                        className="aria-selected:bg-white/50 aria-selected:text-stone-700 dark:hover:bg-stone-500/50 dark:aria-selected:bg-stone-500/50"
+                      >
+                        Voter
+                      </SelectItem>
+                      <SelectItem
+                        value="4"
+                        className="aria-selected:bg-white/50 aria-selected:text-stone-700 dark:hover:bg-stone-500/50 dark:aria-selected:bg-stone-500/50"
+                      >
+                        Executor
+                      </SelectItem>
+                      <SelectItem
+                        value="7"
+                        className="aria-selected:bg-white/50 aria-selected:text-stone-700 dark:hover:bg-stone-500/50 dark:aria-selected:bg-stone-500/50"
+                      >
+                        All
+                      </SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -223,7 +236,7 @@ export default function CreateSquadForm({
             <p className="text-sm">Add Address</p>
           </button>
           {formState.errors.members && (
-            <div className="mt-1.5 text-red-500 text-xs">
+            <div className="mt-1.5 text-red-500 font-neue text-xs">
               {formState.errors.members}
             </div>
           )}
@@ -242,7 +255,7 @@ export default function CreateSquadForm({
             className=""
           />
           {formState.errors.threshold && (
-            <div className="mt-1.5 text-red-500 text-xs">
+            <div className="mt-1.5 text-red-500 font-neue text-xs">
               {formState.errors.threshold}
             </div>
           )}
@@ -259,7 +272,7 @@ export default function CreateSquadForm({
             className=""
           />
           {formState.errors.rentCollector && (
-            <div className="mt-1.5 text-red-500 text-xs">
+            <div className="mt-1.5 text-red-500 font-neue text-xs">
               {formState.errors.rentCollector}
             </div>
           )}
@@ -276,7 +289,7 @@ export default function CreateSquadForm({
             className=""
           />
           {formState.errors.configAuthority && (
-            <div className="mt-1.5 text-red-500 text-xs">
+            <div className="mt-1.5 text-red-500 font-neue text-xs">
               {formState.errors.configAuthority}
             </div>
           )}
@@ -331,7 +344,7 @@ export default function CreateSquadForm({
       >
         Create Squad
       </Button>
-    </>
+    </div>
   );
 }
 

@@ -1,24 +1,8 @@
 "use client";
 import { useCallback, useState } from "react";
+import { FormState, FormValues, ValidationRules } from "../types";
 
 type SubmitHandler<T> = () => Promise<T>;
-
-export interface FormValues {
-  [key: string]: any;
-}
-
-export type ValidationErrors = Record<string, string>;
-export type ValidationFunction = (value: any) => Promise<string | null>;
-export interface ValidationRules {
-  [key: string]: ValidationFunction;
-}
-
-export interface FormState {
-  values: FormValues;
-  errors: ValidationErrors;
-  isValid: boolean;
-  isLoading: boolean;
-}
 
 export function useSquadForm<T>(
   initialValues: FormValues,

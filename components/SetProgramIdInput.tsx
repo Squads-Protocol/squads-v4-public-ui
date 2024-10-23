@@ -1,10 +1,10 @@
 "use client";
 import { useState } from "react";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { isPublickey } from "@/lib/isPublickey";
+import { Input } from "./ui/primitives/input";
+import { Button } from "./ui/primitives/button";
+import { isPublickey } from "@/lib/checks/isPublickey";
 
 const SetProgramIdInput = () => {
   const [programId, setProgramId] = useState("");

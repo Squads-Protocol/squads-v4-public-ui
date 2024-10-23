@@ -6,8 +6,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Button } from "./ui/button";
+} from "@/components/ui/primitives/dialog";
+import { Button } from "./ui/primitives/button";
 import { useState } from "react";
 import * as multisig from "@sqds/multisig";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -21,10 +21,11 @@ import {
   clusterApiUrl,
 } from "@solana/web3.js";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import { Input } from "./ui/input";
+import { Input } from "./ui/primitives/input";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { isPublickey } from "@/lib/isPublickey";
+import { isPublickey } from "@/lib/checks/isPublickey";
+import SendInput from "./ui/primitives/send-input";
 
 type SendSolProps = {
   rpcUrl: string;
@@ -131,29 +132,47 @@ const SendSol = ({
 
   return (
     <Dialog>
-      <DialogTrigger>
-        <Button>Send SOL</Button>
+      <DialogTrigger className="h-10 px-4 py-2 rounded-md font-neue bg-gradient-to-br from-stone-600 to-stone-800 text-white dark:bg-gradient-to-br dark:from-white dark:to-stone-400 dark:text-stone-700 hover:bg-gradient-to-br hover:from-stone-600 hover:to-stone-700 disabled:text-stone-500 disabled:bg-gradient-to-br disabled:from-stone-800 disabled:to-stone-900 dark:disabled:bg-gradient-to-br dark:disabled:from-stone-300 dark:disabled:to-stone-500 dark:disabled:text-stone-700/50 dark:hover:bg-stone-100 transition duration-200">
+        <p className="font-neue text-sm">Send SOL</p>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="font-neue bg-darkforeground border border-[#A9A9A9]/30">
         <DialogHeader>
-          <DialogTitle>Transfer SOL</DialogTitle>
-          <DialogDescription>
+          <DialogTitle>
+            <p className="text-2xl font-neuemedium bg-gradient-to-br from-white to-stone-600 bg-clip-text leading-none text-transparent pointer-events-none">
+              Transfer SOL
+            </p>
+          </DialogTitle>
+          <DialogDescription className="text-stone-400/75">
             Create a proposal to transfer SOL to another address.
           </DialogDescription>
         </DialogHeader>
-        <Input
-          placeholder="Recipient"
-          type="text"
-          onChange={(e) => setRecipient(e.target.value)}
-        />
-        {isPublickey(recipient) ? null : (
-          <p className="text-xs">Invalid recipient address</p>
-        )}
-        <Input
-          placeholder="Amount"
-          type="number"
-          onChange={(e) => setAmount(parseInt(e.target.value))}
-        />
+        <div className="mt-4 mb-6 flex flex-col space-y-6">
+          <div className="flex flex-col space-y-1">
+            <label className="text-sm text-white/75">Recipient</label>
+            <Input
+              placeholder="FcBpwMquaMURbYwpRFUr..."
+              type="text"
+              onChange={(e) => setRecipient(e.target.value)}
+            />
+            {isPublickey(recipient) ? null : (
+              <p className="text-xs text-red-500">Invalid recipient address</p>
+            )}
+          </div>
+          <div className="mb-4 flex flex-col space-y-1">
+            <label className="text-sm text-white/75">Amount</label>
+            <SendInput
+              amount={amount}
+              setAmount={setAmount}
+              label="SOL"
+              icon="/tokens/SOL.webp"
+            />
+            {amount > 0 ? null : (
+              <p className="text-xs text-red-500">
+                Amount must be greater than 0
+              </p>
+            )}
+          </div>
+        </div>
         <Button
           onClick={() =>
             toast.promise(transfer, {

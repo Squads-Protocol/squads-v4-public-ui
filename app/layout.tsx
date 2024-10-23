@@ -1,14 +1,12 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
-import { Wallet } from "@/components/Wallet";
-
-const inter = Inter({ subsets: ["latin"] });
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Squads Simplified",
-  description:
-    "Squads v4 program user interface.",
+  description: "Squads v4 program user interface.",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({
@@ -18,9 +16,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <Wallet>
-        <body>{children}</body>
-      </Wallet>
+      <body>{children}</body>
     </html>
   );
 }

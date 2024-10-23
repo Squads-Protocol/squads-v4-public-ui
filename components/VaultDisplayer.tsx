@@ -1,7 +1,8 @@
 import * as multisig from "@sqds/multisig";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/primitives/card";
 import { PublicKey } from "@solana/web3.js";
 import { VaultSelector } from "./VaultSelector";
+import CopyTextButton from "./ui/misc/copy-text";
 
 type VaultDisplayerProps = {
   multisigPdaString: string;
@@ -21,13 +22,24 @@ export function VaultDisplayer({
   });
 
   return (
-    <Card className="w-fit my-3">
+    <Card className="w-full font-neue dark:bg-darkforeground dark:border-darkborder/30">
       <CardHeader>
-        <CardTitle>Squads Vault</CardTitle>
+        <CardTitle className="tracking-wide">Current Vault</CardTitle>
       </CardHeader>
-      <CardContent>
-        <p className="mb-1">Address: {vaultAddress[0].toBase58()}</p>
-        <br />
+      <CardContent className="text-muted-foreground dark:text-white/50">
+        <div className="flex items-center gap-4 mb-6">
+          <span className="text-stone-700 dark:text-white/75">
+            Account {vaultIndex}:{" "}
+          </span>
+          <div className="flex items-center gap-2">
+            <p className="text-stone-500">
+              {vaultAddress[0].toBase58().slice(0, 4) +
+                "..." +
+                vaultAddress[0].toBase58().slice(-4)}
+            </p>
+            <CopyTextButton text={vaultAddress[0].toBase58()} />
+          </div>
+        </div>
         <VaultSelector />
       </CardContent>
     </Card>
