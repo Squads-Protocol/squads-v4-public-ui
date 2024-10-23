@@ -72,7 +72,7 @@ const CreateTransaction = ({
       ],
       payerKey: vaultAddress,
       recentBlockhash: (await connection.getLatestBlockhash()).blockhash,
-    }).compileToV0Message();
+    }).compileToLegacyMessage();
 
     const encoded = bs58.default.encode(dummyMessage.serialize());
 
@@ -81,8 +81,8 @@ const CreateTransaction = ({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger>
-        <Button>Import Transaction</Button>
+      <DialogTrigger className="h-10 px-4 py-2 text-sm bg-primary text-primary-foreground hover:bg-primary/90 rounded-md">
+        Import Transaction
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

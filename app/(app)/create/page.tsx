@@ -1,9 +1,11 @@
 import CreateSquadForm from "@/components/CreateSquadForm";
 import { Card, CardContent } from "@/components/ui/card";
-import { headers } from "next/headers";
+import { PROGRAM_ID } from "@sqds/multisig";
+import { cookies, headers } from "next/headers";
 
 export default async function CreateSquad() {
   const rpcUrl = headers().get("x-rpc-url");
+  const programId = cookies().get("x-program-id")?.value;
 
   return (
     <div className="">
@@ -15,7 +17,10 @@ export default async function CreateSquad() {
       </div>
       <Card className="pt-5">
         <CardContent>
-          <CreateSquadForm rpc={rpcUrl!} />
+          <CreateSquadForm
+            rpc={rpcUrl!}
+            programId={programId ? programId : PROGRAM_ID.toBase58()}
+          />
         </CardContent>
       </Card>
     </div>

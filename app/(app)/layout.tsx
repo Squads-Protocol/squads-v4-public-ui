@@ -5,7 +5,14 @@ import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
 import * as multisig from "@sqds/multisig";
 import { Toaster } from "@/components/ui/sonner";
 import ConnectWallet from "@/components/ConnectWalletButton";
-import { LucideHome, ArrowDownUp, Users, Settings } from "lucide-react";
+import {
+  LucideHome,
+  ArrowDownUp,
+  Users,
+  Settings,
+  CheckSquare,
+  AlertTriangle,
+} from "lucide-react";
 import RenderMultisigRoute from "@/components/RenderMultisigRoute";
 
 const AppLayout = async ({ children }: { children: React.ReactNode }) => {
@@ -39,7 +46,7 @@ const AppLayout = async ({ children }: { children: React.ReactNode }) => {
   const multisig = await isValidPublicKey(multisigCookie!);
 
   return (
-    <body>
+    <>
       <div className="flex flex-col md:flex-row h-screen min-w-full bg-white">
         <aside
           id="sidebar"
@@ -113,8 +120,13 @@ const AppLayout = async ({ children }: { children: React.ReactNode }) => {
 
         <RenderMultisigRoute multisig={multisig} children={children} />
       </div>
-      <Toaster />
-    </body>
+      <Toaster
+        icons={{
+          error: <AlertTriangle className="w-4 h-4 text-red-600" />,
+          success: <CheckSquare className="w-4 h-4 text-green-600" />,
+        }}
+      />
+    </>
   );
 };
 
