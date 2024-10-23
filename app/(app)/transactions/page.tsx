@@ -34,6 +34,13 @@ export default async function TransactionsPage({
     page
   );
 
+  const transactions = latestTransactions.map((transaction) => {
+    return {
+      ...transaction,
+      transactionPda: transaction.transactionPda[0].toBase58(),
+    };
+  });
+
   return (
     <div>
       <PageHeader heading="Transactions" />
