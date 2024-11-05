@@ -1,8 +1,8 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Input } from "./ui/primitives/input";
-import { Button } from "./ui/primitives/button";
+import { Input } from "../ui/primitives/input";
+import { Button } from "../ui/primitives/button";
 
 const MultisigInput = () => {
   const [multisig, setMultisig] = useState("");

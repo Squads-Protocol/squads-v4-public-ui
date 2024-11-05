@@ -5,7 +5,7 @@ import {
   TransactionMessage,
   VersionedTransaction,
 } from "@solana/web3.js";
-import { Button } from "./ui/primitives/button";
+import { Button } from "../ui/primitives/button";
 import * as multisig from "@sqds/multisig";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";

@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { Button } from "./ui/primitives/button";
-import { Input } from "./ui/primitives/input";
+import { Button } from "../ui/primitives/button";
+import { Input } from "../ui/primitives/input";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useState } from "react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";

@@ -9,7 +9,7 @@ import {
   VersionedTransaction,
   clusterApiUrl,
 } from "@solana/web3.js";
-import { Button } from "./ui/primitives/button";
+import { Button } from "../ui/primitives/button";
 import * as multisig from "@sqds/multisig";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
@@ -19,11 +19,11 @@ import {
   Dialog,
   DialogDescription,
   DialogHeader,
-} from "./ui/primitives/dialog";
-import { DialogTrigger } from "./ui/primitives/dialog";
-import { DialogContent, DialogTitle } from "./ui/primitives/dialog";
+} from "../ui/primitives/dialog";
+import { DialogTrigger } from "../ui/primitives/dialog";
+import { DialogContent, DialogTitle } from "../ui/primitives/dialog";
 import { useState } from "react";
-import { Input } from "./ui/primitives/input";
+import { Input } from "../ui/primitives/input";
 
 type WithALT = {
   instruction: TransactionInstruction;

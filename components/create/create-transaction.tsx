@@ -20,9 +20,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "./ui/primitives/dialog";
-import { Input } from "./ui/primitives/input";
-import { Button } from "./ui/primitives/button";
+} from "../ui/primitives/dialog";
+import { Input } from "../ui/primitives/input";
+import { Button } from "../ui/primitives/button";
 
 type CreateTransactionProps = {
   rpcUrl: string | null;

@@ -8,10 +8,10 @@ import { toast } from "sonner";
 import { getMultisigs } from "@/lib/helpers/getMultisigs";
 import { Connection, clusterApiUrl } from "@solana/web3.js";
 import { AlertOctagon, RefreshCw } from "lucide-react";
-import Loading from "./primitives/loading";
-import { Button } from "./primitives/button";
-import { Card, CardContent, CardHeader, CardTitle } from "./primitives/card";
-import SquadRow from "./squads/squad-row";
+import Loading from "../primitives/loading";
+import { Button } from "../primitives/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../primitives/card";
+import SquadRow from "./squad-row";
 
 export default function MyMultisigs({ rpc }: { rpc: string }) {
   const { publicKey, connected } = useWallet();

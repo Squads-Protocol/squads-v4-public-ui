@@ -1,14 +1,13 @@
 import * as multisig from "@sqds/multisig";
-import { Code2 } from "lucide-react";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "./primitives/card";
-import ChangeUpgradeAuthorityInput from "../ChangeUpgradeAuthorityInput";
+} from "../ui/primitives/card";
 import { clusterApiUrl } from "@solana/web3.js";
+import ChangeUpgradeAuthorityInput from "./change-upgrade-auth-input";
 
 interface ChangeUpgradeAuthProps {
   multisigPda: string;

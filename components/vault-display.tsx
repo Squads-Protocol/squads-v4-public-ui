@@ -1,7 +1,7 @@
 import * as multisig from "@sqds/multisig";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/primitives/card";
 import { PublicKey } from "@solana/web3.js";
-import { VaultSelector } from "./VaultSelector";
+import { VaultSelector } from "./vault-selector";
 import CopyTextButton from "./ui/misc/copy-text";
 
 type VaultDisplayerProps = {

@@ -1,8 +1,8 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import ConnectButton from "./connect-button";
-import Pill from "../pill";
+import ConnectButton from "./wallet/connect-button";
+import Pill from "../ui/pill";
 import { usePathname } from "next/navigation";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useTheme } from "next-themes";

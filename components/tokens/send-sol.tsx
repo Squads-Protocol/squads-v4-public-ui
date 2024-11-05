@@ -7,7 +7,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/primitives/dialog";
-import { Button } from "./ui/primitives/button";
+import { Button } from "../ui/primitives/button";
 import { useState } from "react";
 import * as multisig from "@sqds/multisig";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -21,11 +21,11 @@ import {
   clusterApiUrl,
 } from "@solana/web3.js";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import { Input } from "./ui/primitives/input";
+import { Input } from "../ui/primitives/input";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { isPublickey } from "@/lib/checks/isPublickey";
-import SendInput from "./ui/primitives/send-input";
+import SendInput from "../ui/primitives/send-input";
 
 type SendSolProps = {
   rpcUrl: string;

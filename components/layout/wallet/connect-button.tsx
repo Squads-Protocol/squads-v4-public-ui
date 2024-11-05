@@ -1,7 +1,7 @@
 "use client";
 import { Wallet, useWallet } from "@solana/wallet-adapter-react";
 import Image from "next/image";
-import WalletModal from "../wallet-modal";
+import WalletModal from "./wallet-modal";
 import { Fragment, useState } from "react";
 import {
   Menu,

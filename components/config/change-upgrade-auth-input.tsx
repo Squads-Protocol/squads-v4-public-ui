@@ -1,33 +1,39 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { Button } from "./ui/primitives/button";
-import { Input } from "./ui/primitives/input";
+import { Button } from "../ui/primitives/button";
+import { Input } from "../ui/primitives/input";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useState } from "react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import * as multisig from "@sqds/multisig";
 import {
+  AccountMeta,
   Connection,
   PublicKey,
+  TransactionInstruction,
   TransactionMessage,
   VersionedTransaction,
 } from "@solana/web3.js";
 import { toast } from "sonner";
+import { isPublickey } from "@/lib/checks/isPublickey";
 
-type ChangeThresholdInputProps = {
+type ChangeUpgradeAuthorityInputProps = {
   multisigPda: string;
   transactionIndex: number;
   rpcUrl: string;
-  programId: string;
+  vaultIndex: number;
+  globalProgramId: string;
 };
 
-const ChangeThresholdInput = ({
+const ChangeUpgradeAuthorityInput = ({
   multisigPda,
   transactionIndex,
   rpcUrl,
-  programId,
-}: ChangeThresholdInputProps) => {
-  const [threshold, setThreshold] = useState("");
+  vaultIndex,
+  globalProgramId,
+}: ChangeUpgradeAuthorityInputProps) => {
+  const [programId, setProgramId] = useState("");
+  const [newAuthority, setNewAuthority] = useState("");
   const wallet = useWallet();
   const walletModal = useWalletModal();
   const router = useRouter();
@@ -35,24 +41,75 @@ const ChangeThresholdInput = ({
   const bigIntTransactionIndex = BigInt(transactionIndex);
   const connection = new Connection(rpcUrl, { commitment: "confirmed" });
 
-  const changeThreshold = async () => {
+  const vaultAddress = multisig.getVaultPda({
+    index: vaultIndex,
+    multisigPda: new PublicKey(multisigPda),
+    programId: globalProgramId
+      ? new PublicKey(globalProgramId)
+      : multisig.PROGRAM_ID,
+  })[0];
+
+  const changeUpgradeAuth = async () => {
     if (!wallet.publicKey) {
       walletModal.setVisible(true);
       return;
     }
 
-    const changeThresholdIx = multisig.instructions.configTransactionCreate({
-      multisigPda: new PublicKey(multisigPda),
-      actions: [
-        {
-          __kind: "ChangeThreshold",
-          newThreshold: parseInt(threshold),
-        },
+    const upgradeData = Buffer.alloc(4);
+    upgradeData.writeInt32LE(4, 0);
+
+    const [programDataAddress] = PublicKey.findProgramAddressSync(
+      [new PublicKey(programId).toBuffer()],
+      new PublicKey("BPFLoaderUpgradeab1e11111111111111111111111")
+    );
+    const keys: AccountMeta[] = [
+      {
+        pubkey: programDataAddress,
+        isWritable: true,
+        isSigner: false,
+      },
+      {
+        pubkey: vaultAddress,
+        isWritable: false,
+        isSigner: true,
+      },
+      {
+        pubkey: new PublicKey(newAuthority),
+        isWritable: false,
+        isSigner: false,
+      },
+    ];
+
+    const blockhash = (await connection.getLatestBlockhash()).blockhash;
+
+    const transactionMessage = new TransactionMessage({
+      instructions: [
+        new TransactionInstruction({
+          programId: new PublicKey(
+            "BPFLoaderUpgradeab1e11111111111111111111111"
+          ),
+          data: upgradeData,
+          keys,
+        }),
       ],
+      payerKey: wallet.publicKey,
+      recentBlockhash: blockhash,
+    });
+
+    const transactionIndexBN = BigInt(transactionIndex);
+
+    const multisigTransactionIx = multisig.instructions.vaultTransactionCreate({
+      multisigPda: new PublicKey(multisigPda),
       creator: wallet.publicKey,
-      transactionIndex: bigIntTransactionIndex,
+      ephemeralSigners: 0,
+      transactionMessage,
+      transactionIndex: transactionIndexBN,
+      addressLookupTableAccounts: [],
       rentPayer: wallet.publicKey,
-      programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
+      vaultIndex: vaultIndex,
+      programId: globalProgramId
+        ? new PublicKey(globalProgramId)
+        : multisig.PROGRAM_ID,
     });
     const proposalIx = multisig.instructions.proposalCreate({
       multisigPda: new PublicKey(multisigPda),
@@ -70,7 +127,7 @@ const ChangeThresholdInput = ({
     });
 
     const message = new TransactionMessage({
-      instructions: [changeThresholdIx, proposalIx, approveIx],
+      instructions: [multisigTransactionIx, proposalIx, approveIx],
       payerKey: wallet.publicKey,
       recentBlockhash: (await connection.getLatestBlockhash()).blockhash,
     }).compileToV0Message();
@@ -91,27 +148,33 @@ const ChangeThresholdInput = ({
   return (
     <div>
       <Input
-        placeholder="Threshold Number"
+        placeholder="Program ID"
         type="text"
-        onChange={(e) => setThreshold(e.target.value)}
+        onChange={(e) => setProgramId(e.target.value)}
+        className="mb-3"
+      />
+      <Input
+        placeholder="New Program Authority"
+        type="text"
+        onChange={(e) => setNewAuthority(e.target.value)}
         className="mb-3"
       />
       <Button
         onClick={() =>
-          toast.promise(changeThreshold, {
+          toast.promise(changeUpgradeAuth, {
             id: "transaction",
             loading: "Loading...",
-            success: "Threshold change proposed.",
+            success: "Upgrade authority change proposed.",
             error: (e) => `Failed to propose: ${e}`,
           })
         }
-        disabled={!threshold}
+        disabled={!isPublickey(programId) || !isPublickey(newAuthority)}
         className="font-neue bg-gradient-to-br from-stone-600 to-stone-800 text-white dark:bg-gradient-to-br dark:from-white dark:to-stone-400 dark:text-stone-700 hover:bg-gradient-to-br hover:from-stone-600 hover:to-stone-700 disabled:text-stone-500 disabled:bg-gradient-to-br disabled:from-stone-800 disabled:to-stone-900 dark:disabled:bg-gradient-to-br dark:disabled:from-stone-300 dark:disabled:to-stone-500 dark:disabled:text-stone-700/50 dark:hover:bg-stone-100 transition duration-200"
       >
-        Change Threshold
+        Change Authority
       </Button>
     </div>
   );
 };
 
-export default ChangeThresholdInput;
+export default ChangeUpgradeAuthorityInput;

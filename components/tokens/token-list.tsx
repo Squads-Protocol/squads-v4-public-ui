@@ -11,12 +11,12 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "./ui/primitives/card";
-import SendTokens from "./SendTokensButton";
+} from "../ui/primitives/card";
+import SendTokens from "./send-token";
 import { Coins } from "lucide-react";
 import { FilteredToken } from "@/lib/types";
 import Image from "next/image";
-import SendSol from "./SendSolButton";
+import SendSol from "./send-sol";
 
 type TokenListProps = {
   solBalance: number;
@@ -35,6 +35,7 @@ export function TokenList({
   vaultIndex,
   programId,
 }: TokenListProps) {
+  console.log(tokens);
   return (
     <Card className="font-neue dark:bg-darkforeground dark:border-darkborder/30">
       <CardHeader>

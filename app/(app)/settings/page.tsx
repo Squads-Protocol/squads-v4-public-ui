@@ -1,5 +1,5 @@
-import PageHeader from "@/components/ui/layout/page-header";
-import RPCConfig from "@/components/ui/settings/RPCConfig";
+import PageHeader from "@/components/layout/page-header";
+import RPCConfig from "@/components/settings/set-rpc";
 
 const SettingsPage = () => {
   return (

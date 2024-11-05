@@ -1,4 +1,5 @@
 import Image from "next/image";
+import * as bs58 from "bs58";
 
 interface PillProps {
   label: string;

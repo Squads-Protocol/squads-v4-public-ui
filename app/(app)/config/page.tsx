@@ -1,9 +1,8 @@
-import AddMemberInput from "@/components/AddMemberInput";
-import ChangeThresholdInput from "@/components/ChangeThresholdInput";
-import ChangeUpgradeAuthorityInput from "@/components/ChangeUpgradeAuthorityInput";
-import RemoveMemberButton from "@/components/RemoveMemberButton";
+import AddMemberInput from "@/components/config/add-member";
+import ChangeThresholdInput from "@/components/config/change-threshold";
+import RemoveMemberButton from "@/components/config/remove-member";
 import Chip from "@/components/ui/chip";
-import PageHeader from "@/components/ui/layout/page-header";
+import PageHeader from "@/components/layout/page-header";
 import CopyTextButton from "@/components/ui/misc/copy-text";
 import {
   Card,
@@ -14,15 +13,15 @@ import {
 } from "@/components/ui/primitives/card";
 import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
 import * as multisig from "@sqds/multisig";
-import { ArrowUp01, Code2, User, UserPlus, Users } from "lucide-react";
+import { ArrowUp01, UserPlus, Users } from "lucide-react";
 import { cookies, headers } from "next/headers";
-const ConfigurationPage = async () => {
+
+export default async function Configuration() {
   const rpcUrl = headers().get("x-rpc-url");
 
   const connection = new Connection(rpcUrl || clusterApiUrl("mainnet-beta"));
   const multisigCookie = headers().get("x-multisig");
   const multisigPda = new PublicKey(multisigCookie!);
-  const vaultIndex = Number(headers().get("x-vault-index"));
   const programIdCookie = cookies().get("x-program-id")?.value;
   const programId = programIdCookie
     ? new PublicKey(programIdCookie!)
@@ -32,6 +31,7 @@ const ConfigurationPage = async () => {
     connection,
     multisigPda
   );
+
   return (
     <div className="font-neue">
       <PageHeader heading="Squad Config" />
@@ -146,6 +146,4 @@ const ConfigurationPage = async () => {
       </div>
     </div>
   );
-};
-
-export default ConfigurationPage;
+}

@@ -5,14 +5,14 @@ import {
   Transaction,
   clusterApiUrl,
 } from "@solana/web3.js";
-import { Button } from "./ui/primitives/button";
+import { Button } from "../ui/primitives/button";
 import * as multisig from "@sqds/multisig";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
-type ApproveButtonProps = {
+type RejectButtonProps = {
   rpcUrl: string;
   multisigPda: string;
   transactionIndex: number;
@@ -20,34 +20,36 @@ type ApproveButtonProps = {
   programId: string;
 };
 
-const ApproveButton = ({
+const RejectButton = ({
   rpcUrl,
   multisigPda,
   transactionIndex,
   proposalStatus,
   programId,
-}: ApproveButtonProps) => {
+}: RejectButtonProps) => {
   const wallet = useWallet();
   const walletModal = useWalletModal();
   const router = useRouter();
-  const validKinds = [
-    "Rejected",
-    "Approved",
-    "Executing",
-    "Executed",
-    "Cancelled",
-  ];
-  const isKindValid = validKinds.includes(proposalStatus || "None");
+
   const connection = new Connection(rpcUrl || clusterApiUrl("mainnet-beta"), {
     commitment: "confirmed",
   });
 
-  const approveProposal = async () => {
+  const validKinds = ["None", "Active", "Draft"];
+  const isKindValid = validKinds.includes(proposalStatus);
+
+  const rejectTransaction = async () => {
     if (!wallet.publicKey) {
       walletModal.setVisible(true);
       return;
     }
     let bigIntTransactionIndex = BigInt(transactionIndex);
+
+    if (!isKindValid) {
+      toast.error("You can't reject this proposal.");
+      return;
+    }
+
     const transaction = new Transaction();
     if (proposalStatus === "None") {
       const createProposalInstruction = multisig.instructions.proposalCreate({
@@ -70,13 +72,15 @@ const ApproveButton = ({
         });
       transaction.add(activateProposalInstruction);
     }
-    const approveProposalInstruction = multisig.instructions.proposalApprove({
+    const rejectProposalInstruction = multisig.instructions.proposalReject({
       multisigPda: new PublicKey(multisigPda),
       member: wallet.publicKey,
       transactionIndex: bigIntTransactionIndex,
       programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
     });
-    transaction.add(approveProposalInstruction);
+
+    transaction.add(rejectProposalInstruction);
+
     const signature = await wallet.sendTransaction(transaction, connection, {
       skipPreflight: true,
     });
@@ -90,20 +94,20 @@ const ApproveButton = ({
   };
   return (
     <Button
-      disabled={isKindValid}
+      disabled={!isKindValid}
       onClick={() =>
-        toast.promise(approveProposal, {
+        toast.promise(rejectTransaction, {
           id: "transaction",
           loading: "Loading...",
-          success: "Transaction approved.",
-          error: (e) => `Failed to approve: ${e}`,
+          success: "Transaction rejected.",
+          error: (e) => `Failed to reject: ${e}`,
         })
       }
       className="font-neue bg-gradient-to-br from-stone-600 to-stone-800 text-white dark:bg-gradient-to-br dark:from-white dark:to-stone-400 dark:text-stone-700 hover:bg-gradient-to-br hover:from-stone-600 hover:to-stone-700 disabled:text-stone-500 disabled:bg-gradient-to-br disabled:from-stone-800 disabled:to-stone-900 dark:disabled:bg-gradient-to-br dark:disabled:from-stone-300 dark:disabled:to-stone-500 dark:disabled:text-stone-700/50 dark:hover:bg-stone-100 transition duration-200"
     >
-      Approve
+      Reject
     </Button>
   );
 };
 
-export default ApproveButton;
+export default RejectButton;

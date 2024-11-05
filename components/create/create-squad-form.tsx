@@ -1,6 +1,6 @@
 "use client";
-import { Button } from "./ui/primitives/button";
-import { Input } from "./ui/primitives/input";
+import { Button } from "../ui/primitives/button";
+import { Input } from "../ui/primitives/input";
 import { createMultisig } from "@/lib/helpers/createSquad";
 import { Connection, Keypair, PublicKey, clusterApiUrl } from "@solana/web3.js";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -18,7 +18,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/primitives/select";
+} from "../ui/primitives/select";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Member, ValidationRules } from "@/lib/types";

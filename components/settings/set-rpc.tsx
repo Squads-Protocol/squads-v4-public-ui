@@ -1,8 +1,8 @@
 "use client";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
-import { Button } from "../primitives/button";
-import { Input } from "../primitives/input";
+import { Button } from "../ui/primitives/button";
+import { Input } from "../ui/primitives/input";
 import { useState } from "react";
 import {
   Card,
@@ -10,7 +10,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../primitives/card";
+} from "../ui/primitives/card";
 import { Wifi } from "lucide-react";
 
 export default function RPCConfig() {
