@@ -20,7 +20,7 @@ export const simulateEncodedTransaction = async (
     const keys = await getAccountsForSimulation(
       connection,
       transaction,
-      version === "legacy"
+      version === 0
     );
 
     toast.loading("Simulating...", {

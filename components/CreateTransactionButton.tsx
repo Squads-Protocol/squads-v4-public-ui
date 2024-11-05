@@ -14,6 +14,7 @@ import * as multisig from "@sqds/multisig";
 import { useWallet } from "@solana/wallet-adapter-react";
 import {
   Connection,
+  Message,
   PublicKey,
   TransactionInstruction,
   TransactionMessage,
@@ -54,7 +55,7 @@ const CreateTransaction = ({
       programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
     })[0];
 
-    const dummyMessage = new TransactionMessage({
+    const dummyMessage = Message.compile({
       instructions: [
         new TransactionInstruction({
           keys: [
@@ -72,7 +73,7 @@ const CreateTransaction = ({
       ],
       payerKey: vaultAddress,
       recentBlockhash: (await connection.getLatestBlockhash()).blockhash,
-    }).compileToLegacyMessage();
+    });
 
     const encoded = bs58.default.encode(dummyMessage.serialize());
 
