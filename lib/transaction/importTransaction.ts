@@ -3,6 +3,7 @@ import {
   Connection,
   PublicKey,
   TransactionMessage,
+  VersionedMessage,
   VersionedTransaction,
 } from "@solana/web3.js";
 import { decodeAndDeserialize } from "./decodeAndDeserialize";
@@ -29,7 +30,7 @@ export const importTransaction = async (
       new PublicKey(multisigPda)
     );
 
-    const transactionMessage = TransactionMessage.decompile(message);
+    const transactionMessage = new TransactionMessage(message);
 
     const addressLookupTableAccounts =
       version === 0
