@@ -15,7 +15,7 @@ export const simulateEncodedTransaction = async (
   try {
     const { message, version } = decodeAndDeserialize(tx);
 
-    const transaction = new VersionedTransaction(message);
+    const transaction = new VersionedTransaction(message.compileToV0Message());
 
     const keys = await getAccountsForSimulation(
       connection,
