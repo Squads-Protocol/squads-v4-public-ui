@@ -14,9 +14,9 @@ import * as multisig from "@sqds/multisig";
 import { useWallet } from "@solana/wallet-adapter-react";
 import {
   Connection,
+  Message,
   PublicKey,
   TransactionInstruction,
-  TransactionMessage,
   clusterApiUrl,
 } from "@solana/web3.js";
 import { Input } from "./ui/input";
@@ -54,7 +54,7 @@ const CreateTransaction = ({
       programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
     })[0];
 
-    const dummyMessage = new TransactionMessage({
+    const dummyMessage = Message.compile({
       instructions: [
         new TransactionInstruction({
           keys: [
@@ -72,7 +72,7 @@ const CreateTransaction = ({
       ],
       payerKey: vaultAddress,
       recentBlockhash: (await connection.getLatestBlockhash()).blockhash,
-    }).compileToLegacyMessage();
+    });
 
     const encoded = bs58.default.encode(dummyMessage.serialize());
 
@@ -100,17 +100,22 @@ const CreateTransaction = ({
         />
         <div className="flex gap-2 items-center justify-end">
           <Button
-            onClick={() =>
+            onClick={() => {
+              toast("Note: Simulations may fail on alt-SVM", {
+                description: "Please verify via an explorer before submitting.",
+              });
               toast.promise(
                 simulateEncodedTransaction(tx, connection, wallet),
                 {
                   id: "simulation",
                   loading: "Building simulation...",
                   success: "Simulation successful.",
-                  error: (e) => `${e}`,
+                  error: (e) => {
+                    return `${e}`;
+                  },
                 }
-              )
-            }
+              );
+            }}
           >
             Simulate
           </Button>
