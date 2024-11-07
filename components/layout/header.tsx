@@ -7,15 +7,25 @@ import { usePathname } from "next/navigation";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useTheme } from "next-themes";
 import LightDarkButton from "./light-dark-button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/primitives/tooltip";
 
-export default function Header({ multisig }: { multisig: string | null }) {
+export default function Header({
+  multisig,
+  cluster,
+}: {
+  multisig: string | null;
+  cluster: string | null;
+}) {
   const pathname = usePathname();
   const { connected } = useWallet();
   const { theme } = useTheme();
 
   const logo = theme == "dark" ? "/squads-light.png" : "/logo.svg";
-
-  console.log(multisig);
 
   return (
     <>
@@ -65,10 +75,46 @@ export default function Header({ multisig }: { multisig: string | null }) {
             <div className="flex gap-4 items-center">
               <div className="flex gap-3 items-center">
                 {connected && multisig && (
-                  <Pill
-                    label={multisig.slice(0, 4) + "..." + multisig.slice(-4)}
-                    image="/default_image_light.svg"
-                  />
+                  <TooltipProvider>
+                    <Tooltip delayDuration={300}>
+                      <TooltipTrigger>
+                        <Pill
+                          label={
+                            multisig.slice(0, 4) + "..." + multisig.slice(-4)
+                          }
+                          image="/default_image_light.svg"
+                        />
+                      </TooltipTrigger>
+                      <TooltipContent className="bg-lightbackground dark:bg-darkbackground border border-border/30 dark:border-darkborder/10">
+                        <p className="font-neue text-xs text-stone-700 dark:text-stone-50">
+                          Selected Squad
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+                {cluster && (
+                  <TooltipProvider>
+                    <Tooltip delayDuration={300}>
+                      <TooltipTrigger>
+                        <Pill
+                          label={cluster}
+                          image={
+                            cluster.includes("solana")
+                              ? "/solana.svg"
+                              : cluster.includes("eclipse")
+                              ? "/eclipse.svg"
+                              : "/default_image_light.svg"
+                          }
+                        />
+                      </TooltipTrigger>
+                      <TooltipContent className="bg-lightbackground dark:bg-darkbackground border border-border/30 dark:border-darkborder/10">
+                        <p className="font-neue text-xs text-stone-700 dark:text-stone-50">
+                          Current SVM cluster
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 )}
               </div>
               <ConnectButton />

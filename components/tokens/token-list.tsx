@@ -35,7 +35,6 @@ export function TokenList({
   vaultIndex,
   programId,
 }: TokenListProps) {
-  console.log(tokens);
   return (
     <Card className="font-neue dark:bg-darkforeground dark:border-darkborder/30">
       <CardHeader>
