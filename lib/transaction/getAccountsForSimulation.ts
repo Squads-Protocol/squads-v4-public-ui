@@ -26,9 +26,12 @@ export async function getAccountsForSimulation(
     const { staticAccountKeys, accountKeysFromLookups } =
       tx.message.getAccountKeys({ addressLookupTableAccounts });
 
-    const staticAddresses = staticAccountKeys
-      .filter((k) => !k.equals(SystemProgram.programId))
-      .map((k) => k.toString());
+    const staticAddresses = staticAccountKeys.reduce((acc, k) => {
+      if (!k.equals(SystemProgram.programId)) {
+        acc.push(k.toString());
+      }
+      return acc;
+    }, [] as string[]);
 
     const addressesFromLookups = accountKeysFromLookups
       ? accountKeysFromLookups.writable.map((k) => k.toString())
