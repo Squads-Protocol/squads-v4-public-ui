@@ -121,6 +121,8 @@ const AppLayout = async ({ children }: { children: React.ReactNode }) => {
         <RenderMultisigRoute multisig={multisig} children={children} />
       </div>
       <Toaster
+        expand
+        visibleToasts={3}
         icons={{
           error: <AlertTriangle className="w-4 h-4 text-red-600" />,
           success: <CheckSquare className="w-4 h-4 text-green-600" />,

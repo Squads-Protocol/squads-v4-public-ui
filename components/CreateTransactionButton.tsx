@@ -17,7 +17,6 @@ import {
   Message,
   PublicKey,
   TransactionInstruction,
-  TransactionMessage,
   clusterApiUrl,
 } from "@solana/web3.js";
 import { Input } from "./ui/input";
@@ -101,17 +100,22 @@ const CreateTransaction = ({
         />
         <div className="flex gap-2 items-center justify-end">
           <Button
-            onClick={() =>
+            onClick={() => {
+              toast("Note: Simulations may fail on alt-SVM", {
+                description: "Please verify via an explorer before submitting.",
+              });
               toast.promise(
                 simulateEncodedTransaction(tx, connection, wallet),
                 {
                   id: "simulation",
                   loading: "Building simulation...",
                   success: "Simulation successful.",
-                  error: (e) => `${e}`,
+                  error: (e) => {
+                    return `${e}`;
+                  },
                 }
-              )
-            }
+              );
+            }}
           >
             Simulate
           </Button>
