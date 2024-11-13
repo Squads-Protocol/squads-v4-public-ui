@@ -10,7 +10,12 @@ export async function createMultisig(
   createKey: web3.PublicKey,
   rentCollector?: web3.PublicKey,
   configAuthority?: web3.PublicKey,
-  programId?: string
+  programId?: string,
+  metadata?: {
+    name: string;
+    description: string;
+    uri: string;
+  }
 ) {
   try {
     const multisigPda = multisig.getMultisigPda({
@@ -47,6 +52,9 @@ export async function createMultisig(
       programId: programId
         ? new web3.PublicKey(programId)
         : multisig.PROGRAM_ID,
+      memo:
+        metadata &&
+        `{'name':'${metadata.name}', 'description':'${metadata.description}', 'imageUri':'${metadata.uri}'}`,
     });
 
     const tx = new web3.Transaction().add(ix);

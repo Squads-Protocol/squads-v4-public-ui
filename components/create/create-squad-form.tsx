@@ -44,6 +44,9 @@ export default function CreateSquadForm({
     multisig: string;
   }>(
     {
+      name: "",
+      description: "",
+      imageUri: "",
       threshold: 1,
       rentCollector: "",
       configAuthority: "",
@@ -69,7 +72,12 @@ export default function CreateSquadForm({
         createKey.publicKey,
         formState.values.rentCollector,
         formState.values.configAuthority,
-        programId
+        programId,
+        {
+          name: formState.values.name,
+          description: formState.values.description,
+          uri: formState.values.imageUri,
+        }
       );
 
       const signature = await sendTransaction(transaction, connection, {
@@ -109,6 +117,40 @@ export default function CreateSquadForm({
   return (
     <div className="w-full">
       <div className="grid grid-cols-8 gap-6 mb-6">
+        <div className="col-span-4 flex-col space-y-2">
+          <label htmlFor="configAuthority" className="font-medium">
+            Name
+          </label>
+          <Input
+            type="text"
+            placeholder="Squad name..."
+            defaultValue={formState.values.name}
+            onChange={(e) => handleChange("name", e.target.value)}
+            className=""
+          />
+          {formState.errors.name && (
+            <div className="mt-1.5 text-red-500 font-neue text-xs">
+              {formState.errors.name}
+            </div>
+          )}
+        </div>
+        <div className="col-span-4" />
+        <div className="col-span-4 flex-col space-y-2">
+          <label htmlFor="configAuthority" className="font-medium">
+            Description
+          </label>
+          <textarea
+            placeholder="Squad description..."
+            defaultValue={formState.values.description}
+            onChange={(e) => handleChange("description", e.target.value)}
+            className=""
+          />
+          {formState.errors.description && (
+            <div className="mt-1.5 text-red-500 font-neue text-xs">
+              {formState.errors.description}
+            </div>
+          )}
+        </div>
         <div className="col-span-6 flex-col space-y-4">
           <label htmlFor="members" className="font-medium">
             Members <span className="text-red-600">*</span>
@@ -350,6 +392,15 @@ export default function CreateSquadForm({
 
 function getValidationRules(): ValidationRules {
   return {
+    name: async (value: string) => {
+      if (value.length > 32) return "Name cannot be longer than 32 characters";
+      return null;
+    },
+    description: async (value: string) => {
+      if (value.length > 32)
+        return "Description cannot be longer than 64 characters";
+      return null;
+    },
     threshold: async (value: number) => {
       if (value < 1) return "Threshold must be greater than 0";
       return null;

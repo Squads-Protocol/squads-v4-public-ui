@@ -16,7 +16,8 @@ export const importTransaction = async (
   multisigPda: string,
   programId: string,
   vaultIndex: number,
-  wallet: WalletContextState
+  wallet: WalletContextState,
+  label: string
 ) => {
   if (!wallet.publicKey) {
     throw "Please connect your wallet.";
@@ -52,6 +53,7 @@ export const importTransaction = async (
       rentPayer: wallet.publicKey,
       vaultIndex: vaultIndex,
       programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
+      memo: `{'title': '${label}'}`,
     });
     const proposalIx = multisig.instructions.proposalCreate({
       multisigPda: new PublicKey(multisigPda),

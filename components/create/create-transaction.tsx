@@ -40,6 +40,7 @@ const CreateTransaction = ({
   const wallet = useWallet();
 
   const [tx, setTx] = useState("");
+  const [label, setLabel] = useState("");
   const [open, setOpen] = useState(false);
 
   const connection = new Connection(rpcUrl || clusterApiUrl("mainnet-beta"), {
@@ -92,12 +93,36 @@ const CreateTransaction = ({
             a transaction).
           </DialogDescription>
         </DialogHeader>
-        <Input
-          placeholder="Paste base58 encoded transaction..."
-          type="text"
-          defaultValue={tx}
-          onChange={(e) => setTx(e.target.value)}
-        />
+        <div className="flex flex-col space-y-2">
+          <label htmlFor="tx-label" className="font-medium">
+            Transaction Label
+          </label>
+          <Input
+            placeholder="Transaction label..."
+            type="text"
+            name="tx-label"
+            defaultValue={label}
+            max={32}
+            onChange={(e) => setLabel(e.target.value)}
+          />
+          {label.length > 32 && (
+            <p className="text-xs text-red-500">
+              Label must be less than 32 characters.
+            </p>
+          )}
+        </div>
+        <div className="flex flex-col space-y-2">
+          <label htmlFor="encoded-tx" className="font-medium">
+            Encoded Transaction
+          </label>
+          <Input
+            placeholder="Paste base58 encoded transaction..."
+            type="text"
+            name="encoded-tx"
+            defaultValue={tx}
+            onChange={(e) => setTx(e.target.value)}
+          />
+        </div>
         <div className="flex gap-2 items-center justify-end">
           <Button
             onClick={() =>
@@ -123,7 +148,8 @@ const CreateTransaction = ({
                   multisigPda,
                   programId!,
                   vaultIndex,
-                  wallet
+                  wallet,
+                  label
                 ),
                 {
                   id: "transaction",
