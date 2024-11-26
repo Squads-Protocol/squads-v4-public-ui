@@ -14,11 +14,11 @@ export default function RenderMultisigRoute({
   const pathname = usePathname();
 
   if (multisig) {
-    return <div className="mt-24 px-8 w-full">{children}</div>;
+    return <div className="w-full">{children}</div>;
   }
 
   if (pathname == "/settings" || pathname == "/create") {
-    return <div className="mt-24 px-8 w-full">{children}</div>;
+    return <div className="w-full">{children}</div>;
   } else {
     return <MultisigInput />;
   }

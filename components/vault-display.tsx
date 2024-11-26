@@ -22,7 +22,7 @@ export function VaultDisplayer({
   });
 
   return (
-    <Card className="w-full font-neue dark:bg-darkforeground dark:border-darkborder/30">
+    <Card className="w-full font-neue dark:bg-darkforeground dark:border-darkborder/10">
       <CardHeader>
         <CardTitle className="tracking-wide">Current Vault</CardTitle>
       </CardHeader>

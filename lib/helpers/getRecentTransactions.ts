@@ -1,4 +1,4 @@
-"use server";
+"use client";
 import { Connection, PublicKey } from "@solana/web3.js";
 import * as multisig from "@sqds/multisig";
 
@@ -13,23 +13,21 @@ export async function getRecentTransactions(
   if (isNaN(page)) return [];
   if (isNaN(transactionIndex)) return [];
 
-  let startingTransactionIndex = Math.max(
-    1,
-    transactionIndex - (page - 1) * TRANSACTIONS_PER_PAGE
-  );
+  const startIndex = transactionIndex - (page - 1) * TRANSACTIONS_PER_PAGE;
 
   let latestTransactions = [];
   for (let i = 0; i < TRANSACTIONS_PER_PAGE; i++) {
-    let usingTransactionIndex = startingTransactionIndex - i;
+    const currentIndex = startIndex - i;
 
-    if (usingTransactionIndex < 1) break;
+    if (currentIndex <= 0) break;
 
-    let index = BigInt(usingTransactionIndex);
+    const index = BigInt(currentIndex);
+
     const transactionPda = multisig.getTransactionPda({
       multisigPda,
       index,
     });
-    const proposalPda = multisig.getProposalPda({
+    const [proposalPda] = multisig.getProposalPda({
       multisigPda,
       transactionIndex: index,
     });
@@ -38,7 +36,7 @@ export async function getRecentTransactions(
     try {
       proposal = await multisig.accounts.Proposal.fromAccountAddress(
         connection,
-        proposalPda[0]
+        proposalPda
       );
     } catch (error) {
       proposal = null;

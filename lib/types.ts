@@ -61,3 +61,9 @@ export interface TotalBalancesReturn {
   solana: TokenPrice;
   usdc: TokenPrice;
 }
+
+export interface SquadMetadata {
+  name: string;
+  description: string;
+  imageUri: string;
+}

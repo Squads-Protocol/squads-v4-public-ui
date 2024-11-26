@@ -15,15 +15,6 @@ export async function getCachedSquads(
       const msInfo = await connection.getAccountInfo(ms);
       const vaultInfo = await connection.getAccountInfo(vault);
 
-      // Get update vault balance info
-      const balance = vaultInfo
-        ? await getTotalBalance(connection, vault, vaultInfo)
-        : {
-            total: 0,
-            solana: { balance: 0, usdAmount: 0 },
-            usdc: { balance: 0, usdAmount: 0 },
-          };
-
       const deser = multisig.accounts.Multisig.fromAccountInfo(msInfo!)[0];
 
       // Check if core config has changed, refresh on a case-by-case basis if needed
@@ -41,6 +32,22 @@ export async function getCachedSquads(
         members = m.data.members;
       }
 
+      let balance;
+      try {
+        // Get update vault balance info
+        balance = {
+          total: 0,
+          solana: { balance: 0, usdAmount: 0 },
+          usdc: { balance: 0, usdAmount: 0 },
+        };
+      } catch (e) {
+        console.log(e);
+        balance = {
+          total: 0,
+          solana: { balance: 0, usdAmount: 0 },
+          usdc: { balance: 0, usdAmount: 0 },
+        };
+      }
       // Return with updated data if needed
       return {
         ...m,

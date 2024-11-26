@@ -1,7 +1,11 @@
 import Link from "next/link";
 import * as multisig from "@sqds/multisig";
 import { TableCell, TableRow } from "../primitives/table";
-import { createExplorerUrl } from "@/lib/helpers/createExplorerUrl";
+import {
+  createExplorerAddressUrl,
+  createExplorerTxUrl,
+  createExplorerUrl,
+} from "@/lib/helpers/createExplorerUrl";
 import { PublicKey, clusterApiUrl } from "@solana/web3.js";
 import ApproveButton from "@/components/proposal-actions/approve-button";
 import RejectButton from "@/components/proposal-actions/reject-button";
@@ -20,6 +24,7 @@ interface TransactionTableRowProps {
     index: bigint;
   };
   threshold: number;
+  cluster: string | null;
 }
 
 export default function TransactionTableRow({
@@ -28,19 +33,21 @@ export default function TransactionTableRow({
   programId,
   transaction,
   threshold,
+  cluster,
 }: TransactionTableRowProps) {
   return (
-    <TableRow className="border-darkborder/30 hover:bg-white/[0.03]">
+    <TableRow className="border-darkborder/10 hover:bg-white/[0.03]">
       <TableCell className="font-neuemedium">
         {Number(transaction.index)}
       </TableCell>
       <TableCell className="text-blue-500 font-neue">
         <div className="inline-flex gap-2 items-center">
           <Link
-            href={createExplorerUrl(
-              transaction.transactionPda[0].toBase58(),
-              rpcUrl || clusterApiUrl("mainnet-beta")
-            )}
+            href={createExplorerAddressUrl({
+              publicKey: transaction.transactionPda[0].toBase58(),
+              cluster: cluster ? cluster : undefined,
+              rpcUrl: rpcUrl || clusterApiUrl("mainnet-beta"),
+            })}
           >
             {transaction.transactionPda[0].toBase58().slice(0, 4) +
               "..." +
@@ -162,6 +169,8 @@ function showStatusChip(proposalStatus: string) {
       return <Chip label="Executed" color="green" />;
     case "Cancelled":
       return <Chip label="Cancelled" color="red" />;
+    case "None":
+      return <Chip label="No Account" color="orange" />;
     default:
       return <Chip label="Unknown" color="stone" />;
   }

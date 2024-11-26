@@ -22,7 +22,7 @@ import {
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Member, ValidationRules } from "@/lib/types";
-import { useSquadForm } from "@/lib/hooks/useSquadForm";
+import { useSquadForm } from "@/state/form";
 import { isPublickey } from "@/lib/checks/isPublickey";
 import Link from "next/link";
 
@@ -139,7 +139,7 @@ export default function CreateSquadForm({
           <label htmlFor="configAuthority" className="font-medium">
             Description
           </label>
-          <textarea
+          <Input
             placeholder="Squad description..."
             defaultValue={formState.values.description}
             onChange={(e) => handleChange("description", e.target.value)}

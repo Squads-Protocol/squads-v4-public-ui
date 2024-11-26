@@ -13,13 +13,16 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/primitives/tooltip";
+import { SquadMetadata } from "@/lib/types";
 
 export default function Header({
   multisig,
   cluster,
+  metadata,
 }: {
   multisig: string | null;
   cluster: string | null;
+  metadata: SquadMetadata | null;
 }) {
   const pathname = usePathname();
   const { connected } = useWallet();
@@ -54,6 +57,15 @@ export default function Header({
                 Transactions
               </Link>
               <Link
+                href={`/developers`}
+                className={`text-sm py-2 px-3 font-neue rounded-lg text-stone-700 hover:bg-stone-300/50 dark:text-stone-50 dark:hover:bg-white/[0.03] ${
+                  pathname == "/config" &&
+                  "bg-stone-300/50 dark:bg-white/[0.03]"
+                }`}
+              >
+                Developers
+              </Link>
+              <Link
                 href={`/config`}
                 className={`text-sm py-2 px-3 font-neue rounded-lg text-stone-700 hover:bg-stone-300/50 dark:text-stone-50 dark:hover:bg-white/[0.03] ${
                   pathname == "/config" &&
@@ -80,9 +92,15 @@ export default function Header({
                       <TooltipTrigger>
                         <Pill
                           label={
-                            multisig.slice(0, 4) + "..." + multisig.slice(-4)
+                            metadata?.name
+                              ? metadata.name
+                              : multisig.slice(0, 4) +
+                                "..." +
+                                multisig.slice(-4)
                           }
-                          image="/default_image_light.svg"
+                          image={
+                            metadata?.imageUri || "/default_image_light.svg"
+                          }
                         />
                       </TooltipTrigger>
                       <TooltipContent className="bg-lightbackground dark:bg-darkbackground border border-border/30 dark:border-darkborder/10">

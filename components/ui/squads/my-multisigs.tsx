@@ -80,7 +80,7 @@ export default function MyMultisigs({ rpc }: { rpc: string }) {
   if (loading) {
     return (
       <>
-        <Card className="w-full font-neue dark:bg-darkforeground dark:border-darkborder/30">
+        <Card className="w-full font-neue dark:bg-darkforeground dark:border-darkborder/10">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="flex gap-4 items-center">
@@ -110,7 +110,7 @@ export default function MyMultisigs({ rpc }: { rpc: string }) {
   }
 
   return (
-    <Card className="w-full font-neue dark:bg-darkforeground dark:border-darkborder/30">
+    <Card className="w-full font-neue dark:bg-darkforeground dark:border-darkborder/10">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex gap-4 items-center">
@@ -123,7 +123,7 @@ export default function MyMultisigs({ rpc }: { rpc: string }) {
             </button>
           </div>
           <Link href="/create" passHref>
-            <Button className="font-neue bg-gradient-to-br from-stone-600 to-stone-800 text-white dark:bg-gradient-to-br dark:from-white dark:to-stone-400 dark:text-stone-700 hover:bg-gradient-to-br hover:from-stone-600 hover:to-stone-700 disabled:text-stone-500 disabled:bg-gradient-to-br disabled:from-stone-800 disabled:to-stone-900 dark:disabled:bg-gradient-to-br dark:disabled:from-stone-300 dark:disabled:to-stone-500 dark:disabled:text-stone-700/50 dark:hover:bg-stone-100 transition duration-200">
+            <Button className="font-neue bg-stone-700 text-white dark:bg-white dark:text-stone-700 disabled:text-stone-500 disabled:bg-gradient-to-br disabled:from-stone-800 disabled:to-stone-900 dark:disabled:bg-gradient-to-br dark:disabled:from-stone-300 dark:disabled:to-stone-500 dark:disabled:text-stone-700/50 dark:hover:bg-stone-100 transition duration-200">
               Create Squad
             </Button>
           </Link>
@@ -131,7 +131,7 @@ export default function MyMultisigs({ rpc }: { rpc: string }) {
       </CardHeader>
       <CardContent>
         {accounts.length != 0 && connected ? (
-          <div className="w-full h-[25rem] bg-stone-500/10 dark:bg-white/[0.03] rounded-md p-4">
+          <div className="w-full h-[25rem] bg-stone-500/10 dark:bg-white/[0.03] rounded-md p-4 overflow-y-scroll">
             {accounts
               .sort((a, b) => b.balance.total - a.balance.total)
               .map((acc, i) => (

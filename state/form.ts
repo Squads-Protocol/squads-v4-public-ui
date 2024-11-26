@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useState } from "react";
-import { FormState, FormValues, ValidationRules } from "../types";
+import { FormState, FormValues, ValidationRules } from "@/lib/types";
 
 type SubmitHandler<T> = () => Promise<T>;
 

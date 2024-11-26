@@ -20,3 +20,7 @@ export function nFormatter(num: number, digits?: number) {
     ? (num / item.value).toFixed(digits || 1).replace(rx, "$1") + item.symbol
     : "0";
 }
+
+export function nWithCommas(x: string) {
+  return x.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}

@@ -52,12 +52,24 @@ export async function createMultisig(
       programId: programId
         ? new web3.PublicKey(programId)
         : multisig.PROGRAM_ID,
-      memo:
-        metadata &&
-        `{'name':'${metadata.name}', 'description':'${metadata.description}', 'imageUri':'${metadata.uri}'}`,
     });
 
     const tx = new web3.Transaction().add(ix);
+
+    if (metadata) {
+      tx.add(
+        new web3.TransactionInstruction({
+          keys: [{ pubkey: user, isSigner: true, isWritable: true }],
+          data: Buffer.from(
+            `{'name':'${metadata.name}', 'description':'${metadata.description}', 'imageUri':'https://i.imgur.com/xYKO8Vk.png'}`,
+            "utf-8"
+          ),
+          programId: new web3.PublicKey(
+            "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"
+          ),
+        })
+      );
+    }
 
     tx.feePayer = user;
     tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;

@@ -13,7 +13,7 @@ export default function PageHeader({ heading }: { heading: string }) {
         ease: "easeInOut",
       }}
     >
-      <h1 className="text-5xl font-neuemedium leading-relaxed bg-clip-text text-transparent bg-gradient-to-br from-stone-700 to-stone-300 dark:from-white dark:to-stone-500/75">
+      <h1 className="text-5xl font-neuemedium leading-relaxed text-stone-700 dark:text-white">
         {heading}
       </h1>
       <div className="mt-6 mb-12 w-36 border border-t-stone-500/10 dark:border-darkborder/30"></div>

@@ -9,7 +9,7 @@ export default function TableHeadSection({ page }: { page: string }) {
   return (
     <>
       <TableHeader className="bg-stone-500/5">
-        <TableRow className="font-neuemedium border-darkborder/30 hover:bg-white/[0.03]">
+        <TableRow className="font-neuemedium border-darkborder/10 hover:bg-white/[0.03]">
           <TableHead className="text-stone-700 dark:text-white/75">
             Index
           </TableHead>

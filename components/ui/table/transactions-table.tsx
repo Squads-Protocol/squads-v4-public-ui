@@ -1,48 +1,55 @@
-import * as multisig from "@sqds/multisig";
+"use client";
+
 import { Suspense } from "react";
 import { Table, TableBody } from "../primitives/table";
 import PaginationSection from "./pagination";
 import TableHeadSection from "./table-head";
 import TransactionTableRow from "./transaction-table-row";
-import { PublicKey } from "@solana/web3.js";
 import { Skeleton } from "../primitives/skeleton";
+import { useCluster } from "@/state/ClusterContext";
+import { useSquadMetadata } from "@/state/metadata";
+import { useTransactions } from "@/state/transactions";
 
 interface TransactionsTableProps {
-  rpcUrl: string;
   multisigPda: string;
-  multisigInfo: multisig.generated.Multisig;
   programId: string;
-  searchParams: { page: string };
-  transactions: {
-    transactionPda: [PublicKey, number];
-    proposal: multisig.generated.Proposal | null;
-    index: bigint;
-  }[];
+  page: number;
 }
 
 export default function TransactionsTable({
-  rpcUrl,
   multisigPda,
-  multisigInfo,
   programId,
-  searchParams,
-  transactions,
+  page,
 }: TransactionsTableProps) {
+  const { rpc, connection, cluster } = useCluster();
+  const { account } = useSquadMetadata(multisigPda!);
+  const { transactions, isLoading } = useTransactions(
+    multisigPda!,
+    connection!,
+    Number(account?.transactionIndex!),
+    page ? page : 1
+  );
+
+  if (isLoading) {
+    return <Skeleton className="w-full h-96 bg-neutral-600 rounded-lg" />;
+  }
+
   return (
     <>
       <Suspense fallback={<Skeleton className="w-full h-64 rounded-lg" />}>
-        <div className="rounded-md border border-darkborder/30">
+        <div className="rounded-md border border-darkborder/10">
           <Table>
-            <TableHeadSection page={searchParams.page} />
+            <TableHeadSection page={page.toString()!} />
             <TableBody>
-              {transactions.map((transaction, index) => (
+              {transactions?.map((transaction, index) => (
                 <TransactionTableRow
                   key={index}
-                  rpcUrl={rpcUrl!}
+                  rpcUrl={rpc!}
                   multisigPda={multisigPda!}
                   programId={programId}
                   transaction={transaction}
-                  threshold={multisigInfo.threshold}
+                  threshold={account?.threshold!}
+                  cluster={cluster!}
                 />
               ))}
             </TableBody>
@@ -51,8 +58,8 @@ export default function TransactionsTable({
       </Suspense>
 
       <PaginationSection
-        page={searchParams.page}
-        transactionsLength={transactions.length}
+        page={page.toString()!}
+        transactionsLength={transactions?.length!}
       />
     </>
   );

@@ -1,22 +1,13 @@
 import {
-  AccountInfo,
-  LAMPORTS_PER_SOL,
-  ParsedAccountData,
-  PublicKey,
-  RpcResponseAndContext,
-} from "@solana/web3.js";
-import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "../ui/primitives/card";
-import SendTokens from "./send-token";
-import { Coins } from "lucide-react";
 import { FilteredToken } from "@/lib/types";
-import Image from "next/image";
-import SendSol from "./send-sol";
+import TokenRow from "./token-row";
+import SolanaRow from "./solana-row";
 
 type TokenListProps = {
   solBalance: number;
@@ -36,7 +27,7 @@ export function TokenList({
   programId,
 }: TokenListProps) {
   return (
-    <Card className="font-neue dark:bg-darkforeground dark:border-darkborder/30">
+    <Card className="font-neue dark:bg-darkforeground dark:border-darkborder/10">
       <CardHeader>
         <CardTitle className="tracking-wide">Assets</CardTitle>
         <CardDescription className="text-stone-500 dark:text-white/50">
@@ -45,88 +36,28 @@ export function TokenList({
       </CardHeader>
       <CardContent>
         <div className="flex flex-col space-y-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Image
-                src={"/tokens/SOL.webp"}
-                width={30}
-                height={30}
-                alt="SOL Icon"
-                className="w-8 h-8 rounded-full"
-              />
-              <div className="flex flex-col space-y-0.5 items-start justify-start">
-                <p className="text-sm font-neuemedium leading-none text-stone-700 dark:text-white">
-                  SOL
-                </p>
-                <div className="flex items-baseline gap-1">
-                  <p className="text-xs text-stone-500 dark:text-white/50 font-neue">
-                    Amount: {solBalance / LAMPORTS_PER_SOL}
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="ml-auto">
-              <SendSol
+          <SolanaRow
+            rpcUrl={rpcUrl}
+            multisig={multisigPda}
+            solanaBalance={solBalance}
+            vaultIndex={vaultIndex}
+            programId={programId}
+          />
+          {tokens
+            .sort((a, b) => {
+              if (!a.symbol && b.symbol) return 1;
+              if (a.symbol && !b.symbol) return -1;
+              return 0;
+            })
+            .map((token, i) => (
+              <TokenRow
+                key={i}
+                token={token}
                 rpcUrl={rpcUrl}
-                multisigPda={multisigPda}
+                multisig={multisigPda}
                 vaultIndex={vaultIndex}
-                programId={programId}
               />
-            </div>
-          </div>
-          {tokens.map((token, i) => (
-            <div key={i} className="w-full">
-              <hr className="mb-6 border-darkborder/30" />
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="flex items-center gap-2">
-                    {token.icon && (
-                      <Image
-                        src={token.icon}
-                        width={30}
-                        height={30}
-                        alt="Token Icon"
-                        className="w-8 h-8 rounded-full"
-                      />
-                    )}
-                    <div className="flex flex-col space-y-0.5 items-start justify-start">
-                      {token.symbol ? (
-                        <p className="text-sm font-neuemedium leading-none text-stone-700 dark:text-white">
-                          {token.symbol}
-                        </p>
-                      ) : (
-                        <p className="text-sm font-medium leading-none text-stone-700 dark:text-white">
-                          Mint: {token.mint}
-                        </p>
-                      )}
-                      <div className="flex items-baseline gap-1">
-                        <p className="text-xs text-stone-500 dark:text-white/50 font-neue">
-                          Amount:{" "}
-                          {token.account.data.parsed.info.tokenAmount.uiAmount}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="ml-auto">
-                  <SendTokens
-                    mint={token.account.data.parsed.info.mint}
-                    tokenAccount={token.pubkey.toBase58()}
-                    decimals={
-                      token.account.data.parsed.info.tokenAmount.decimals
-                    }
-                    symbol={
-                      token.symbol || token.account.data.parsed.info.symbol
-                    }
-                    icon={token.icon || null}
-                    rpcUrl={rpcUrl}
-                    multisigPda={multisigPda}
-                    vaultIndex={vaultIndex}
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
+            ))}
         </div>
       </CardContent>
     </Card>

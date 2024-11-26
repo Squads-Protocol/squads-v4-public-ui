@@ -11,7 +11,7 @@ import {
   Transition,
 } from "@headlessui/react";
 import { cn } from "@/lib/utils";
-import { Eye, LogOut } from "lucide-react";
+import { Code, Eye, LogOut, ServerIcon } from "lucide-react";
 import Link from "next/link";
 import { PublicKey } from "@solana/web3.js";
 
@@ -87,6 +87,42 @@ function ConnectedState({
                       ? "w-full inline-flex gap-2 items-center font-neue bg-zinc-500/25 text-zinc-900 dark:text-white"
                       : "text-zinc-700 dark:text-white",
                     "w-full inline-flex gap-2 items-center font-neue px-4 py-2 text-left text-sm rounded-t-md"
+                  )}
+                >
+                  <ServerIcon size={18} strokeWidth={1} />
+                  Set RPC
+                </Link>
+              )}
+            </MenuItem>
+            <MenuItem>
+              {({ active }) => (
+                <Link
+                  href={`https://explorer.solana.com/address/${publicKey?.toString()}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(
+                    active
+                      ? "w-full inline-flex gap-2 items-center font-neue bg-zinc-500/25 text-zinc-900 dark:text-white"
+                      : "text-zinc-700 dark:text-white",
+                    "w-full inline-flex gap-2 items-center font-neue px-4 py-2 text-left text-sm"
+                  )}
+                >
+                  <Code size={18} strokeWidth={1} />
+                  Set Program ID
+                </Link>
+              )}
+            </MenuItem>
+            <MenuItem>
+              {({ active }) => (
+                <Link
+                  href={`https://explorer.solana.com/address/${publicKey?.toString()}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(
+                    active
+                      ? "w-full inline-flex gap-2 items-center font-neue bg-zinc-500/25 text-zinc-900 dark:text-white"
+                      : "text-zinc-700 dark:text-white",
+                    "w-full inline-flex gap-2 items-center font-neue px-4 py-2 text-left text-sm"
                   )}
                 >
                   <Eye size={18} strokeWidth={1} />

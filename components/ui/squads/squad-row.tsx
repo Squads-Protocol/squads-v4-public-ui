@@ -1,4 +1,3 @@
-import { nFormatter } from "@/lib/nFormatter";
 import { MultisigInfo } from "@/lib/types";
 import { useTheme } from "next-themes";
 import Image from "next/image";
@@ -25,10 +24,12 @@ export default function SquadRow({ index, accounts, squad }: SquadRowProps) {
   return (
     <div className="w-full">
       {index > 0 && index < accounts.length && (
-        <hr className="my-2 border-stone-500/25 dark:border-white/[0.25]" />
+        <hr className="my-2 border-darkborder/10" />
       )}
       <button
-        onClick={() => setMultisigCookie(squad.publicKey.toString())}
+        onClick={() => {
+          setMultisigCookie(squad.publicKey.toString());
+        }}
         className="w-full flex items-center justify-between p-2 dark:hover:bg-white/[0.04] rounded-md"
       >
         <div className="flex gap-4 items-center">
@@ -48,6 +49,7 @@ export default function SquadRow({ index, accounts, squad }: SquadRowProps) {
             </p>
           </div>
         </div>
+        {/*
         <p className="font-neuemedium text-lg dark:text-white">
           ${nFormatter(squad.balance.total)}{" "}
           <span className="ml-1 text-xs font-neue dark:text-white/50">
@@ -55,6 +57,7 @@ export default function SquadRow({ index, accounts, squad }: SquadRowProps) {
             balance
           </span>
         </p>
+        */}
       </button>
     </div>
   );

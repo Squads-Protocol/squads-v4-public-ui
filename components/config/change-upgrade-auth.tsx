@@ -25,7 +25,7 @@ export default function ChangeUpgradeAuth({
   programId,
 }: ChangeUpgradeAuthProps) {
   return (
-    <Card className="dark:bg-darkforeground dark:border-darkborder/30 font-neue">
+    <Card className="dark:bg-darkforeground dark:border-darkborder/10 font-neue">
       <CardHeader className="space-y-3">
         <CardTitle className="inline-flex gap-2 items-center tracking-wide">
           Change Program Upgrade Authority

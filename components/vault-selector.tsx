@@ -42,14 +42,14 @@ export function VaultSelector() {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[200px] justify-between font-neue bg-gradient-to-br from-stone-600 to-stone-800 text-white hover:text-white dark:bg-gradient-to-br dark:from-white dark:to-stone-400 dark:text-stone-700 hover:bg-gradient-to-br hover:from-stone-600 hover:to-stone-700 disabled:text-stone-500 disabled:bg-gradient-to-br disabled:from-stone-800 disabled:to-stone-900 dark:disabled:bg-gradient-to-br dark:disabled:from-stone-300 dark:disabled:to-stone-500 dark:disabled:text-stone-700/50 dark:hover:bg-stone-100 transition duration-200"
+          className="w-[200px] justify-between font-neue bg-stone-800 text-white hover:text-white dark:bg-white dark:text-stone-700 disabled:text-stone-500 disabled:bg-stone-800 dark:disabled:bg-stone-300 dark:disabled:text-stone-700/50 transition duration-200"
         >
           {value ? `Vault ${value}` : "Select Vault Index..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0 font-neue">
-        <Command className="bg-gradient-to-br from-stone-600 to-stone-800 text-white dark:bg-gradient-to-br dark:from-white dark:to-stone-400 dark:text-stone-700">
+        <Command className="bg-stone-800 text-white dark:bg-white dark:text-stone-700">
           <CommandInput
             placeholder="Search Vault Index..."
             className="placeholder:text-white/25 dark:placeholder:text-stone-700/40"
