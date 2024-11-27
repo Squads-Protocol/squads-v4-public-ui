@@ -5,11 +5,11 @@ import { TokenList } from "@/components/tokens/token-list";
 import { VaultDisplayer } from "@/components/vault-display";
 import MyMultisigs from "@/components/ui/squads/my-multisigs";
 import { FilteredToken } from "@/lib/types";
-import ChangeUpgradeAuth from "@/components/config/change-upgrade-auth";
 import SectionHeader from "@/components/layout/section-header";
 import { Metaplex } from "@metaplex-foundation/js";
 import { getTokenMetadata } from "@/lib/helpers/getTokenMetadata";
 import { lookupAddress } from "@/lib/helpers/tokenAddresses";
+import { getClusterName } from "@arrangedev/detect-cluster";
 
 export default async function Home() {
   const rpcUrl = headers().get("x-rpc-url");
@@ -24,6 +24,8 @@ export default async function Home() {
     : multisig.PROGRAM_ID;
 
   const metaplex = Metaplex.make(connection as any);
+
+  const cluster = await getClusterName(rpcUrl!);
 
   const multisigVault = multisig.getVaultPda({
     multisigPda,
@@ -108,21 +110,7 @@ export default async function Home() {
               rpcUrl={rpcUrl!}
               multisigPda={multisigCookie!}
               vaultIndex={vaultIndex || 0}
-            />
-            <ChangeUpgradeAuth
-              multisigPda={multisigCookie!}
-              rpcUrl={rpcUrl || clusterApiUrl("mainnet-beta")}
-              transactionIndex={
-                multisigInfo.transactionIndex
-                  ? Number(multisigInfo.transactionIndex) + 1
-                  : 1
-              }
-              vaultIndex={vaultIndex}
-              programId={
-                programIdCookie
-                  ? programIdCookie
-                  : multisig.PROGRAM_ID.toBase58()
-              }
+              cluster={cluster!}
             />
           </div>
         </div>

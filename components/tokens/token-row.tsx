@@ -2,6 +2,7 @@ import Image from "next/image";
 import SendTokens from "./send-token";
 import { nWithCommas } from "@/lib/nFormatter";
 import { ChipWithLink } from "../ui/chip";
+import { createExplorerAddressUrl } from "@/lib/helpers/createExplorerUrl";
 
 export default function TokenRow({
   token,
@@ -42,7 +43,7 @@ export default function TokenRow({
                 )}
                 <ChipWithLink
                   label={token.mint.slice(0, 4) + "..." + token.mint.slice(-4)}
-                  href=""
+                  href={createExplorerAddressUrl({ publicKey: token.mint, cluster: "" })}
                   color="muted"
                 />
               </div>

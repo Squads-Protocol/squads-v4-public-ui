@@ -26,6 +26,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { isPublickey } from "@/lib/checks/isPublickey";
 import SendInput from "../ui/primitives/send-input";
+import { useCluster } from "@/state/ClusterContext";
 
 type SendSolProps = {
   rpcUrl: string;
@@ -45,6 +46,7 @@ const SendSol = ({
   const [amount, setAmount] = useState(0);
   const [recipient, setRecipient] = useState("");
   const router = useRouter();
+  const { cluster } = useCluster();
 
   const transfer = async () => {
     if (!wallet.publicKey) {
@@ -130,20 +132,22 @@ const SendSol = ({
     router.refresh();
   };
 
+  const nativeMoniker = cluster?.includes("eclipse") ? "wETH" : "SOL";
+
   return (
     <Dialog>
       <DialogTrigger className="h-10 px-4 py-2 rounded-md font-neue bg-stone-700 text-white dark:bg-white dark:text-stone-700 disabled:text-stone-500 disabled:bg-gradient-to-br disabled:from-stone-800 disabled:to-stone-900 dark:disabled:bg-gradient-to-br dark:disabled:from-stone-300 dark:disabled:to-stone-500 dark:disabled:text-stone-700/50 dark:hover:bg-stone-100 transition duration-200">
-        <p className="font-neue text-sm">Send SOL</p>
+        <p className="font-neue text-sm">Send {nativeMoniker}</p>
       </DialogTrigger>
       <DialogContent className="font-neue bg-darkforeground border border-[#A9A9A9]/30">
         <DialogHeader>
           <DialogTitle>
             <p className="text-2xl font-neuemedium bg-gradient-to-br from-white to-stone-600 bg-clip-text leading-none text-transparent pointer-events-none">
-              Transfer SOL
+              Transfer {nativeMoniker}
             </p>
           </DialogTitle>
           <DialogDescription className="text-stone-400/75">
-            Create a proposal to transfer SOL to another address.
+            Create a proposal to transfer {nativeMoniker} to another address.
           </DialogDescription>
         </DialogHeader>
         <div className="mt-4 mb-6 flex flex-col space-y-6">
@@ -163,8 +167,10 @@ const SendSol = ({
             <SendInput
               amount={amount}
               setAmount={setAmount}
-              label="SOL"
-              icon="/tokens/SOL.webp"
+              label={nativeMoniker}
+              icon={
+                nativeMoniker == "SOL" ? "/tokens/SOL.webp" : "/tokens/eth.svg"
+              }
             />
             {amount > 0 ? null : (
               <p className="text-xs text-red-500">

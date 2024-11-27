@@ -16,6 +16,7 @@ type TokenListProps = {
   multisigPda: string;
   vaultIndex: number;
   programId?: string;
+  cluster?: string;
 };
 
 export function TokenList({
@@ -25,6 +26,7 @@ export function TokenList({
   multisigPda,
   vaultIndex,
   programId,
+  cluster,
 }: TokenListProps) {
   return (
     <Card className="font-neue dark:bg-darkforeground dark:border-darkborder/10">
@@ -42,6 +44,7 @@ export function TokenList({
             solanaBalance={solBalance}
             vaultIndex={vaultIndex}
             programId={programId}
+            cluster={cluster}
           />
           {tokens
             .sort((a, b) => {
