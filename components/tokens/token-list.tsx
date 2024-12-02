@@ -31,7 +31,7 @@ export function TokenList({
   return (
     <Card className="font-neue dark:bg-darkforeground dark:border-darkborder/10">
       <CardHeader>
-        <CardTitle className="tracking-wide">Assets</CardTitle>
+        <CardTitle className="tracking-wide">Tokens</CardTitle>
         <CardDescription className="text-stone-500 dark:text-white/50">
           Current token assets in your vault.
         </CardDescription>

@@ -100,9 +100,8 @@ export default function SidebarLayout({
             <div className="mt-8 flex flex-col gap-4">
               {links.map((link, idx) => (
                 <SidebarLink
-                  className={`font-neue p-1 rounded-md ${
-                    pathname == link.href ? "bg-stone-500/50" : ""
-                  }`}
+                  className={`font-neue p-1 rounded-md ${pathname == link.href ? "bg-stone-500/50" : ""
+                    }`}
                   key={idx}
                   link={link}
                 />
@@ -116,9 +115,9 @@ export default function SidebarLayout({
                 button={{
                   label:
                     publicKey?.toString().slice(0, 4) +
-                      "..." +
-                      publicKey?.toString().slice(-4) || "????",
-                  onClick: () => {},
+                    "..." +
+                    publicKey?.toString().slice(-4) || "????",
+                  onClick: () => { },
                   icon: (
                     <Image
                       src={
@@ -136,9 +135,8 @@ export default function SidebarLayout({
               <Unplug
                 onClick={disconnect}
                 strokeWidth={1}
-                className={`text-stone-300 hover:text-stone-100 h-5 w-5 ${
-                  !open && "hidden"
-                }`}
+                className={`text-stone-300 hover:text-stone-100 h-5 w-5 ${!open && "hidden"
+                  }`}
               />
             </div>
           ) : (
@@ -162,7 +160,7 @@ export default function SidebarLayout({
 }
 export const Logo = () => {
   const { theme } = useTheme();
-  const logo = theme == "dark" ? "/squads-light.png" : "/logo.svg";
+  const logo = theme == "dark" ? "/assets/squads-light.png" : "/assets/logo.svg";
 
   return (
     <Link
@@ -180,14 +178,14 @@ export const Logo = () => {
 };
 export const LogoIcon = () => {
   const { theme } = useTheme();
-  const logo = theme == "dark" ? "/squads-light.png" : "/logo.svg";
+  const logo = theme == "dark" ? "/assets/squads-light.png" : "/assets/logo.svg";
 
   return (
     <Link
       href="#"
       className="ml-1 font-normal flex space-x-2 items-center text-sm text-black py-1 relative z-20"
     >
-      <img src="./squads-icon.svg" className="h-5 w-6-sm flex-shrink-0" />
+      <img src="./assets/squads-icon.svg" className="h-5 w-6-sm flex-shrink-0" />
     </Link>
   );
 };

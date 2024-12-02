@@ -14,7 +14,7 @@ export default function SquadRow({ index, accounts, squad }: SquadRowProps) {
   const { theme } = useTheme();
 
   const logo =
-    theme == "dark" ? "/default_image_light.svg" : "/default_image.svg";
+    theme == "dark" ? "/assets/default_image_light.svg" : "/assets/default_image.svg";
 
   const setMultisigCookie = (multisig: string) => {
     document.cookie = `x-multisig=${multisig}; path=/`;

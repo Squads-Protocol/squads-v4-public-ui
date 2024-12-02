@@ -1,5 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
+import { usePathname } from "next/navigation";
 
 interface SectionHeaderProps {
   title: string;
@@ -10,9 +11,14 @@ export default function SectionHeader({
   title,
   description,
 }: SectionHeaderProps) {
+  const pathname = usePathname();
+  const image = routeToBg(pathname);
+
   return (
     <div className="bg-white flex flex-col gap-2 flex-1 w-full h-full">
-      <div className="p-2 md:p-10 w-full h-full bg-[url('/sqds-cover.png')] bg-no-repeat bg-center bg-cover">
+      <div className="p-2 md:p-10 w-full h-full bg-no-repeat bg-center bg-cover"
+        style={{ backgroundImage: image ? image : "/assets/sqds-cover.png" }}
+      >
         <motion.h1
           initial={{ opacity: 0.5, x: 50 }}
           whileInView={{ opacity: 1, x: 0 }}
@@ -42,4 +48,23 @@ export default function SectionHeader({
       </div>
     </div>
   );
+}
+
+const routeToBg = (path: string) => {
+  switch (true) {
+    case path == "/":
+      return "url(/assets/sqds-cover.png)"
+
+    case path.includes("/transactions"):
+      return "url(/assets/sqds-swish-2.png)"
+
+    case path == "/developers":
+      return "url(/assets/sqds-resources.png)"
+
+    case path == "/settings":
+      return "url(/assets/sqds-cover.png)"
+
+    case path == "/config":
+      return "url(/assets/sqds-grid.png)"
+  }
 }

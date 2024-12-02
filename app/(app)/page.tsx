@@ -39,6 +39,7 @@ export default async function Home() {
   );
 
   const solBalance = await connection.getBalance(multisigVault);
+  console.log(solBalance)
 
   const tokensInWallet = await connection.getParsedTokenAccountsByOwner(
     multisigVault,
