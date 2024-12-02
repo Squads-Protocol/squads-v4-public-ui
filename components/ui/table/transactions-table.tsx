@@ -6,18 +6,21 @@ import PaginationSection from "./pagination";
 import TableHeadSection from "./table-head";
 import TransactionTableRow from "./transaction-table-row";
 import { Skeleton } from "../primitives/skeleton";
+import TransactionTableFallback from "./fallback";
 import { useCluster } from "@/state/ClusterContext";
 import { useSquadMetadata } from "@/state/metadata";
 import { useTransactions } from "@/state/transactions";
 
 interface TransactionsTableProps {
   multisigPda: string;
+  vaultIndex: number;
   programId: string;
   page: number;
 }
 
 export default function TransactionsTable({
   multisigPda,
+  vaultIndex,
   programId,
   page,
 }: TransactionsTableProps) {
@@ -32,6 +35,10 @@ export default function TransactionsTable({
 
   if (isLoading) {
     return <Skeleton className="w-full h-96 bg-neutral-600 rounded-lg" />;
+  }
+
+  if (!transactions || transactions.length === 0) {
+    return <TransactionTableFallback rpc={rpc!} multisigAddr={multisigPda!} vaultIndex={vaultIndex} programId={programId!} />
   }
 
   return (

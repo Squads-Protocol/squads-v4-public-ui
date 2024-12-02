@@ -15,6 +15,7 @@ export default async function TransactionsPage({
   searchParams: { page: string };
 }) {
   const multisigCookie = headers().get("x-multisig");
+  const vaultIndex = Number(headers().get("x-vault-index")) || 0;
   const programId =
     cookies().get("x-program-id")?.value || multisig.PROGRAM_ID.toBase58();
 
@@ -50,6 +51,7 @@ export default async function TransactionsPage({
         ) : (
           <TransactionsTable
             multisigPda={multisigCookie!}
+            vaultIndex={vaultIndex}
             programId={programId}
             page={parseInt(searchParams.page) || 1}
           />
