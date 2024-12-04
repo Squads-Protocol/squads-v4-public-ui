@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Connection } from "@solana/web3.js";
+import { Connection, clusterApiUrl } from "@solana/web3.js";
 import { isMultisigAddress } from "./lib/checks/isMultisig";
 
 const PROTECTED_ROUTES = ["/", "/transactions", "/config"];
@@ -12,6 +12,8 @@ export async function middleware(req: NextRequest) {
   const rpcUrl = req.cookies.get("x-rpc-url")?.value;
   if (rpcUrl) {
     requestHeaders.set("x-rpc-url", rpcUrl);
+  } else {
+    requestHeaders.set("x-rpc-url", clusterApiUrl("mainnet-beta"));
   }
 
   const cookie = req.cookies.get("x-multisig")?.value;
