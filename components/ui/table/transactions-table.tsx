@@ -30,7 +30,8 @@ export default function TransactionsTable({
     multisigPda!,
     connection!,
     Number(account?.transactionIndex!),
-    page ? page : 1
+    page ? page : 1,
+    programId
   );
 
   if (isLoading) {

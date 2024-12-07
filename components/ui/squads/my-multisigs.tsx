@@ -139,21 +139,21 @@ export default function MyMultisigs({ rpc }: { rpc: string }) {
               ))}
           </div>
         ) : (
-          <div className="w-full h-[25rem] flex items-center justify-center bg-stone-500/10 dark:bg-white/[0.03] rounded-md p-4">
+          <div className="w-full h-[25rem] flex items-center justify-center border border-darkborder/10 rounded-md p-4">
             <div className="w-full flex-col justify-center">
-              <div className="mx-auto p-3 w-fit bg-stone-500/25 rounded-md">
+              <div className="mx-auto p-3 w-fit bg-stone-600/25 rounded-md">
                 <AlertOctagon className="text-stone-400 w-6 h-6" />
               </div>
-              <h4 className="mt-4 font-neue font-semibold text-lg text-center text-stone-700 dark:text-white/75">
-                No Squads Yet.
+              <h4 className="mt-4 font-neue font-semibold text-lg text-center text-white">
+                No Squads Found.
               </h4>
-              <p className="mt-2 font-neue text-base text-center text-stone-400 dark:text-white/25">
-                Click below to deploy your first Squad.
+              <p className="mt-2 font-neue text-base text-center text-white/10 dark:text-white/25">
+                Click below to input one manually.
               </p>
               <div className="mt-4 flex justify-center">
                 <Link href="/create" passHref>
-                  <Button className="font-neue bg-gradient-to-br from-stone-600 to-stone-800 text-white dark:bg-gradient-to-br dark:from-white dark:to-stone-400 dark:text-stone-700 hover:bg-gradient-to-br hover:from-stone-600 hover:to-stone-700 disabled:text-stone-500 disabled:bg-gradient-to-br disabled:from-stone-800 disabled:to-stone-900 dark:disabled:bg-gradient-to-br dark:disabled:from-stone-300 dark:disabled:to-stone-500 dark:disabled:text-stone-700/50 dark:hover:bg-stone-100 transition duration-200">
-                    Create Squad
+                  <Button className="font-neue bg-white/[0.03] text-white/75 hover:bg-white/[0.05] hover:text-white disabled:bg-white/[0.01] disabled:text-stone-500/50">
+                    Add Squad
                   </Button>
                 </Link>
               </div>

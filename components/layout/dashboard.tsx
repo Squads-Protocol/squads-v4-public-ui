@@ -24,6 +24,8 @@ import { useTheme } from "next-themes";
 import Image from "next/image";
 import { getRandomAvatar } from "@/lib/helpers/getAvatar";
 import ConnectButton from "./wallet/connect-button";
+import WalletMenu from "./wallet/connected-state";
+import { useCluster } from "@/state/ClusterContext";
 
 export default function SidebarLayout({
   children,
@@ -31,6 +33,7 @@ export default function SidebarLayout({
   children: React.ReactNode;
 }) {
   const { connected, disconnect, wallet, publicKey } = useWallet();
+  const { cluster } = useCluster();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -110,6 +113,7 @@ export default function SidebarLayout({
           </div>
           {connected ? (
             <div className="flex gap-2 items-center justify-between">
+              {/*<WalletMenu open={modalOpen} setOpen={setModalOpen} />*/}
               <SidebarButton
                 className="font-neuemedium"
                 button={{
@@ -119,16 +123,32 @@ export default function SidebarLayout({
                     publicKey?.toString().slice(-4) || "????",
                   onClick: () => { },
                   icon: (
-                    <Image
-                      src={
-                        wallet?.adapter.icon ??
-                        getRandomAvatar(publicKey?.toString() as string)
-                      }
-                      className="h-7 w-7 flex-shrink-0 rounded-full"
-                      width={50}
-                      height={50}
-                      alt="Avatar"
-                    />
+                    <span className="relative inline-flex">
+                      <Image
+                        alt="Wallet"
+                        width={100}
+                        height={100}
+                        src={
+                          wallet?.adapter.icon ??
+                          getRandomAvatar(publicKey?.toString() as string)
+                        }
+                        className="size-6 rounded-md flex-shrink-0 rounded-full"
+                      />
+                      <span className="absolute bottom-0 right-0 block translate-x-1/2 translate-y-1/2 transform rounded-full border-2 border-darkbackground">
+                        <Image
+                          alt="Cluster"
+                          src={cluster?.includes("solana")
+                            ? "/assets/solana.svg"
+                            : cluster?.includes("eclipse")
+                              ? "/assets/eclipse.svg"
+                              : "/assets/default_image_light.svg"
+                          }
+                          width={20}
+                          height={20}
+                          className="block size-2 flex-shrink-0 rounded-full"
+                        />
+                      </span>
+                    </span>
                   ),
                 }}
               />
@@ -142,7 +162,18 @@ export default function SidebarLayout({
           ) : (
             <>
               {open ? (
-                <ConnectButton />
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  transition={{
+                    delay: 0.1,
+                    duration: 0.2,
+                    ease: "easeInOut",
+                  }}
+                  className="w-full"
+                >
+                  <ConnectButton />
+                </motion.div>
               ) : (
                 <PlugIcon
                   onClick={disconnect}

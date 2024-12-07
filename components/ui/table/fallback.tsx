@@ -19,6 +19,5 @@ export default function TransactionTableFallback({ rpc, multisigAddr, vaultIndex
         </div>
       </div>
     </div>
-
   );
 }

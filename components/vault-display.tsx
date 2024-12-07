@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/primitives/card";
 import { PublicKey } from "@solana/web3.js";
 import { VaultSelector } from "./vault-selector";
 import CopyTextButton from "./ui/misc/copy-text";
+import Alert from "./ui/alert";
 
 type VaultDisplayerProps = {
   multisigPdaString: string;
@@ -27,15 +28,13 @@ export function VaultDisplayer({
         <CardTitle className="tracking-wide">Current Vault</CardTitle>
       </CardHeader>
       <CardContent className="text-muted-foreground dark:text-white/50">
-        <div className="flex items-center gap-4 mb-6">
-          <span className="text-stone-700 dark:text-white/75">
-            Account {vaultIndex}:{" "}
-          </span>
+        <Alert title="Use your vault address" description="Please ensure you're sending funds to a valid vault address. Sending funds to the multisig account will result in them being potentially unrecoverable." />
+        <div className="flex items-center gap-4 my-6">
           <div className="flex items-center gap-2">
-            <p className="text-stone-500">
-              {vaultAddress[0].toBase58().slice(0, 4) +
+            <p className="text-lg text-stone-200">
+              {vaultAddress[0].toBase58().slice(0, 8) +
                 "..." +
-                vaultAddress[0].toBase58().slice(-4)}
+                vaultAddress[0].toBase58().slice(-8)}
             </p>
             <CopyTextButton text={vaultAddress[0].toBase58()} />
           </div>

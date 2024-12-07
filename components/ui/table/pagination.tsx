@@ -47,23 +47,27 @@ export default function PaginationSection({
             {parseInt(page)}
           </PaginationLink>
         </PaginationItem>
-        <PaginationItem>
-          <PaginationLink
-            href={`/transactions?page=${parseInt(page) + 1}`}
-            className="hover:bg-neutral-500"
-          >
-            {parseInt(page) + 1}
-          </PaginationLink>
-        </PaginationItem>
-        <PaginationItem>
-          <PaginationEllipsis />
-        </PaginationItem>
-        <PaginationItem>
-          <PaginationNext
-            href={`/transactions?page=${transactionsLength % 10}`}
-            className="hover:bg-neutral-500"
-          />
-        </PaginationItem>
+        {transactionsLength > 10 && (
+          <>
+            <PaginationItem>
+              <PaginationLink
+                href={`/transactions?page=${parseInt(page) + 1}`}
+                className="hover:bg-neutral-500"
+              >
+                {parseInt(page) + 1}
+              </PaginationLink>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationEllipsis />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationNext
+                href={`/transactions?page=${transactionsLength % 10}`}
+                className="hover:bg-neutral-500"
+              />
+            </PaginationItem>
+          </>
+        )}
       </PaginationContent>
     </Pagination>
   );

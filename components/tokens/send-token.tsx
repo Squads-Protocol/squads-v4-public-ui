@@ -162,7 +162,7 @@ const SendTokens = ({
 
   return (
     <Dialog>
-      <DialogTrigger className="h-10 px-4 py-2 rounded-md font-neue bg-stone-700 text-white dark:bg-white dark:text-stone-700 disabled:text-stone-500 disabled:bg-gradient-to-br disabled:from-stone-800 disabled:to-stone-900 dark:disabled:bg-gradient-to-br dark:disabled:from-stone-300 dark:disabled:to-stone-500 dark:disabled:text-stone-700/50 dark:hover:bg-stone-100 transition duration-200">
+      <DialogTrigger className="h-10 px-4 py-2 rounded-md font-neue bg-white/[0.03] text-white/75 hover:bg-white/[0.05] hover:text-white disabled:bg-white/[0.01] disabled:text-stone-500/50">
         <p className="font-neue text-sm">Send {symbol ? symbol : "Tokens"}</p>
       </DialogTrigger>
       <DialogContent className="font-neue bg-darkforeground border border-[#A9A9A9]/30">

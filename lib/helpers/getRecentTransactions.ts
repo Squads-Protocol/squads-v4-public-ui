@@ -8,12 +8,14 @@ export async function getRecentTransactions(
   connection: Connection,
   multisigPda: PublicKey,
   transactionIndex: number,
-  page: number
+  page: number,
+  programId: string = multisig.PROGRAM_ID.toBase58(),
 ) {
   if (isNaN(page)) return [];
   if (isNaN(transactionIndex)) return [];
 
   const startIndex = transactionIndex - (page - 1) * TRANSACTIONS_PER_PAGE;
+  console.log(startIndex);
 
   let latestTransactions = [];
   for (let i = 0; i < TRANSACTIONS_PER_PAGE; i++) {
@@ -26,19 +28,23 @@ export async function getRecentTransactions(
     const transactionPda = multisig.getTransactionPda({
       multisigPda,
       index,
+      programId: new PublicKey(programId),
     });
     const [proposalPda] = multisig.getProposalPda({
       multisigPda,
       transactionIndex: index,
+      programId: new PublicKey(programId),
     });
+    console.log(proposalPda);
 
     let proposal;
     try {
       proposal = await multisig.accounts.Proposal.fromAccountAddress(
         connection,
-        proposalPda
+        proposalPda,
       );
     } catch (error) {
+      console.error(error);
       proposal = null;
     }
 

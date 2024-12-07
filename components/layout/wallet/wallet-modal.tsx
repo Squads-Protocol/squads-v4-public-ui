@@ -1,5 +1,5 @@
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useEffect } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import Image from "next/image";
 import { ListChecks, ScanEye, Wallet, X } from "lucide-react";
@@ -11,6 +11,7 @@ interface WalletModalProps {
 
 export default function WalletModal({ open, setOpen }: WalletModalProps) {
   const { wallets, select, connected, disconnect } = useWallet();
+  const [expand, setExpand] = useState<boolean>(false);
 
   useEffect(() => {
     const check = () => {
@@ -77,7 +78,7 @@ export default function WalletModal({ open, setOpen }: WalletModalProps) {
                               .filter(
                                 (wallet) => wallet.readyState === "Installed"
                               )
-                              .slice(0, 3)
+                              .slice(0, expand ? wallets.length : 3)
                               .map((wallet, i) => (
                                 <div key={i} className="w-full px-2">
                                   <button
@@ -85,7 +86,7 @@ export default function WalletModal({ open, setOpen }: WalletModalProps) {
                                       if (connected) disconnect();
                                       select(wallet.adapter.name);
                                     }}
-                                    className="w-full flex-col gap-2 justify-center items-center px-2 py-3 rounded-md border border-[#A9A9A9]/30 hover:border-[#A9A9A9] transition ease-in-out delay-110 hover:-translate-y-1 hover:scale-101"
+                                    className="w-full flex-col gap-2 justify-center items-center mb-2 px-2 py-3 rounded-md border border-[#A9A9A9]/30 hover:border-[#A9A9A9] transition ease-in-out delay-110 hover:-translate-y-1 hover:scale-101"
                                   >
                                     <Image
                                       src={wallet.adapter.icon}
@@ -102,7 +103,7 @@ export default function WalletModal({ open, setOpen }: WalletModalProps) {
                               ))}
                             <div className="w-full px-2">
                               <button
-                                onClick={() => {}}
+                                onClick={() => setExpand(!expand)}
                                 className="w-full flex-col gap-2 justify-center items-center px-2 py-3 rounded-md border border-[#A9A9A9]/30 hover:border-[#A9A9A9] transition ease-in-out delay-110 hover:-translate-y-1 hover:scale-101"
                               >
                                 <Wallet

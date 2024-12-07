@@ -27,11 +27,11 @@ export default async function Home() {
 
   const cluster = await getClusterName(rpcUrl!);
 
-  const multisigVault = multisig.getVaultPda({
+  const [multisigVault] = multisig.getVaultPda({
     multisigPda,
     index: vaultIndex || 0,
     programId: programId ? programId : multisig.PROGRAM_ID,
-  })[0];
+  });
 
   const multisigInfo = await multisig.accounts.Multisig.fromAccountAddress(
     connection,

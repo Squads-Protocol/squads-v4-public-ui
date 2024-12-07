@@ -3,8 +3,6 @@ import * as multisig from "@sqds/multisig";
 import { TableCell, TableRow } from "../primitives/table";
 import {
   createExplorerAddressUrl,
-  createExplorerTxUrl,
-  createExplorerUrl,
 } from "@/lib/helpers/createExplorerUrl";
 import { PublicKey, clusterApiUrl } from "@solana/web3.js";
 import ApproveButton from "@/components/proposal-actions/approve-button";

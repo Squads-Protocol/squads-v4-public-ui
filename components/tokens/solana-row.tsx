@@ -39,7 +39,7 @@ export default function SolanaRow({
           <div className="flex items-baseline gap-1">
             <p className="text-xs text-stone-500 dark:text-white/50 font-neue">
               Balance:{" "}
-              {nWithCommas((solanaBalance / LAMPORTS_PER_SOL).toFixed(3))}
+              {(solanaBalance / LAMPORTS_PER_SOL).toFixed(6)}
             </p>
           </div>
         </div>

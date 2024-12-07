@@ -7,7 +7,8 @@ export const useTransactions = (
   ms: string,
   connection: Connection,
   transactionIndex: number,
-  page: number
+  page: number,
+  programId: string,
 ) => {
   const {
     data: transactions,
@@ -20,10 +21,11 @@ export const useTransactions = (
         connection!,
         new PublicKey(ms),
         transactionIndex,
-        page
+        page,
+        programId,
       );
     },
-    enabled: !!connection && !!ms,
+    enabled: !!connection && !!ms && !!transactionIndex && !!page,
     retry: 3,
   });
 
