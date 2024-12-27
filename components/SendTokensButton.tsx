@@ -56,7 +56,6 @@ const SendTokens = ({
 
   const transfer = async () => {
     if (!wallet.publicKey) {
-      walletModal.setVisible(true);
       return;
     }
     const recipientATA = getAssociatedTokenAddressSync(
@@ -158,7 +157,15 @@ const SendTokens = ({
   return (
     <Dialog>
       <DialogTrigger>
-        <Button>Send Tokens</Button>
+        <Button
+            onClick={(e) => {
+              if (!wallet.publicKey) {
+                e.preventDefault()
+                walletModal.setVisible(true);
+                return;
+              }
+            }}
+        >Send Tokens</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

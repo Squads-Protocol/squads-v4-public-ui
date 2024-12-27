@@ -13,7 +13,7 @@ export async function middleware(req: NextRequest) {
     requestHeaders.set("x-multisig", cookie);
   }
 
-  const rpcUrl = req.cookies.get("x-rpc-url")?.value;
+  const rpcUrl = req.cookies.get("x-rpc-url")?.value || process.env.NEXT_PUBLIC_RPC_URL;
   if (rpcUrl) {
     requestHeaders.set("x-rpc-url", rpcUrl);
   }

@@ -47,7 +47,6 @@ const SendSol = ({
 
   const transfer = async () => {
     if (!wallet.publicKey) {
-      walletModal.setVisible(true);
       return;
     }
 
@@ -132,7 +131,13 @@ const SendSol = ({
   return (
     <Dialog>
       <DialogTrigger>
-        <Button>Send SOL</Button>
+        <Button onClick={(e) => {
+          if (!wallet.publicKey) {
+            e.preventDefault()
+            walletModal.setVisible(true);
+            return;
+          }
+        }}>Send SOL</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
