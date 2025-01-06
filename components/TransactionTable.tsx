@@ -52,14 +52,14 @@ export default function TransactionTable({
               </Link>
             </TableCell>
             <TableCell>
-              {transaction.proposal?.status.__kind || "Active"}
+              {transaction.proposal?.status.__kind || "None"}
             </TableCell>
             <TableCell>
               <ActionButtons
                 rpcUrl={rpcUrl!}
                 multisigPda={multisigPda!}
                 transactionIndex={Number(transaction.index)}
-                proposalStatus={transaction.proposal?.status.__kind || "Active"}
+                proposalStatus={transaction.proposal?.status.__kind || "None"}
                 programId={
                   programId ? programId : multisig.PROGRAM_ID.toBase58()
                 }
