@@ -127,10 +127,10 @@ const ExecuteButton = ({
     }
 
     const priorityFeeInstruction = ComputeBudgetProgram.setComputeUnitPrice({
-      microLamports: priorityFeeLamports,
+      microLamports: priorityFeeLamports > 0 ? priorityFeeLamports : 1,
     });
     const computeUnitInstruction = ComputeBudgetProgram.setComputeUnitLimit({
-      units: computeUnitBudget,
+      units: computeUnitBudget > 0 ? computeUnitBudget : 200_000,
     });
 
     let blockhash = (await connection.getLatestBlockhash()).blockhash;
@@ -146,6 +146,17 @@ const ExecuteButton = ({
     }).compileToV0Message(altAccounts && altAccounts);
 
     const execTx = new VersionedTransaction(executeMessage);
+
+    try {
+      const { value } = await connection.simulateTransaction(execTx, {
+        commitment: "confirmed",
+        sigVerify: false,
+      });
+
+      console.info("Simulation result:", value);
+    } catch (error) {
+      console.error(error);
+    }
 
     const signature = await wallet.sendTransaction(execTx, connection, {
       skipPreflight: true,
