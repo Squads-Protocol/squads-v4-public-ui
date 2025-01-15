@@ -141,7 +141,7 @@ const isValidPublicKey = async (multisigString: string) => {
     const connection = new Connection(rpcUrl || clusterApiUrl("mainnet-beta"));
     await multisig.accounts.Multisig.fromAccountAddress(
       connection,
-      multisigPubkey
+      multisigPubkey,
     );
     return true;
   } catch (e) {

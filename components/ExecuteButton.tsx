@@ -165,8 +165,21 @@ const ExecuteButton = ({
     toast.loading("Confirming...", {
       id: "transaction",
     });
-    await connection.getSignatureStatuses([signature]);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    let sent = false;
+    const maxAttempts = 15;
+    const delayMs = 1500;
+
+    for (let attempt = 0; attempt <= maxAttempts && !sent; attempt++) {
+      const status = await connection.getSignatureStatus(signature);
+      if (status?.value?.confirmationStatus === "confirmed") {
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+        sent = true;
+      } else {
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+      }
+    }
+
     router.refresh();
   };
   return (
