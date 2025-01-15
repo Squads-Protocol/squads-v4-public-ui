@@ -127,10 +127,10 @@ const ExecuteButton = ({
     }
 
     const priorityFeeInstruction = ComputeBudgetProgram.setComputeUnitPrice({
-      microLamports: priorityFeeLamports,
+      microLamports: priorityFeeLamports > 0 ? priorityFeeLamports : 1,
     });
     const computeUnitInstruction = ComputeBudgetProgram.setComputeUnitLimit({
-      units: computeUnitBudget,
+      units: computeUnitBudget > 0 ? computeUnitBudget : 200_000,
     });
 
     let blockhash = (await connection.getLatestBlockhash()).blockhash;
@@ -147,15 +147,49 @@ const ExecuteButton = ({
 
     const execTx = new VersionedTransaction(executeMessage);
 
-    const signature = await wallet.sendTransaction(execTx, connection, {
+    try {
+      const { value } = await connection.simulateTransaction(execTx, {
+        commitment: "confirmed",
+        sigVerify: false,
+      });
+
+      console.info("Simulation result:", value);
+    } catch (error) {
+      console.error(error);
+    }
+
+    if (!wallet.signTransaction) {
+      throw new Error("Wallet does not support signing transactions");
+    }
+
+    const signed = await wallet.signTransaction?.(execTx);
+
+    if (!signed) {
+      throw new Error("Failed to sign transaction");
+    }
+
+    const signature = await connection.sendTransaction(signed, {
       skipPreflight: true,
     });
     console.log("Transaction signature", signature);
     toast.loading("Confirming...", {
       id: "transaction",
     });
-    await connection.getSignatureStatuses([signature]);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    let sent = false;
+    const maxAttempts = 15;
+    const delayMs = 1500;
+
+    for (let attempt = 0; attempt <= maxAttempts && !sent; attempt++) {
+      const status = await connection.getSignatureStatus(signature);
+      if (status?.value?.confirmationStatus === "confirmed") {
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+        sent = true;
+      } else {
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+      }
+    }
+
     router.refresh();
   };
   return (

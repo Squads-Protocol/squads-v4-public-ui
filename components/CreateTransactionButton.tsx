@@ -70,7 +70,7 @@ const CreateTransaction = ({
           ),
         }),
       ],
-      payerKey: vaultAddress,
+      payerKey: wallet.publicKey as PublicKey,
       recentBlockhash: (await connection.getLatestBlockhash()).blockhash,
     });
 
