@@ -158,7 +158,17 @@ const ExecuteButton = ({
       console.error(error);
     }
 
-    const signature = await wallet.sendTransaction(execTx, connection, {
+    if (!wallet.signTransaction) {
+      throw new Error("Wallet does not support signing transactions");
+    }
+
+    const signed = await wallet.signTransaction?.(execTx);
+
+    if (!signed) {
+      throw new Error("Failed to sign transaction");
+    }
+
+    const signature = await connection.sendTransaction(signed, {
       skipPreflight: true,
     });
     console.log("Transaction signature", signature);
