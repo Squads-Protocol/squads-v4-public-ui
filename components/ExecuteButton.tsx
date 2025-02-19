@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import {
   AddressLookupTableAccount,
   ComputeBudgetProgram,
@@ -8,18 +8,19 @@ import {
   TransactionMessage,
   VersionedTransaction,
   clusterApiUrl,
-} from "@solana/web3.js";
-import { Button } from "./ui/button";
-import * as multisig from "@sqds/multisig";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { Dialog, DialogDescription, DialogHeader } from "./ui/dialog";
-import { DialogTrigger } from "./ui/dialog";
-import { DialogContent, DialogTitle } from "./ui/dialog";
-import { useState } from "react";
-import { Input } from "./ui/input";
+} from '@solana/web3.js';
+import { Button } from './ui/button';
+import * as multisig from '@sqds/multisig';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { useWalletModal } from '@solana/wallet-adapter-react-ui';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
+import { Dialog, DialogDescription, DialogHeader } from './ui/dialog';
+import { DialogTrigger } from './ui/dialog';
+import { DialogContent, DialogTitle } from './ui/dialog';
+import { useState } from 'react';
+import { Input } from './ui/input';
+import { range } from '@/lib/utils';
 
 type WithALT = {
   instruction: TransactionInstruction;
@@ -47,9 +48,9 @@ const ExecuteButton = ({
   const [priorityFeeLamports, setPriorityFeeLamports] = useState<number>(5000);
   const [computeUnitBudget, setComputeUnitBudget] = useState<number>(200_000);
 
-  const isTransactionReady = proposalStatus === "Approved";
-  const connection = new Connection(rpcUrl || clusterApiUrl("mainnet-beta"), {
-    commitment: "confirmed",
+  const isTransactionReady = proposalStatus === 'Approved';
+  const connection = new Connection(rpcUrl || clusterApiUrl('mainnet-beta'), {
+    commitment: 'confirmed',
   });
 
   const executeTransaction = async () => {
@@ -57,17 +58,19 @@ const ExecuteButton = ({
       walletModal.setVisible(true);
       return;
     }
+    const member = wallet.publicKey;
+    if (!wallet.signAllTransactions) return;
     let bigIntTransactionIndex = BigInt(transactionIndex);
 
     if (!isTransactionReady) {
-      toast.error("Proposal has not reached threshold.");
+      toast.error('Proposal has not reached threshold.');
       return;
     }
 
     console.log({
       multisigPda: multisigPda,
       connection,
-      member: wallet.publicKey.toBase58(),
+      member: member.toBase58(),
       transactionIndex: bigIntTransactionIndex,
       programId: programId ? programId : multisig.PROGRAM_ID.toBase58(),
     });
@@ -78,53 +81,22 @@ const ExecuteButton = ({
       programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
     });
 
+    let txData;
     let txType;
     try {
-      await multisig.accounts.VaultTransaction.fromAccountAddress(
-        connection,
-        transactionPda
-      );
-      txType = "vault";
+      await multisig.accounts.VaultTransaction.fromAccountAddress(connection, transactionPda);
+      txType = 'vault';
     } catch (error) {
-      txType = await multisig.accounts.ConfigTransaction.fromAccountAddress(
-        connection,
-        transactionPda
-      );
-      txType = "config";
+      try {
+        await multisig.accounts.ConfigTransaction.fromAccountAddress(connection, transactionPda);
+        txType = 'config';
+      } catch (e) {
+        txData = await multisig.accounts.Batch.fromAccountAddress(connection, transactionPda);
+        txType = 'batch';
+      }
     }
-    console.log(txType);
 
-    let executeInstruction;
-    let altAccounts;
-    if (txType == "vault") {
-      const resp = await multisig.instructions.vaultTransactionExecute({
-        multisigPda: new PublicKey(multisigPda),
-        connection,
-        member: wallet.publicKey,
-        transactionIndex: bigIntTransactionIndex,
-        programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
-      });
-      executeInstruction = resp.instruction;
-      altAccounts = resp.lookupTableAccounts;
-    } else if (txType == "config") {
-      executeInstruction = multisig.instructions.configTransactionExecute({
-        multisigPda: new PublicKey(multisigPda),
-        member: wallet.publicKey,
-        rentPayer: wallet.publicKey,
-        transactionIndex: bigIntTransactionIndex,
-        programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
-      });
-    } else {
-      const resp = await multisig.instructions.vaultTransactionExecute({
-        multisigPda: new PublicKey(multisigPda),
-        connection,
-        member: wallet.publicKey,
-        transactionIndex: bigIntTransactionIndex,
-        programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
-      });
-      executeInstruction = resp.instruction;
-      altAccounts = resp.lookupTableAccounts;
-    }
+    let transactions: VersionedTransaction[] = [];
 
     const priorityFeeInstruction = ComputeBudgetProgram.setComputeUnitPrice({
       microLamports: priorityFeeLamports,
@@ -135,27 +107,88 @@ const ExecuteButton = ({
 
     let blockhash = (await connection.getLatestBlockhash()).blockhash;
 
-    const executeMessage = new TransactionMessage({
-      instructions: [
-        priorityFeeInstruction,
-        computeUnitInstruction,
-        executeInstruction,
-      ],
-      payerKey: wallet.publicKey,
-      recentBlockhash: blockhash,
-    }).compileToV0Message(altAccounts && altAccounts);
+    if (txType == 'vault') {
+      const resp = await multisig.instructions.vaultTransactionExecute({
+        multisigPda: new PublicKey(multisigPda),
+        connection,
+        member,
+        transactionIndex: bigIntTransactionIndex,
+        programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
+      });
+      transactions.push(
+        new VersionedTransaction(
+          new TransactionMessage({
+            instructions: [priorityFeeInstruction, computeUnitInstruction, resp.instruction],
+            payerKey: member,
+            recentBlockhash: blockhash,
+          }).compileToV0Message(resp.lookupTableAccounts)
+        )
+      );
+    } else if (txType == 'config') {
+      const executeIx = multisig.instructions.configTransactionExecute({
+        multisigPda: new PublicKey(multisigPda),
+        member,
+        rentPayer: member,
+        transactionIndex: bigIntTransactionIndex,
+        programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
+      });
+      transactions.push(
+        new VersionedTransaction(
+          new TransactionMessage({
+            instructions: [priorityFeeInstruction, computeUnitInstruction, executeIx],
+            payerKey: member,
+            recentBlockhash: blockhash,
+          }).compileToV0Message()
+        )
+      );
+    } else if (txType == 'batch' && txData) {
+      const executedBatchIndex = txData.executedTransactionIndex;
+      const batchSize = txData.size;
 
-    const execTx = new VersionedTransaction(executeMessage);
+      if (executedBatchIndex === undefined || batchSize === undefined) {
+        throw new Error(
+          "executedBatchIndex or batchSize is undefined and can't execute the transaction"
+        );
+      }
 
-    const signature = await wallet.sendTransaction(execTx, connection, {
-      skipPreflight: true,
-    });
-    console.log("Transaction signature", signature);
-    toast.loading("Confirming...", {
-      id: "transaction",
-    });
-    await connection.getSignatureStatuses([signature]);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+      transactions.push(
+        ...(await Promise.all(
+          range(executedBatchIndex + 1, batchSize).map(async (batchIndex) => {
+            const { instruction: transactionExecuteIx, lookupTableAccounts } =
+              await multisig.instructions.batchExecuteTransaction({
+                connection,
+                member,
+                batchIndex: bigIntTransactionIndex,
+                transactionIndex: batchIndex,
+                multisigPda: new PublicKey(multisigPda),
+                programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
+              });
+
+            const message = new TransactionMessage({
+              payerKey: member,
+              recentBlockhash: blockhash,
+              instructions: [priorityFeeInstruction, computeUnitInstruction, transactionExecuteIx],
+            }).compileToV0Message(lookupTableAccounts);
+
+            return new VersionedTransaction(message);
+          })
+        ))
+      );
+    }
+
+    const signedTransactions = await wallet.signAllTransactions(transactions);
+
+    for (const signedTx of signedTransactions) {
+      const signature = await connection.sendRawTransaction(signedTx.serialize(), {
+        skipPreflight: true,
+      });
+      console.log('Transaction signature', signature);
+      toast.loading('Confirming...', {
+        id: 'transaction',
+      });
+      await connection.getSignatureStatuses([signature]);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
     router.refresh();
   };
   return (
@@ -170,8 +203,7 @@ const ExecuteButton = ({
         <DialogHeader>
           <DialogTitle>Execute Transaction</DialogTitle>
           <DialogDescription>
-            Select custom priority fees and compute unit limits and execute
-            transaction.
+            Select custom priority fees and compute unit limits and execute transaction.
           </DialogDescription>
         </DialogHeader>
         <h3>Priority Fee in lamports</h3>
@@ -191,10 +223,10 @@ const ExecuteButton = ({
           disabled={!isTransactionReady}
           onClick={() =>
             toast.promise(executeTransaction, {
-              id: "transaction",
-              loading: "Loading...",
-              success: "Transaction executed.",
-              error: "Failed to execute. Check console for info.",
+              id: 'transaction',
+              loading: 'Loading...',
+              success: 'Transaction executed.',
+              error: 'Failed to execute. Check console for info.',
             })
           }
           className="mr-2"
