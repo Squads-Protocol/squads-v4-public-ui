@@ -1,5 +1,6 @@
 import * as web3 from "@solana/web3.js";
 import * as multisig from "@sqds/multisig";
+import { PublicKey } from "@solana/web3.js";
 
 export interface Member {
   key: web3.PublicKey | null;
@@ -12,8 +13,8 @@ export async function createMultisig(
   members: Member[],
   threshold: number,
   createKey: web3.PublicKey,
-  rentCollector?: web3.PublicKey,
-  configAuthority?: web3.PublicKey,
+  rentCollector?: string,
+  configAuthority?: string,
   programId?: string
 ) {
   try {
@@ -44,9 +45,9 @@ export async function createMultisig(
       creator: user,
       members: members as any,
       threshold: threshold,
-      configAuthority: configAuthority ? configAuthority : null,
+      configAuthority: configAuthority ? new PublicKey(configAuthority) : null,
       treasury: configTreasury,
-      rentCollector: rentCollector ? rentCollector : null,
+      rentCollector: rentCollector ? new PublicKey(rentCollector) : null,
       timeLock: 0,
       programId: programId
         ? new web3.PublicKey(programId)
