@@ -40,3 +40,4 @@ next-env.d.ts
 .env
 
 squads-public-build/
+squads-public-verify/
