@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Define project-specific naming
 IMAGE_NAME="squads-public"
 OUTPUT_DIR="squads-public-build"
 
@@ -11,16 +10,24 @@ echo "📂 Creating output directory: $OUTPUT_DIR..."
 mkdir -p "$OUTPUT_DIR"
 
 echo "🚀 Running the container and extracting the verified build..."
-docker run --rm -v "$(pwd)/$OUTPUT_DIR:/app/out" $IMAGE_NAME || { echo "❌ Container run failed!"; exit 1; }
+CONTAINER_ID=$(docker create $IMAGE_NAME) || { echo "❌ Container creation failed!"; exit 1; }
+
+echo "📦 Copying built files from container..."
+docker cp "$CONTAINER_ID:/output/." "$OUTPUT_DIR" || { echo "❌ Failed to copy files from container!"; exit 1; }
+
+# Ensure cleanup
+docker rm "$CONTAINER_ID" > /dev/null
 
 echo "✅ Build completed! Files are in: $OUTPUT_DIR/"
-echo "🔍 Verifying the output hash..."
+echo "🔍 Retrieving the output hash..."
 
-# Run the container again to get the hash and save it
-docker run --rm $IMAGE_NAME > "$OUTPUT_DIR/hash.txt"
+# Ensure the hash file exists
+if [ -f "$OUTPUT_DIR/hash.txt" ]; then
+    echo "🔗 Hash saved in: $OUTPUT_DIR/hash.txt"
+    cat "$OUTPUT_DIR/hash.txt"
+else
+    echo "❌ Hash file not found!"
+    exit 1
+fi
 
-echo "🔗 Hash saved to: $OUTPUT_DIR/hash.txt"
-echo "📜 Hash:"
-cat "$OUTPUT_DIR/hash.txt"
-
-echo "🎉 Done! You can now upload $OUTPUT_DIR/out/ to IPFS or Arweave!"
+echo "🎉 Done! You can now upload $OUTPUT_DIR/dist/ to IPFS!"

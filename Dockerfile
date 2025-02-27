@@ -18,14 +18,24 @@ RUN yarn install --frozen-lockfile --non-interactive
 # Copy the full project
 COPY . .
 
-# Build and export the static site (no need for `yarn export`)
+# Build and export the static site
 RUN yarn build
 
-# Ensure deterministic timestamps and permissions
+# Ensure deterministic timestamps and permissions for reproducibility
 RUN find out -exec touch -d @${SOURCE_DATE_EPOCH} {} + && \
     find out -exec chmod 644 {} +
 
-# Define a volume for the build output
-VOLUME /app/out
+# Compute SHA-256 hash of the `out/` directory
+RUN mkdir -p /squads-public-build/dist && \
+    mv out/* /squads-public-build/dist && \
+    tar -cf - squads-public-build/dist | sha256sum | awk '{ print $1 }' > /squads-public-build/hash.txt
 
-CMD ["sh", "-c", "tar -cf - out | sha256sum"]
+# ✅ Fix: Ensure permissions are set correctly (use BusyBox-compatible chmod)
+RUN chmod -R u+rwX,go+rX /squads-public-build/dist && \
+    chmod u+rw,go+r /squads-public-build/hash.txt
+
+# ✅ Fix: Separate the output copy step
+RUN mkdir -p /output && cp -r /squads-public-build/* /output/
+
+# No need for VOLUME; we copy files manually
+CMD ["sh", "-c", "cat /output/hash.txt"]
