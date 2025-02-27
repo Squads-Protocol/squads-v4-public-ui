@@ -1,3 +1,5 @@
+"use client"
+
 import AddMemberInput from "@/components/AddMemberInput";
 import ChangeThresholdInput from "@/components/ChangeThresholdInput";
 import ChangeUpgradeAuthorityInput from "@/components/ChangeUpgradeAuthorityInput";
@@ -11,23 +13,21 @@ import {
 } from "@/components/ui/card";
 import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
 import * as multisig from "@sqds/multisig";
-import { cookies, headers } from "next/headers";
-const ConfigurationPage = async () => {
-  const rpcUrl = headers().get("x-rpc-url");
+import { useCookie } from '@/app/(app)/cookies';
+import { useMultisig } from '@/app/(app)/services';
+
+const ConfigurationPage = () => {
+  const rpcUrl = useCookie("x-rpc-url");
 
   const connection = new Connection(rpcUrl || clusterApiUrl("mainnet-beta"));
-  const multisigCookie = headers().get("x-multisig");
-  const multisigPda = new PublicKey(multisigCookie!);
-  const vaultIndex = Number(headers().get("x-vault-index"));
-  const programIdCookie = cookies().get("x-program-id")?.value;
+  const multisigAddress = useCookie("x-multisig");
+  const vaultIndex = Number(useCookie("x-vault-index"));
+  const programIdCookie = useCookie("x-program-id");
   const programId = programIdCookie
     ? new PublicKey(programIdCookie!)
     : multisig.PROGRAM_ID;
 
-  const multisigInfo = await multisig.accounts.Multisig.fromAccountAddress(
-    connection,
-    multisigPda
-  );
+  const {data: multisigConfig} = useMultisig(connection, multisigAddress!)
   return (
     <div className="">
       <h1 className="text-3xl font-bold mb-4">Multisig Configuration</h1>
@@ -40,7 +40,7 @@ const ConfigurationPage = async () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-8">
-            {multisigInfo.members.map((member) => (
+            {multisigConfig && multisigConfig.members.map((member) => (
               <div key={member.key.toBase58()}>
                 <div className="flex items-center">
                   <div className="ml-4 space-y-1">
@@ -56,9 +56,9 @@ const ConfigurationPage = async () => {
                     <RemoveMemberButton
                       rpcUrl={rpcUrl || clusterApiUrl("mainnet-beta")}
                       memberKey={member.key.toBase58()}
-                      multisigPda={multisigCookie!}
+                      multisigPda={multisigAddress!}
                       transactionIndex={
-                        Number(multisigInfo.transactionIndex) + 1
+                        Number(multisigConfig ? multisigConfig.transactionIndex : 0) + 1
                       }
                       programId={
                         programId.toBase58()
@@ -82,9 +82,9 @@ const ConfigurationPage = async () => {
           </CardHeader>
           <CardContent>
             <AddMemberInput
-              multisigPda={multisigCookie!}
+              multisigPda={multisigAddress!}
               rpcUrl={rpcUrl || clusterApiUrl("mainnet-beta")}
-              transactionIndex={Number(multisigInfo.transactionIndex) + 1}
+              transactionIndex={Number(multisigConfig ? multisigConfig.transactionIndex : 0) + 1}
               programId={
                 programIdCookie
                   ? programIdCookie
@@ -102,9 +102,9 @@ const ConfigurationPage = async () => {
           </CardHeader>
           <CardContent>
             <ChangeThresholdInput
-              multisigPda={multisigCookie!}
+              multisigPda={multisigAddress!}
               rpcUrl={rpcUrl || clusterApiUrl("mainnet-beta")}
-              transactionIndex={Number(multisigInfo.transactionIndex) + 1}
+              transactionIndex={Number(multisigConfig ? multisigConfig.transactionIndex : 0) + 1}
               programId={
                 programIdCookie
                   ? programIdCookie
@@ -114,6 +114,7 @@ const ConfigurationPage = async () => {
           </CardContent>
         </Card>
       </div>
+      {multisigConfig && (
       <div className="pb-4">
         <Card className="w-1/2">
           <CardHeader>
@@ -124,9 +125,9 @@ const ConfigurationPage = async () => {
           </CardHeader>
           <CardContent>
             <ChangeUpgradeAuthorityInput
-              multisigPda={multisigCookie!}
+              multisigPda={multisigAddress!}
               rpcUrl={rpcUrl || clusterApiUrl("mainnet-beta")}
-              transactionIndex={Number(multisigInfo.transactionIndex) + 1}
+              transactionIndex={Number(multisigConfig ? multisigConfig.transactionIndex : 0) + 1}
               vaultIndex={vaultIndex}
               globalProgramId={
                 programIdCookie
@@ -137,6 +138,7 @@ const ConfigurationPage = async () => {
           </CardContent>
         </Card>
       </div>
+      )}
     </div>
   );
 };

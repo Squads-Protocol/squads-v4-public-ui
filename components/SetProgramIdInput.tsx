@@ -5,8 +5,11 @@ import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { isPublickey } from "@/lib/isPublickey";
+import { useCookie } from '@/app/(app)/cookies';
 
 const SetProgramIdInput = () => {
+  const foundProgramId = useCookie('x-program-id');
+
   const [programId, setProgramId] = useState("");
   const router = useRouter();
 
@@ -28,7 +31,7 @@ const SetProgramIdInput = () => {
     <div>
       <Input
         onChange={(e) => setProgramId(e.target.value)}
-        placeholder="SQDS4ep65T869zMMBKyuUq6aD6EgTu8psMjkvj52pCf"
+        placeholder={foundProgramId || "SQDS4ep65T869zMMBKyuUq6aD6EgTu8psMjkvj52pCf"}
         defaultValue={programId}
         className=""
       />

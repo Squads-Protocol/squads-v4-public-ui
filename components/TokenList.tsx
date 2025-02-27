@@ -22,7 +22,7 @@ type TokenListProps = {
       pubkey: PublicKey;
       account: AccountInfo<ParsedAccountData>;
     }[]
-  >;
+  > | null;
   rpcUrl: string;
   multisigPda: string;
   vaultIndex: number;
@@ -62,9 +62,9 @@ export function TokenList({
                 />
               </div>
             </div>
-            {tokens.value.length > 0 ? <hr className="mt-2" /> : null}
+            {tokens && tokens.value.length > 0 ? <hr className="mt-2" /> : null}
           </div>
-          {tokens.value.map((token) => (
+          {tokens && tokens.value.map((token) => (
             <div key={token.account.data.parsed.info.mint}>
               <div className="flex items-center">
                 <div className="ml-4 space-y-1">

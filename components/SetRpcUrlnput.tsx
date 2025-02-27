@@ -4,9 +4,11 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useCookie } from '@/app/(app)/cookies';
 
 const SetRpcUrlInput = () => {
-  const [rpcUrl, setRpcUrl] = useState("");
+  const foundRpcUrl = useCookie('x-rpc-url');
+  const [rpcUrl, setRpcUrl] = useState(foundRpcUrl || "");
   const router = useRouter();
   const isValidUrl = (url: string) => {
     const urlPattern = new RegExp(
@@ -23,7 +25,7 @@ const SetRpcUrlInput = () => {
 
   const onSubmit = async () => {
     if (isValidUrl(rpcUrl)) {
-      document.cookie = `x-rpc-url=${rpcUrl}`;
+      document.cookie = `x-rpc-url=${rpcUrl}; Path=/`;
       setRpcUrl("");
       router.refresh();
     } else {
@@ -35,7 +37,7 @@ const SetRpcUrlInput = () => {
     <div>
       <Input
         onChange={(e) => setRpcUrl(e.target.value)}
-        placeholder="https://api.mainnet-beta.solana.com"
+        placeholder={foundRpcUrl || "https://api.mainnet-beta.solana.com"}
         defaultValue={rpcUrl}
         className=""
       />

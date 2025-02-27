@@ -1,11 +1,13 @@
+"use client"
 import CreateSquadForm from "@/components/CreateSquadForm";
 import { Card, CardContent } from "@/components/ui/card";
 import { PROGRAM_ID } from "@sqds/multisig";
-import { cookies, headers } from "next/headers";
+import { useCookie } from '@/app/(app)/cookies';
+import { clusterApiUrl } from '@solana/web3.js';
 
-export default async function CreateSquad() {
-  const rpcUrl = headers().get("x-rpc-url");
-  const programId = cookies().get("x-program-id")?.value;
+export default function CreateSquad() {
+  const rpcUrl = useCookie("x-rpc-url");
+  const programId = useCookie("x-program-id");
 
   return (
     <div className="">
@@ -18,7 +20,7 @@ export default async function CreateSquad() {
       <Card className="pt-5">
         <CardContent>
           <CreateSquadForm
-            rpc={rpcUrl!}
+            rpc={rpcUrl || clusterApiUrl("mainnet-beta")}
             programId={programId ? programId : PROGRAM_ID.toBase58()}
           />
         </CardContent>

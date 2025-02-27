@@ -1,8 +1,7 @@
-import { headers } from "next/headers";
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
-import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
-import * as multisig from "@sqds/multisig";
 import { Toaster } from "@/components/ui/sonner";
 import ConnectWallet from "@/components/ConnectWalletButton";
 import {
@@ -14,8 +13,14 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import RenderMultisigRoute from "@/components/RenderMultisigRoute";
+import { usePathname } from 'next/navigation';
+import { QueryClient } from '@tanstack/query-core';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
-const AppLayout = async ({ children }: { children: React.ReactNode }) => {
+const queryClient = new QueryClient();
+
+const AppLayout =  ({ children }: { children: React.ReactNode }) => {
   const tabs = [
     {
       name: "Home",
@@ -25,28 +30,24 @@ const AppLayout = async ({ children }: { children: React.ReactNode }) => {
     {
       name: "Transactions",
       icon: <ArrowDownUp />,
-      route: "/transactions",
+      route: "/transactions/",
     },
     {
       name: "Configuration",
       icon: <Users />,
-      route: "/config",
+      route: "/config/",
     },
     {
       name: "Settings",
       icon: <Settings />,
-      route: "/settings",
+      route: "/settings/",
     },
   ];
 
-  const headersList = headers();
-
-  const path = headersList.get("x-pathname");
-  const multisigCookie = headersList.get("x-multisig");
-  const multisig = await isValidPublicKey(multisigCookie!);
+  const path = usePathname();
 
   return (
-    <>
+    <QueryClientProvider client={queryClient}>
       <div className="flex flex-col md:flex-row h-screen min-w-full bg-white">
         <aside
           id="sidebar"
@@ -59,12 +60,13 @@ const AppLayout = async ({ children }: { children: React.ReactNode }) => {
               <Link href="/">
                 <div className="mb-10 flex items-center rounded-lg px-3 py-2 text-slate-900 dark:text-white">
                   <Image
-                    src="https://drive.google.com/uc?export=download&id=1UjZG82vU6aQHiGxzZEzoTneP7TTSsKda"
+                    src="/logo.png"
                     width={0}
                     height={0}
                     sizes="100vw"
                     style={{ width: "150px", height: "auto" }}
                     alt="Mercure Logo"
+                    unoptimized
                   />
                 </div>
               </Link>
@@ -117,8 +119,9 @@ const AppLayout = async ({ children }: { children: React.ReactNode }) => {
             ))}
           </div>
         </aside>
-
-        <RenderMultisigRoute multisig={multisig} children={children} />
+        <ErrorBoundary>
+          <RenderMultisigRoute children={children} />
+        </ErrorBoundary>
       </div>
       <Toaster
         expand
@@ -128,23 +131,8 @@ const AppLayout = async ({ children }: { children: React.ReactNode }) => {
           success: <CheckSquare className="w-4 h-4 text-green-600" />,
         }}
       />
-    </>
+    </QueryClientProvider>
   );
 };
 
 export default AppLayout;
-
-const isValidPublicKey = async (multisigString: string) => {
-  try {
-    const multisigPubkey = new PublicKey(multisigString); // This will throw an error if the string is not a valid public key
-    const rpcUrl = headers().get("x-rpc-url");
-    const connection = new Connection(rpcUrl || clusterApiUrl("mainnet-beta"));
-    await multisig.accounts.Multisig.fromAccountAddress(
-      connection,
-      multisigPubkey
-    );
-    return true;
-  } catch (e) {
-    return false;
-  }
-};

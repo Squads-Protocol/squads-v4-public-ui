@@ -4,13 +4,14 @@ import { useState } from "react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 
-const MultisigInput = () => {
+const MultisigInput = ({onUpdate}:{onUpdate: () => void}) => {
   const [multisig, setMultisig] = useState("");
   const router = useRouter();
 
   const setMultisigCookie = () => {
+    console.log("setting cookie", multisig);
     document.cookie = `x-multisig=${multisig}; path=/`;
-    router.refresh();
+    onUpdate();
   };
 
   return (

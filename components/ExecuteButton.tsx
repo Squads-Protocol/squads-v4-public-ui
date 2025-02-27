@@ -195,7 +195,7 @@ const ExecuteButton = ({
     <Dialog>
       <DialogTrigger
         disabled={!isTransactionReady}
-        className="mr-2 h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md"
+        className={`mr-2 h-10 px-4 py-2 ${!isTransactionReady ? `bg-primary/50` : `bg-primary hover:bg-primary/90 `} text-primary-foreground  rounded-md`}
       >
         Execute
       </DialogTrigger>

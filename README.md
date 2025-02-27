@@ -48,6 +48,12 @@ Cookie name: x-multisig
 
 Cookie name: x-vault-index
 
+## Verifiable build
+### Build
+`docker build -t nextjs-reproducible` .
+### Verify Hash
+`docker run --rm nextjs-reproducible`
+
 ## Disclaimer
 
 Use this code at your own risk. 
