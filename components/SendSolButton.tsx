@@ -121,7 +121,7 @@ const SendSol = ({ multisigPda, vaultIndex }: SendSolProps) => {
 
   return (
     <Dialog>
-      <DialogTrigger>
+      <DialogTrigger asChild>
         <Button
           onClick={(e) => {
             if (!wallet.publicKey) {
