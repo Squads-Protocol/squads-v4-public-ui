@@ -1,0 +1,7 @@
+node_modules
+.next/cache
+out/
+squads-public-build/
+logs/
+.DS_Store
+.git

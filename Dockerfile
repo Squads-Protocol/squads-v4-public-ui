@@ -3,15 +3,18 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+RUN corepack enable && corepack prepare yarn@stable --activate
+
 ENV NODE_ENV=static
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV SOURCE_DATE_EPOCH=315532800
 
 COPY package.json yarn.lock ./
 
-RUN yarn install --frozen-lockfile --non-interactive
+RUN yarn install --frozen-lockfile --non-interactive --check-files
 
 COPY . .
+
 
 RUN yarn build
 
