@@ -19,7 +19,7 @@ export const useMultisig = (connection: Connection, multisigAddress: String) => 
         );
       }
       catch (error) {
-        console.error(error);
+        console.log(error);
         return null;
       }
     }
@@ -35,7 +35,7 @@ export const useBalance = (connection: Connection, vaultAddress: String) => {
         return connection.getBalance(multisigPubkey);
       }
       catch (error) {
-        console.error(error);
+        console.log(error);
         return null;
       }
     }
@@ -55,7 +55,7 @@ export const useGetTokens = (connection: Connection, address: String)=> {
           }
         );
       }catch(error){
-        console.error(error);
+        console.log(error);
         return null;
       }
     }

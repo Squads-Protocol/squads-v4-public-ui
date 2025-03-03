@@ -17,6 +17,7 @@ import { usePathname } from 'next/navigation';
 import { QueryClient } from '@tanstack/query-core';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { Suspense } from 'react';
 
 const queryClient = new QueryClient();
 
@@ -76,13 +77,12 @@ const AppLayout =  ({ children }: { children: React.ReactNode }) => {
                     <a
                       href={tab.route}
                       className={`flex items-center rounded-lg px-4 py-3 text-slate-900 
-                    
-        ${
-          (path!.startsWith(`${tab.route}/`) && tab.route != "/") ||
-          tab.route === path
-            ? "bg-slate-400"
-            : "hover:bg-slate-400"
-        }`}
+                      ${
+                        (path!.startsWith(`${tab.route}/`) && tab.route != "/") ||
+                        tab.route === path
+                          ? "bg-slate-400"
+                          : "hover:bg-slate-400"
+                      }`}
                     >
                       {tab.icon}
                       <span className="ml-3 flex-1 whitespace-nowrap text-base text-black">
@@ -120,7 +120,9 @@ const AppLayout =  ({ children }: { children: React.ReactNode }) => {
           </div>
         </aside>
         <ErrorBoundary>
+          <Suspense>
           <RenderMultisigRoute children={children} />
+          </Suspense>
         </ErrorBoundary>
       </div>
       <Toaster

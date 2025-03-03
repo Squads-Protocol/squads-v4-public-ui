@@ -17,13 +17,13 @@ export default function RenderMultisigRoute({
   const multisigAddress = useCookie("x-multisig");
   const rpcUrl = useCookie("x-rpc-url");
   console.log("rpcUrl", rpcUrl);
-  console.log("multisigAddress", multisigAddress)
+  console.log("multisigAddress", multisigAddress);
+
   const {data: multisig} = useMultisig(
     new Connection(rpcUrl || clusterApiUrl("mainnet-beta")),
     multisigAddress!);
 
   return (
-    <Suspense>
     <div className="md:w-9/12 md:ml-auto space-y-2 p-3 pt-4 mt-1 md:space-y-4 md:p-8 md:pt-6 pb-24">
       {multisig ? (
         <div>{children} </div>
@@ -37,6 +37,5 @@ export default function RenderMultisigRoute({
         </>
       )}
     </div>
-    </Suspense>
   );
 }

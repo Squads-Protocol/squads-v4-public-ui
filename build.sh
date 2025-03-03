@@ -30,4 +30,4 @@ else
     exit 1
 fi
 
-echo "🎉 Done! You can now upload $OUTPUT_DIR/dist/ to IPFS!"
+echo "🎉 Done!"
