@@ -99,12 +99,15 @@ export const useTransactions = (startIndex: number, endIndex: number) => {
       if (!multisigAddress) return null;
       try {
         const multisigPda = new PublicKey(multisigAddress);
-        return Promise.all(
-          Array.from({ length: startIndex - endIndex + 1 }, (_, i) => {
-            const index = BigInt(startIndex - i);
-            return fetchTransactionData(connection, multisigPda, index, programId);
-          })
-        );
+        const results: any[] = [];
+
+        for (let i = 0; i <= startIndex - endIndex; i++) {
+          const index = BigInt(startIndex - i);
+          const transaction = await fetchTransactionData(connection, multisigPda, index, programId);
+          results.push(transaction);
+        }
+
+        return results;
       } catch (error) {
         console.error(error);
         return null;
