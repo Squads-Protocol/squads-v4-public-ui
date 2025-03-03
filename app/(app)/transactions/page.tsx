@@ -1,5 +1,5 @@
 'use client';
-import { PublicKey } from '@solana/web3.js';
+
 import { Table, TableCaption, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import {
   Pagination,
@@ -15,15 +15,7 @@ import { useMultisig, useTransactions } from '@/hooks/useServices';
 import { useMultisigData } from '@/hooks/useMultisigData';
 import { useSearchParams } from 'next/navigation';
 
-const TRANSACTIONS_PER_PAGE = 20;
-
-interface ActionButtonsProps {
-  rpcUrl: string;
-  multisigPda: string;
-  transactionIndex: number;
-  proposalStatus: string;
-  programId: PublicKey;
-}
+const TRANSACTIONS_PER_PAGE = 5;
 
 export default function TransactionsPage() {
   const searchParams = useSearchParams();
@@ -94,16 +86,8 @@ export default function TransactionsPage() {
 
       <Pagination>
         <PaginationContent>
-          {page > 1 && (
-            <PaginationItem>
-              <PaginationPrevious href={`/transactions?page=${page - 1}`} />
-            </PaginationItem>
-          )}
-          {page < totalPages && (
-            <PaginationItem>
-              <PaginationNext href={`/transactions?page=${page + 1}`} />
-            </PaginationItem>
-          )}
+          {page > 1 && <PaginationPrevious href={`/transactions?page=${page - 1}`} />}
+          {page < totalPages && <PaginationNext href={`/transactions?page=${page + 1}`} />}
         </PaginationContent>
       </Pagination>
     </div>
