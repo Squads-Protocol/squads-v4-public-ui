@@ -21,6 +21,8 @@ import { DialogContent, DialogTitle } from './ui/dialog';
 import { useState } from 'react';
 import { Input } from './ui/input';
 import { range } from '@/lib/utils';
+import { useMultisigData } from '@/hooks/useMultisigData';
+import { useQueryClient } from '@tanstack/react-query';
 
 type WithALT = {
   instruction: TransactionInstruction;
@@ -28,7 +30,6 @@ type WithALT = {
 };
 
 type ExecuteButtonProps = {
-  rpcUrl: string;
   multisigPda: string;
   transactionIndex: number;
   proposalStatus: string;
@@ -36,7 +37,6 @@ type ExecuteButtonProps = {
 };
 
 const ExecuteButton = ({
-  rpcUrl,
   multisigPda,
   transactionIndex,
   proposalStatus,
@@ -49,9 +49,9 @@ const ExecuteButton = ({
   const [computeUnitBudget, setComputeUnitBudget] = useState<number>(200_000);
 
   const isTransactionReady = proposalStatus === 'Approved';
-  const connection = new Connection(rpcUrl || clusterApiUrl('mainnet-beta'), {
-    commitment: 'confirmed',
-  });
+
+  const { connection } = useMultisigData();
+  const queryClient = useQueryClient();
 
   const executeTransaction = async () => {
     if (!wallet.publicKey) {
@@ -189,7 +189,8 @@ const ExecuteButton = ({
       await connection.getSignatureStatuses([signature]);
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }
-    router.refresh();
+
+    await queryClient.invalidateQueries({ queryKey: ['transactions'] });
   };
   return (
     <Dialog>

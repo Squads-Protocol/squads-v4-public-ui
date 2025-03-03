@@ -26,6 +26,7 @@ import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { isPublickey } from '@/lib/isPublickey';
 import { useMultisigData } from '@/hooks/useMultisigData';
+import { useQueryClient } from '@tanstack/react-query';
 
 type SendSolProps = {
   multisigPda: string;
@@ -40,7 +41,7 @@ const SendSol = ({ multisigPda, vaultIndex, programId }: SendSolProps) => {
   const [recipient, setRecipient] = useState('');
   const router = useRouter();
   const { connection } = useMultisigData();
-
+  const queryClient = useQueryClient();
   const parsedAmount = parseFloat(amount);
   const isAmountValid = !isNaN(parsedAmount) && parsedAmount > 0;
 
@@ -120,7 +121,7 @@ const SendSol = ({ multisigPda, vaultIndex, programId }: SendSolProps) => {
     });
     await connection.getSignatureStatuses([signature]);
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    router.refresh();
+    await queryClient.invalidateQueries({ queryKey: ['transactions'] });
   };
 
   return (

@@ -1,16 +1,10 @@
-"use client";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Member, createMultisig } from "@/lib/createSquad";
-import { Connection, Keypair, PublicKey, clusterApiUrl } from "@solana/web3.js";
-import { useWallet } from "@solana/wallet-adapter-react";
-import {
-  CheckSquare,
-  Copy,
-  ExternalLink,
-  PlusCircleIcon,
-  XIcon,
-} from "lucide-react";
+'use client';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Member, createMultisig } from '@/lib/createSquad';
+import { Keypair, PublicKey } from '@solana/web3.js';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { CheckSquare, Copy, ExternalLink, PlusCircleIcon, XIcon } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -18,12 +12,14 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { isPublickey } from "@/lib/isPublickey";
-import { ValidationRules, useSquadForm } from "@/lib/hooks/useSquadForm";
-import Link from "next/link";
+} from './ui/select';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
+import { isPublickey } from '@/lib/isPublickey';
+import { ValidationRules, useSquadForm } from '@/lib/hooks/useSquadForm';
+import Link from 'next/link';
+import { useMultisigData } from '@/hooks/useMultisigData';
+import { useMultisigAddress } from '@/hooks/useMultisigAddress';
 
 interface MemberAddresses {
   count: number;
@@ -38,17 +34,12 @@ interface CreateSquadFormData {
   createKey: string;
 }
 
-export default function CreateSquadForm({
-  rpc,
-  programId,
-}: {
-  rpc: string;
-  programId: string;
-}) {
+export default function CreateSquadForm({}: {}) {
   const router = useRouter();
   const { publicKey, connected, sendTransaction } = useWallet();
 
-  const connection = new Connection(rpc || clusterApiUrl("mainnet-beta"));
+  const { connection, programId } = useMultisigData();
+  const { setMultisigAddress } = useMultisigAddress();
   const validationRules = getValidationRules();
 
   const { formState, handleChange, handleAddMember, onSubmit } = useSquadForm<{
@@ -57,9 +48,9 @@ export default function CreateSquadForm({
   }>(
     {
       threshold: 1,
-      rentCollector: "",
-      configAuthority: "",
-      createKey: "",
+      rentCollector: '',
+      configAuthority: '',
+      createKey: '',
       members: {
         count: 0,
         memberData: [],
@@ -69,7 +60,7 @@ export default function CreateSquadForm({
   );
 
   async function submitHandler() {
-    if (!connected) throw new Error("Please connect your wallet.");
+    if (!connected) throw new Error('Please connect your wallet.');
     try {
       const createKey = Keypair.generate();
 
@@ -81,16 +72,16 @@ export default function CreateSquadForm({
         createKey.publicKey,
         formState.values.rentCollector,
         formState.values.configAuthority,
-        programId
+        programId.toBase58()
       );
 
       const signature = await sendTransaction(transaction, connection, {
         skipPreflight: true,
         signers: [createKey],
       });
-      console.log("Transaction signature", signature);
-      toast.loading("Confirming...", {
-        id: "create",
+      console.log('Transaction signature', signature);
+      toast.loading('Confirming...', {
+        id: 'create',
       });
 
       let sent = false;
@@ -98,7 +89,7 @@ export default function CreateSquadForm({
       const delayMs = 1000;
       for (let attempt = 0; attempt <= maxAttempts && !sent; attempt++) {
         const status = await connection.getSignatureStatus(signature);
-        if (status?.value?.confirmationStatus === "confirmed") {
+        if (status?.value?.confirmationStatus === 'confirmed') {
           await new Promise((resolve) => setTimeout(resolve, delayMs));
           sent = true;
         } else {
@@ -106,7 +97,7 @@ export default function CreateSquadForm({
         }
       }
 
-      document.cookie = `x-multisig=${multisig.toBase58()}; path=/`;
+      setMultisigAddress.mutate(multisig.toBase58());
 
       return { signature, multisig: multisig.toBase58() };
     } catch (error: any) {
@@ -125,72 +116,29 @@ export default function CreateSquadForm({
           <label htmlFor="members" className="font-medium">
             Members <span className="text-red-600">*</span>
           </label>
-          {formState.values.members.memberData.map(
-            (member: Member, i: number) => (
-              <div key={i} className="grid grid-cols-4 items-center gap-2">
-                <div className="relative col-span-3">
-                  <Input
-                    defaultValue={member.key ? member.key.toBase58() : ""}
-                    placeholder={`Member key ${i + 1}`}
-                    onChange={(e) => {
-                      handleChange("members", {
-                        count: formState.values.members.count,
-                        memberData: formState.values.members.memberData.map(
-                          (member: Member, index: number) => {
-                            if (index === i) {
-                              let newKey = null;
-                              try {
-                                if (
-                                  e.target.value &&
-                                  PublicKey.isOnCurve(e.target.value)
-                                ) {
-                                  newKey = new PublicKey(e.target.value);
-                                }
-                              } catch (error) {
-                                console.error(
-                                  "Invalid public key input:",
-                                  error
-                                );
-                              }
-                              return {
-                                ...member,
-                                key: newKey,
-                              };
-                            }
-                            return member;
-                          }
-                        ),
-                      });
-                    }}
-                  />
-                  {i > 0 && (
-                    <XIcon
-                      onClick={() => {
-                        handleChange("members", {
-                          count: formState.values.members.count,
-                          memberData:
-                            formState.values.members.memberData.filter(
-                              (_: Member, index: number) => index !== i
-                            ),
-                        });
-                      }}
-                      className="absolute inset-y-3 right-2 w-4 h-4 text-zinc-400 hover:text-zinc-600"
-                    />
-                  )}
-                </div>
-                <Select
-                  defaultValue={member.permissions.mask.toString()}
-                  onValueChange={(e: any) => {
-                    handleChange("members", {
+          {formState.values.members.memberData.map((member: Member, i: number) => (
+            <div key={i} className="grid grid-cols-4 items-center gap-2">
+              <div className="relative col-span-3">
+                <Input
+                  defaultValue={member.key ? member.key.toBase58() : ''}
+                  placeholder={`Member key ${i + 1}`}
+                  onChange={(e) => {
+                    handleChange('members', {
                       count: formState.values.members.count,
                       memberData: formState.values.members.memberData.map(
                         (member: Member, index: number) => {
                           if (index === i) {
+                            let newKey = null;
+                            try {
+                              if (e.target.value && PublicKey.isOnCurve(e.target.value)) {
+                                newKey = new PublicKey(e.target.value);
+                              }
+                            } catch (error) {
+                              console.error('Invalid public key input:', error);
+                            }
                             return {
                               ...member,
-                              permissions: {
-                                mask: Number(e),
-                              },
+                              key: newKey,
                             };
                           }
                           return member;
@@ -198,23 +146,57 @@ export default function CreateSquadForm({
                       ),
                     });
                   }}
-                >
-                  <SelectTrigger className="col-span-1">
-                    <SelectValue placeholder="Select permissions" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="0">None</SelectItem>
-                      <SelectItem value="1">Proposer</SelectItem>
-                      <SelectItem value="2">Voter</SelectItem>
-                      <SelectItem value="4">Executor</SelectItem>
-                      <SelectItem value="7">All</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
+                />
+                {i > 0 && (
+                  <XIcon
+                    onClick={() => {
+                      handleChange('members', {
+                        count: formState.values.members.count,
+                        memberData: formState.values.members.memberData.filter(
+                          (_: Member, index: number) => index !== i
+                        ),
+                      });
+                    }}
+                    className="absolute inset-y-3 right-2 w-4 h-4 text-zinc-400 hover:text-zinc-600"
+                  />
+                )}
               </div>
-            )
-          )}
+              <Select
+                defaultValue={member.permissions.mask.toString()}
+                onValueChange={(e: any) => {
+                  handleChange('members', {
+                    count: formState.values.members.count,
+                    memberData: formState.values.members.memberData.map(
+                      (member: Member, index: number) => {
+                        if (index === i) {
+                          return {
+                            ...member,
+                            permissions: {
+                              mask: Number(e),
+                            },
+                          };
+                        }
+                        return member;
+                      }
+                    ),
+                  });
+                }}
+              >
+                <SelectTrigger className="col-span-1">
+                  <SelectValue placeholder="Select permissions" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="0">None</SelectItem>
+                    <SelectItem value="1">Proposer</SelectItem>
+                    <SelectItem value="2">Voter</SelectItem>
+                    <SelectItem value="4">Executor</SelectItem>
+                    <SelectItem value="7">All</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+          ))}
           <button
             onClick={(e) => handleAddMember(e)}
             className="mt-2 flex gap-1 items-center text-zinc-400 hover:text-zinc-600"
@@ -223,9 +205,7 @@ export default function CreateSquadForm({
             <p className="text-sm">Add Address</p>
           </button>
           {formState.errors.members && (
-            <div className="mt-1.5 text-red-500 text-xs">
-              {formState.errors.members}
-            </div>
+            <div className="mt-1.5 text-red-500 text-xs">{formState.errors.members}</div>
           )}
         </div>
         <div className="col-span-4 flex-col space-y-2">
@@ -236,15 +216,11 @@ export default function CreateSquadForm({
             type="number"
             placeholder="Approval threshold for execution"
             defaultValue={formState.values.threshold}
-            onChange={(e) =>
-              handleChange("threshold", parseInt(e.target.value))
-            }
+            onChange={(e) => handleChange('threshold', parseInt(e.target.value))}
             className=""
           />
           {formState.errors.threshold && (
-            <div className="mt-1.5 text-red-500 text-xs">
-              {formState.errors.threshold}
-            </div>
+            <div className="mt-1.5 text-red-500 text-xs">{formState.errors.threshold}</div>
           )}
         </div>
         <div className="col-span-4 flex-col space-y-2">
@@ -255,13 +231,11 @@ export default function CreateSquadForm({
             type="text"
             placeholder="Optional rent collector"
             defaultValue={formState.values.rentCollector}
-            onChange={(e) => handleChange("rentCollector", e.target.value)}
+            onChange={(e) => handleChange('rentCollector', e.target.value)}
             className=""
           />
           {formState.errors.rentCollector && (
-            <div className="mt-1.5 text-red-500 text-xs">
-              {formState.errors.rentCollector}
-            </div>
+            <div className="mt-1.5 text-red-500 text-xs">{formState.errors.rentCollector}</div>
           )}
         </div>
         <div className="col-span-4 flex-col space-y-2">
@@ -272,45 +246,39 @@ export default function CreateSquadForm({
             type="text"
             placeholder="Optional config authority"
             defaultValue={formState.values.configAuthority}
-            onChange={(e) => handleChange("configAuthority", e.target.value)}
+            onChange={(e) => handleChange('configAuthority', e.target.value)}
             className=""
           />
           {formState.errors.configAuthority && (
-            <div className="mt-1.5 text-red-500 text-xs">
-              {formState.errors.configAuthority}
-            </div>
+            <div className="mt-1.5 text-red-500 text-xs">{formState.errors.configAuthority}</div>
           )}
         </div>
       </div>
       <Button
         onClick={() =>
           toast.promise(onSubmit(submitHandler), {
-            id: "create",
+            id: 'create',
             duration: 10000,
-            loading: "Building Transaction...",
+            loading: 'Building Transaction...',
             success: (res) => (
               <div className="w-full flex items-center justify-between">
                 <div className="flex gap-4 items-center">
                   <CheckSquare className="w-4 h-4 text-green-600" />
                   <div className="flex flex-col space-y-0.5">
                     <p className="font-semibold">
-                      Squad Created:{" "}
+                      Squad Created:{' '}
                       <span className="font-normal">
-                        {res.multisig.slice(0, 4) +
-                          "..." +
-                          res.multisig.slice(-4)}
+                        {res.multisig.slice(0, 4) + '...' + res.multisig.slice(-4)}
                       </span>
                     </p>
-                    <p className="font-light">
-                      Your new Squad has been set as active.
-                    </p>
+                    <p className="font-light">Your new Squad has been set as active.</p>
                   </div>
                 </div>
                 <div className="flex gap-2 items-center">
                   <Copy
                     onClick={() => {
                       navigator.clipboard.writeText(res.multisig);
-                      toast.success("Copied address!");
+                      toast.success('Copied address!');
                     }}
                     className="w-4 h-4 hover:text-stone-500"
                   />
@@ -338,33 +306,33 @@ export default function CreateSquadForm({
 function getValidationRules(): ValidationRules {
   return {
     threshold: async (value: number) => {
-      if (value < 1) return "Threshold must be greater than 0";
+      if (value < 1) return 'Threshold must be greater than 0';
       return null;
     },
     rentCollector: async (value: string) => {
       const valid = isPublickey(value);
-      if (!valid) return "Rent collector must be a valid public key";
+      if (!valid) return 'Rent collector must be a valid public key';
       return null;
     },
     configAuthority: async (value: string) => {
       const valid = isPublickey(value);
-      if (!valid) return "Config authority must be a valid public key";
+      if (!valid) return 'Config authority must be a valid public key';
       return null;
     },
     members: async (value: { count: number; memberData: Member[] }) => {
-      if (value.count < 1) return "At least one member is required";
+      if (value.count < 1) return 'At least one member is required';
 
       const valid = await Promise.all(
         value.memberData.map(async (member) => {
-          if (member.key == null) return "Invalid Member Key";
+          if (member.key == null) return 'Invalid Member Key';
           const valid = isPublickey(member.key.toBase58());
-          if (!valid) return "Invalid Member Key";
+          if (!valid) return 'Invalid Member Key';
           return null;
         })
       );
 
-      if (valid.includes("Invalid Member Key")) {
-        let index = valid.findIndex((v) => v === "Invalid Member Key");
+      if (valid.includes('Invalid Member Key')) {
+        let index = valid.findIndex((v) => v === 'Invalid Member Key');
         return `Member ${index + 1} is invalid`;
       }
 
