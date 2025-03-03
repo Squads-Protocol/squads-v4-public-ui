@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import {
   Dialog,
   DialogContent,
@@ -6,34 +6,34 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Button } from "./ui/button";
-import { useState } from "react";
+} from '@/components/ui/dialog';
+import { Button } from './ui/button';
+import { useState } from 'react';
 import {
   createAssociatedTokenAccountIdempotentInstruction,
   createTransferCheckedInstruction,
   getAssociatedTokenAddressSync,
-} from "@solana/spl-token";
-import * as multisig from "@sqds/multisig";
-import { useWallet } from "@solana/wallet-adapter-react";
+} from '@solana/spl-token';
+import * as multisig from '@sqds/multisig';
+import { useWallet } from '@solana/wallet-adapter-react';
 import {
   Connection,
   PublicKey,
   TransactionMessage,
   VersionedTransaction,
   clusterApiUrl,
-} from "@solana/web3.js";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import { Input } from "./ui/input";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { isPublickey } from "@/lib/isPublickey";
+} from '@solana/web3.js';
+import { useWalletModal } from '@solana/wallet-adapter-react-ui';
+import { Input } from './ui/input';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
+import { isPublickey } from '@/lib/isPublickey';
+import { useMultisigData } from '@/hooks/useMultisigData';
 
 type SendTokensProps = {
   tokenAccount: string;
   mint: string;
   decimals: number;
-  rpcUrl: string;
   multisigPda: string;
   vaultIndex: number;
   programId?: string;
@@ -43,16 +43,20 @@ const SendTokens = ({
   tokenAccount,
   mint,
   decimals,
-  rpcUrl,
   multisigPda,
   vaultIndex,
   programId,
 }: SendTokensProps) => {
   const wallet = useWallet();
   const walletModal = useWalletModal();
-  const [amount, setAmount] = useState(0);
-  const [recipient, setRecipient] = useState("");
+  const [amount, setAmount] = useState<string>('');
+  const [recipient, setRecipient] = useState('');
   const router = useRouter();
+
+  const { connection } = useMultisigData();
+
+  const parsedAmount = parseFloat(amount);
+  const isAmountValid = !isNaN(parsedAmount) && parsedAmount > 0;
 
   const transfer = async () => {
     if (!wallet.publicKey) {
@@ -72,26 +76,21 @@ const SendTokens = ({
       })[0]
       .toBase58();
 
-    const createRecipientATAInstruction =
-      createAssociatedTokenAccountIdempotentInstruction(
-        new PublicKey(vaultAddress),
-        recipientATA,
-        new PublicKey(recipient),
-        new PublicKey(mint)
-      );
+    const createRecipientATAInstruction = createAssociatedTokenAccountIdempotentInstruction(
+      new PublicKey(vaultAddress),
+      recipientATA,
+      new PublicKey(recipient),
+      new PublicKey(mint)
+    );
 
     const transferInstruction = createTransferCheckedInstruction(
       new PublicKey(tokenAccount),
       new PublicKey(mint),
       recipientATA,
       new PublicKey(vaultAddress),
-      amount * 10 ** decimals,
+      parsedAmount * 10 ** decimals,
       decimals
     );
-
-    const connection = new Connection(rpcUrl || clusterApiUrl("mainnet-beta"), {
-      commitment: "confirmed",
-    });
 
     const multisigInfo = await multisig.accounts.Multisig.fromAccountAddress(
       connection,
@@ -145,9 +144,9 @@ const SendTokens = ({
     const signature = await wallet.sendTransaction(transaction, connection, {
       skipPreflight: true,
     });
-    console.log("Transaction signature", signature);
-    toast.loading("Confirming...", {
-      id: "transaction",
+    console.log('Transaction signature', signature);
+    toast.loading('Confirming...', {
+      id: 'transaction',
     });
     await connection.getSignatureStatuses([signature]);
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -158,14 +157,16 @@ const SendTokens = ({
     <Dialog>
       <DialogTrigger>
         <Button
-            onClick={(e) => {
-              if (!wallet.publicKey) {
-                e.preventDefault()
-                walletModal.setVisible(true);
-                return;
-              }
-            }}
-        >Send Tokens</Button>
+          onClick={(e) => {
+            if (!wallet.publicKey) {
+              e.preventDefault();
+              walletModal.setVisible(true);
+              return;
+            }
+          }}
+        >
+          Send Tokens
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -174,25 +175,18 @@ const SendTokens = ({
             Create a proposal to transfer tokens to another address.
           </DialogDescription>
         </DialogHeader>
-        <Input
-          placeholder="Recipient"
-          type="text"
-          onChange={(e) => setRecipient(e.target.value)}
-        />
-        {isPublickey(recipient) ? null : (
-          <p className="text-xs">Invalid recipient address</p>
+        <Input placeholder="Recipient" type="text" onChange={(e) => setRecipient(e.target.value)} />
+        {isPublickey(recipient) ? null : <p className="text-xs">Invalid recipient address</p>}
+        <Input placeholder="Amount" type="number" onChange={(e) => setAmount(e.target.value)} />
+        {!isAmountValid && amount.length > 0 && (
+          <p className="text-xs text-red-500">Invalid amount</p>
         )}
-        <Input
-          placeholder="Amount"
-          type="number"
-          onChange={(e) => setAmount(parseInt(e.target.value))}
-        />
         <Button
           onClick={() =>
             toast.promise(transfer, {
-              id: "transaction",
-              loading: "Loading...",
-              success: "Transfer proposed.",
+              id: 'transaction',
+              loading: 'Loading...',
+              success: 'Transfer proposed.',
               error: (e) => `Failed to propose: ${e}`,
             })
           }

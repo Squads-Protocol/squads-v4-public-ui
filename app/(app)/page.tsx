@@ -8,12 +8,11 @@ import { useMultisigData } from '@/hooks/useMultisigData';
 import { ChangeMultisig } from '@/components/ChangeMultisig';
 
 export default function Home() {
-  const { rpcUrl, connection, multisigAddress, vaultIndex, programId, multisigVault } =
-    useMultisigData();
+  const { rpcUrl, multisigAddress, vaultIndex, programId } = useMultisigData();
 
-  const { data: solBalance = 0 } = useBalance(connection, multisigVault?.toBase58() || '');
+  const { data: solBalance = 0 } = useBalance();
 
-  const { data: tokensInWallet = null } = useGetTokens(connection, multisigVault?.toBase58() || '');
+  const { data: tokensInWallet = null } = useGetTokens();
 
   return (
     <main>
@@ -31,7 +30,6 @@ export default function Home() {
           <TokenList
             solBalance={solBalance || 0}
             tokens={tokensInWallet}
-            rpcUrl={rpcUrl}
             multisigPda={multisigAddress}
             vaultIndex={vaultIndex}
             programId={programId.toBase58()}

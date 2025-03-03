@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import {
   Dialog,
   DialogContent,
@@ -6,11 +6,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Button } from "./ui/button";
-import { useState } from "react";
-import * as multisig from "@sqds/multisig";
-import { useWallet } from "@solana/wallet-adapter-react";
+} from '@/components/ui/dialog';
+import { Button } from './ui/button';
+import { useState } from 'react';
+import * as multisig from '@sqds/multisig';
+import { useWallet } from '@solana/wallet-adapter-react';
 import {
   Connection,
   LAMPORTS_PER_SOL,
@@ -19,31 +19,30 @@ import {
   TransactionMessage,
   VersionedTransaction,
   clusterApiUrl,
-} from "@solana/web3.js";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import { Input } from "./ui/input";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { isPublickey } from "@/lib/isPublickey";
+} from '@solana/web3.js';
+import { useWalletModal } from '@solana/wallet-adapter-react-ui';
+import { Input } from './ui/input';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
+import { isPublickey } from '@/lib/isPublickey';
+import { useMultisigData } from '@/hooks/useMultisigData';
 
 type SendSolProps = {
-  rpcUrl: string;
   multisigPda: string;
   vaultIndex: number;
   programId?: string;
 };
 
-const SendSol = ({
-  rpcUrl,
-  multisigPda,
-  vaultIndex,
-  programId,
-}: SendSolProps) => {
+const SendSol = ({ multisigPda, vaultIndex, programId }: SendSolProps) => {
   const wallet = useWallet();
   const walletModal = useWalletModal();
-  const [amount, setAmount] = useState(0);
-  const [recipient, setRecipient] = useState("");
+  const [amount, setAmount] = useState<string>('');
+  const [recipient, setRecipient] = useState('');
   const router = useRouter();
+  const { connection } = useMultisigData();
+
+  const parsedAmount = parseFloat(amount);
+  const isAmountValid = !isNaN(parsedAmount) && parsedAmount > 0;
 
   const transfer = async () => {
     if (!wallet.publicKey) {
@@ -59,11 +58,7 @@ const SendSol = ({
     const transferInstruction = SystemProgram.transfer({
       fromPubkey: vaultAddress,
       toPubkey: new PublicKey(recipient),
-      lamports: amount * LAMPORTS_PER_SOL,
-    });
-
-    const connection = new Connection(rpcUrl || clusterApiUrl("mainnet-beta"), {
-      commitment: "confirmed",
+      lamports: parsedAmount * LAMPORTS_PER_SOL,
     });
 
     const multisigInfo = await multisig.accounts.Multisig.fromAccountAddress(
@@ -119,9 +114,9 @@ const SendSol = ({
     const signature = await wallet.sendTransaction(transaction, connection, {
       skipPreflight: true,
     });
-    console.log("Transaction signature", signature);
-    toast.loading("Confirming...", {
-      id: "transaction",
+    console.log('Transaction signature', signature);
+    toast.loading('Confirming...', {
+      id: 'transaction',
     });
     await connection.getSignatureStatuses([signature]);
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -131,13 +126,17 @@ const SendSol = ({
   return (
     <Dialog>
       <DialogTrigger>
-        <Button onClick={(e) => {
-          if (!wallet.publicKey) {
-            e.preventDefault()
-            walletModal.setVisible(true);
-            return;
-          }
-        }}>Send SOL</Button>
+        <Button
+          onClick={(e) => {
+            if (!wallet.publicKey) {
+              e.preventDefault();
+              walletModal.setVisible(true);
+              return;
+            }
+          }}
+        >
+          Send SOL
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -146,25 +145,18 @@ const SendSol = ({
             Create a proposal to transfer SOL to another address.
           </DialogDescription>
         </DialogHeader>
-        <Input
-          placeholder="Recipient"
-          type="text"
-          onChange={(e) => setRecipient(e.target.value)}
-        />
-        {isPublickey(recipient) ? null : (
-          <p className="text-xs">Invalid recipient address</p>
+        <Input placeholder="Recipient" type="text" onChange={(e) => setRecipient(e.target.value)} />
+        {isPublickey(recipient) ? null : <p className="text-xs">Invalid recipient address</p>}
+        <Input placeholder="Amount" type="number" onChange={(e) => setAmount(e.target.value)} />
+        {!isAmountValid && amount.length > 0 && (
+          <p className="text-xs text-red-500">Invalid amount</p>
         )}
-        <Input
-          placeholder="Amount"
-          type="number"
-          onChange={(e) => setAmount(parseInt(e.target.value))}
-        />
         <Button
           onClick={() =>
             toast.promise(transfer, {
-              id: "transaction",
-              loading: "Loading...",
-              success: "Transfer proposed.",
+              id: 'transaction',
+              loading: 'Loading...',
+              success: 'Transfer proposed.',
               error: (e) => `Failed to propose: ${e}`,
             })
           }
