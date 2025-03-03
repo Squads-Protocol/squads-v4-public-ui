@@ -24,7 +24,6 @@ const ApproveButton = ({
 }: ApproveButtonProps) => {
   const wallet = useWallet();
   const walletModal = useWalletModal();
-  const router = useRouter();
   const validKinds = ['Rejected', 'Approved', 'Executing', 'Executed', 'Cancelled'];
   const isKindValid = validKinds.includes(proposalStatus || 'None');
   const { connection } = useMultisigData();

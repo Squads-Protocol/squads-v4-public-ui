@@ -21,8 +21,7 @@ export default function TransactionsPage() {
   const searchParams = useSearchParams();
   const pageParam = searchParams.get('page');
   const page = pageParam ? parseInt(pageParam) : 1;
-  const { rpcUrl, connection, multisigAddress, vaultIndex, programId, multisigVault } =
-    useMultisigData();
+  const { multisigAddress, programId } = useMultisigData();
 
   const { data } = useMultisig();
 
@@ -51,12 +50,7 @@ export default function TransactionsPage() {
     <div>
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-3xl font-bold">Transactions</h1>
-        <CreateTransaction
-          rpcUrl={rpcUrl!}
-          multisigPda={multisigAddress!}
-          vaultIndex={vaultIndex}
-          programId={programId.toBase58()}
-        />
+        <CreateTransaction />
       </div>
 
       <Suspense fallback={<div>Loading...</div>}>

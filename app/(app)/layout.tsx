@@ -1,18 +1,11 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import Image from "next/image";
-import { Toaster } from "@/components/ui/sonner";
-import ConnectWallet from "@/components/ConnectWalletButton";
-import {
-  LucideHome,
-  ArrowDownUp,
-  Users,
-  Settings,
-  CheckSquare,
-  AlertTriangle,
-} from "lucide-react";
-import RenderMultisigRoute from "@/components/RenderMultisigRoute";
+import Link from 'next/link';
+import Image from 'next/image';
+import { Toaster } from '@/components/ui/sonner';
+import ConnectWallet from '@/components/ConnectWalletButton';
+import { LucideHome, ArrowDownUp, Users, Settings, CheckSquare, AlertTriangle } from 'lucide-react';
+import RenderMultisigRoute from '@/components/RenderMultisigRoute';
 import { usePathname } from 'next/navigation';
 import { QueryClient } from '@tanstack/query-core';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -21,27 +14,27 @@ import { Suspense } from 'react';
 
 const queryClient = new QueryClient();
 
-const AppLayout =  ({ children }: { children: React.ReactNode }) => {
+const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const tabs = [
     {
-      name: "Home",
+      name: 'Home',
       icon: <LucideHome />,
-      route: "/",
+      route: '/',
     },
     {
-      name: "Transactions",
+      name: 'Transactions',
       icon: <ArrowDownUp />,
-      route: "/transactions/",
+      route: '/transactions/',
     },
     {
-      name: "Configuration",
+      name: 'Configuration',
       icon: <Users />,
-      route: "/config/",
+      route: '/config/',
     },
     {
-      name: "Settings",
+      name: 'Settings',
       icon: <Settings />,
-      route: "/settings/",
+      route: '/settings/',
     },
   ];
 
@@ -57,7 +50,7 @@ const AppLayout =  ({ children }: { children: React.ReactNode }) => {
         >
           <div className="flex h-auto md:h-full flex-col overflow-y-auto justify-between md:border-r border-slate-200 px-3 py-4  bg-slate-200">
             <div>
-              {" "}
+              {' '}
               <Link href="/">
                 <div className="mb-10 flex items-center rounded-lg px-3 py-2 text-slate-900 dark:text-white">
                   <Image
@@ -65,7 +58,7 @@ const AppLayout =  ({ children }: { children: React.ReactNode }) => {
                     width={0}
                     height={0}
                     sizes="100vw"
-                    style={{ width: "150px", height: "auto" }}
+                    style={{ width: '150px', height: 'auto' }}
                     alt="Mercure Logo"
                     unoptimized
                   />
@@ -78,10 +71,10 @@ const AppLayout =  ({ children }: { children: React.ReactNode }) => {
                       href={tab.route}
                       className={`flex items-center rounded-lg px-4 py-3 text-slate-900 
                       ${
-                        (path!.startsWith(`${tab.route}/`) && tab.route != "/") ||
+                        (path!.startsWith(`${tab.route}/`) && tab.route != '/') ||
                         tab.route === path
-                          ? "bg-slate-400"
-                          : "hover:bg-slate-400"
+                          ? 'bg-slate-400'
+                          : 'hover:bg-slate-400'
                       }`}
                     >
                       {tab.icon}
@@ -121,7 +114,7 @@ const AppLayout =  ({ children }: { children: React.ReactNode }) => {
         </aside>
         <ErrorBoundary>
           <Suspense>
-          <RenderMultisigRoute children={children} />
+            <RenderMultisigRoute>{children}</RenderMultisigRoute>
           </Suspense>
         </ErrorBoundary>
       </div>

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import {
   Dialog,
   DialogContent,
@@ -6,52 +6,37 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import * as bs58 from "bs58";
-import { Button } from "./ui/button";
-import { useState } from "react";
-import * as multisig from "@sqds/multisig";
-import { useWallet } from "@solana/wallet-adapter-react";
-import {
-  Connection,
-  Message,
-  PublicKey,
-  TransactionInstruction,
-  clusterApiUrl,
-} from "@solana/web3.js";
-import { Input } from "./ui/input";
-import { toast } from "sonner";
-import { simulateEncodedTransaction } from "@/lib/transaction/simulateEncodedTransaction";
-import { importTransaction } from "@/lib/transaction/importTransaction";
+} from '@/components/ui/dialog';
+import * as bs58 from 'bs58';
+import { Button } from './ui/button';
+import { useState } from 'react';
+import * as multisig from '@sqds/multisig';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { Message, PublicKey, TransactionInstruction } from '@solana/web3.js';
+import { Input } from './ui/input';
+import { toast } from 'sonner';
+import { simulateEncodedTransaction } from '@/lib/transaction/simulateEncodedTransaction';
+import { importTransaction } from '@/lib/transaction/importTransaction';
+import { useMultisigData } from '@/hooks/useMultisigData';
+import invariant from 'invariant';
 
-type CreateTransactionProps = {
-  rpcUrl: string | null;
-  multisigPda: string;
-  vaultIndex: number;
-  programId?: string;
-};
-
-const CreateTransaction = ({
-  rpcUrl,
-  multisigPda,
-  vaultIndex,
-  programId,
-}: CreateTransactionProps) => {
+const CreateTransaction = () => {
   const wallet = useWallet();
 
-  const [tx, setTx] = useState("");
+  const [tx, setTx] = useState('');
   const [open, setOpen] = useState(false);
 
-  const connection = new Connection(rpcUrl || clusterApiUrl("mainnet-beta"), {
-    commitment: "confirmed",
-  });
+  const { connection, multisigAddress, vaultIndex, programId } = useMultisigData();
 
   const getSampleMessage = async () => {
-    let memo = "Hello from Solana land!";
+    invariant(programId, 'Program ID not found');
+    invariant(multisigAddress, 'Multisig address not found. Please create a multisig first.');
+
+    let memo = 'Hello from Solana land!';
     const vaultAddress = multisig.getVaultPda({
       index: vaultIndex,
-      multisigPda: new PublicKey(multisigPda),
-      programId: programId ? new PublicKey(programId) : multisig.PROGRAM_ID,
+      multisigPda: new PublicKey(multisigAddress),
+      programId: programId,
     })[0];
 
     const dummyMessage = Message.compile({
@@ -64,10 +49,8 @@ const CreateTransaction = ({
               isWritable: true,
             },
           ],
-          data: Buffer.from(memo, "utf-8"),
-          programId: new PublicKey(
-            "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr"
-          ),
+          data: Buffer.from(memo, 'utf-8'),
+          programId: new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr'),
         }),
       ],
       payerKey: vaultAddress,
@@ -88,8 +71,7 @@ const CreateTransaction = ({
         <DialogHeader>
           <DialogTitle>Import Transaction</DialogTitle>
           <DialogDescription>
-            Propose a transaction from a base58 encoded transaction message (not
-            a transaction).
+            Propose a transaction from a base58 encoded transaction message (not a transaction).
           </DialogDescription>
         </DialogHeader>
         <Input
@@ -101,49 +83,48 @@ const CreateTransaction = ({
         <div className="flex gap-2 items-center justify-end">
           <Button
             onClick={() => {
-              toast("Note: Simulations may fail on alt-SVM", {
-                description: "Please verify via an explorer before submitting.",
+              toast('Note: Simulations may fail on alt-SVM', {
+                description: 'Please verify via an explorer before submitting.',
               });
-              toast.promise(
-                simulateEncodedTransaction(tx, connection, wallet),
-                {
-                  id: "simulation",
-                  loading: "Building simulation...",
-                  success: "Simulation successful.",
-                  error: (e) => {
-                    return `${e}`;
-                  },
-                }
-              );
+              toast.promise(simulateEncodedTransaction(tx, connection, wallet), {
+                id: 'simulation',
+                loading: 'Building simulation...',
+                success: 'Simulation successful.',
+                error: (e) => {
+                  return `${e}`;
+                },
+              });
             }}
           >
             Simulate
           </Button>
-          <Button
-            onClick={() =>
-              toast.promise(
-                importTransaction(
-                  tx,
-                  connection,
-                  multisigPda,
-                  programId!,
-                  vaultIndex,
-                  wallet
-                ),
-                {
-                  id: "transaction",
-                  loading: "Building transaction...",
-                  success: () => {
-                    setOpen(false);
-                    return "Transaction proposed.";
-                  },
-                  error: (e) => `Failed to propose: ${e}`,
-                }
-              )
-            }
-          >
-            Import
-          </Button>
+          {multisigAddress && (
+            <Button
+              onClick={() =>
+                toast.promise(
+                  importTransaction(
+                    tx,
+                    connection,
+                    multisigAddress,
+                    programId.toBase58(),
+                    vaultIndex,
+                    wallet
+                  ),
+                  {
+                    id: 'transaction',
+                    loading: 'Building transaction...',
+                    success: () => {
+                      setOpen(false);
+                      return 'Transaction proposed.';
+                    },
+                    error: (e) => `Failed to propose: ${e}`,
+                  }
+                )
+              }
+            >
+              Import
+            </Button>
+          )}
         </div>
         <button
           onClick={() => getSampleMessage()}
