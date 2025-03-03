@@ -13,6 +13,7 @@ import CreateTransaction from '@/components/CreateTransactionButton';
 import TransactionTable from '@/components/TransactionTable';
 import { useMultisig, useTransactions } from '@/hooks/useServices';
 import { useMultisigData } from '@/hooks/useMultisigData';
+import { useSearchParams } from 'next/navigation';
 
 const TRANSACTIONS_PER_PAGE = 20;
 
@@ -24,14 +25,10 @@ interface ActionButtonsProps {
   programId: PublicKey;
 }
 
-export default function TransactionsPage({
-  params,
-  searchParams,
-}: {
-  params: {};
-  searchParams: { page: string };
-}) {
-  const page = searchParams.page ? parseInt(searchParams.page) : 1;
+export default function TransactionsPage() {
+  const searchParams = useSearchParams();
+  const pageParam = searchParams.get('page');
+  const page = pageParam ? parseInt(pageParam) : 1;
   const { rpcUrl, connection, multisigAddress, vaultIndex, programId, multisigVault } =
     useMultisigData();
 
@@ -88,7 +85,6 @@ export default function TransactionsPage({
           <Suspense fallback={<div>Loading...</div>}>
             <TransactionTable
               multisigPda={multisigAddress!}
-              rpcUrl={rpcUrl!}
               transactions={transactions}
               programId={programId!.toBase58()}
             />

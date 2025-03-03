@@ -2,11 +2,9 @@
 import CreateSquadForm from '@/components/CreateSquadForm';
 import { Card, CardContent } from '@/components/ui/card';
 import { PROGRAM_ID } from '@sqds/multisig';
-import { clusterApiUrl } from '@solana/web3.js';
 import { useProgramId, useRpcUrl } from '@/hooks/useSettings';
 
 export default function CreateSquad() {
-  const { rpcUrl } = useRpcUrl();
   const { programId } = useProgramId();
 
   return (
@@ -19,10 +17,7 @@ export default function CreateSquad() {
       </div>
       <Card className="pt-5">
         <CardContent>
-          <CreateSquadForm
-            rpc={rpcUrl || clusterApiUrl('mainnet-beta')}
-            programId={programId ? programId : PROGRAM_ID.toBase58()}
-          />
+          <CreateSquadForm />
         </CardContent>
       </Card>
     </div>
