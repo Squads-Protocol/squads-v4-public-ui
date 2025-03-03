@@ -2,7 +2,13 @@
 
 import * as multisig from '@sqds/multisig';
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { Connection, PublicKey } from '@solana/web3.js';
+import {
+  AccountInfo,
+  Connection,
+  ParsedAccountData,
+  PublicKey,
+  RpcResponseAndContext,
+} from '@solana/web3.js';
 import { useMultisigData } from '@/hooks/useMultisigData';
 import { useMultisigAddress } from '@/hooks/useMultisigAddress';
 

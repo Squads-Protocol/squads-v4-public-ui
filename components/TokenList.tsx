@@ -1,34 +1,18 @@
-import {
-  AccountInfo,
-  LAMPORTS_PER_SOL,
-  ParsedAccountData,
-  PublicKey,
-  RpcResponseAndContext,
-} from '@solana/web3.js';
+import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import SendTokens from './SendTokensButton';
 import SendSol from './SendSolButton';
+import { useMultisigData } from '@/hooks/useMultisigData';
+import { useBalance, useGetTokens } from '@/hooks/useServices';
 
 type TokenListProps = {
-  solBalance: number;
-  tokens: RpcResponseAndContext<
-    {
-      pubkey: PublicKey;
-      account: AccountInfo<ParsedAccountData>;
-    }[]
-  > | null;
   multisigPda: string;
-  vaultIndex: number;
-  programId?: string;
 };
 
-export function TokenList({
-  solBalance,
-  tokens,
-  multisigPda,
-  vaultIndex,
-  programId,
-}: TokenListProps) {
+export function TokenList({ multisigPda }: TokenListProps) {
+  const { vaultIndex, programId } = useMultisigData();
+  const { data: solBalance = 0 } = useBalance();
+  const { data: tokens = null } = useGetTokens();
   return (
     <Card>
       <CardHeader>
@@ -42,11 +26,11 @@ export function TokenList({
               <div className="ml-4 space-y-1">
                 <p className="text-sm font-medium leading-none">SOL</p>
                 <p className="text-sm text-muted-foreground">
-                  Amount: {solBalance / LAMPORTS_PER_SOL}
+                  Amount: {solBalance ? solBalance / LAMPORTS_PER_SOL : 0}
                 </p>
               </div>
               <div className="ml-auto">
-                <SendSol multisigPda={multisigPda} vaultIndex={vaultIndex} programId={programId} />
+                <SendSol multisigPda={multisigPda} vaultIndex={vaultIndex} />
               </div>
             </div>
             {tokens && tokens.value.length > 0 ? <hr className="mt-2" /> : null}
@@ -70,7 +54,7 @@ export function TokenList({
                       decimals={token.account.data.parsed.info.tokenAmount.decimals}
                       multisigPda={multisigPda}
                       vaultIndex={vaultIndex}
-                      programId={programId}
+                      programId={programId.toBase58()}
                     />
                   </div>
                 </div>

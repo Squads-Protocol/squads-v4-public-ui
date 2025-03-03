@@ -12,18 +12,15 @@ import { useState } from 'react';
 import * as multisig from '@sqds/multisig';
 import { useWallet } from '@solana/wallet-adapter-react';
 import {
-  Connection,
   LAMPORTS_PER_SOL,
   PublicKey,
   SystemProgram,
   TransactionMessage,
   VersionedTransaction,
-  clusterApiUrl,
 } from '@solana/web3.js';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { Input } from './ui/input';
 import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
 import { isPublickey } from '@/lib/isPublickey';
 import { useMultisigData } from '@/hooks/useMultisigData';
 import { useQueryClient } from '@tanstack/react-query';
@@ -31,16 +28,14 @@ import { useQueryClient } from '@tanstack/react-query';
 type SendSolProps = {
   multisigPda: string;
   vaultIndex: number;
-  programId?: string;
 };
 
-const SendSol = ({ multisigPda, vaultIndex, programId }: SendSolProps) => {
+const SendSol = ({ multisigPda, vaultIndex }: SendSolProps) => {
   const wallet = useWallet();
   const walletModal = useWalletModal();
   const [amount, setAmount] = useState<string>('');
   const [recipient, setRecipient] = useState('');
-  const router = useRouter();
-  const { connection } = useMultisigData();
+  const { connection, programId } = useMultisigData();
   const queryClient = useQueryClient();
   const parsedAmount = parseFloat(amount);
   const isAmountValid = !isNaN(parsedAmount) && parsedAmount > 0;
