@@ -1,13 +1,13 @@
-"use client"
-import CreateSquadForm from "@/components/CreateSquadForm";
-import { Card, CardContent } from "@/components/ui/card";
-import { PROGRAM_ID } from "@sqds/multisig";
-import { useCookie } from '@/app/(app)/cookies';
+'use client';
+import CreateSquadForm from '@/components/CreateSquadForm';
+import { Card, CardContent } from '@/components/ui/card';
+import { PROGRAM_ID } from '@sqds/multisig';
 import { clusterApiUrl } from '@solana/web3.js';
+import { useProgramId, useRpcUrl } from '@/hooks/useSettings';
 
 export default function CreateSquad() {
-  const rpcUrl = useCookie("x-rpc-url");
-  const programId = useCookie("x-program-id");
+  const { rpcUrl } = useRpcUrl();
+  const { programId } = useProgramId();
 
   return (
     <div className="">
@@ -20,7 +20,7 @@ export default function CreateSquad() {
       <Card className="pt-5">
         <CardContent>
           <CreateSquadForm
-            rpc={rpcUrl || clusterApiUrl("mainnet-beta")}
+            rpc={rpcUrl || clusterApiUrl('mainnet-beta')}
             programId={programId ? programId : PROGRAM_ID.toBase58()}
           />
         </CardContent>

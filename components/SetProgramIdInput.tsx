@@ -1,38 +1,36 @@
-"use client";
-import { useState } from "react";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { isPublickey } from "@/lib/isPublickey";
-import { useCookie } from '@/app/(app)/cookies';
+'use client';
+
+import { useState } from 'react';
+import { Input } from './ui/input';
+import { Button } from './ui/button';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { isPublickey } from '@/lib/isPublickey';
+import { useProgramId } from '@/hooks/useSettings'; // Now using React Query!
 
 const SetProgramIdInput = () => {
-  const foundProgramId = useCookie('x-program-id');
-
-  const [programId, setProgramId] = useState("");
+  const { programId: storedProgramId, setProgramId } = useProgramId(); // Use React Query
+  const [programId, setProgramIdState] = useState(storedProgramId || '');
   const router = useRouter();
 
   const publicKeyTest = isPublickey(programId);
 
   const onSubmit = async () => {
-    // Needs to use an RPC that isn't the public endpoint
-    // const programTest = await isProgram(programId);
     if (publicKeyTest) {
-      document.cookie = `x-program-id=${programId}`;
-      setProgramId("");
-      router.refresh();
+      await setProgramId.mutateAsync(programId); // Use React Query mutation
+      setProgramIdState(''); // Clear input field after submission
+      router.refresh(); // Refresh the page (if necessary)
     } else {
-      throw "Please enter a valid program.";
+      throw 'Please enter a valid program.';
     }
   };
 
   return (
     <div>
       <Input
-        onChange={(e) => setProgramId(e.target.value)}
-        placeholder={foundProgramId || "SQDS4ep65T869zMMBKyuUq6aD6EgTu8psMjkvj52pCf"}
-        defaultValue={programId}
+        onChange={(e) => setProgramIdState(e.target.value)}
+        placeholder={storedProgramId || 'SQDS4ep65T869zMMBKyuUq6aD6EgTu8psMjkvj52pCf'}
+        value={programId} // Sync input state with stored value
         className=""
       />
       {!publicKeyTest && programId.length > 0 && (
@@ -41,8 +39,8 @@ const SetProgramIdInput = () => {
       <Button
         onClick={() =>
           toast.promise(onSubmit(), {
-            loading: "Loading...",
-            success: "Program ID set successfully.",
+            loading: 'Updating Program ID...',
+            success: 'Program ID set successfully.',
             error: (err) => `${err}`,
           })
         }

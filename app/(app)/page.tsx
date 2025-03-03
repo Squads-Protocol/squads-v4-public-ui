@@ -1,28 +1,19 @@
-"use client";
+'use client';
 
-import { TokenList } from "@/components/TokenList";
-import { VaultDisplayer } from "@/components/VaultDisplayer";
-import { useBalance, useGetTokens, useMultisigData } from '@/app/(app)/services';
+import { TokenList } from '@/components/TokenList';
+import { VaultDisplayer } from '@/components/VaultDisplayer';
+import { useBalance, useGetTokens } from '@/hooks/useServices';
+
+import { useMultisigData } from '@/hooks/useMultisigData';
+import { ChangeMultisig } from '@/components/ChangeMultisig';
 
 export default function Home() {
-  const {
-    rpcUrl,
-    connection,
-    multisigAddress,
-    vaultIndex,
-    programId,
-    multisigVault,
-  } = useMultisigData();
+  const { rpcUrl, connection, multisigAddress, vaultIndex, programId, multisigVault } =
+    useMultisigData();
 
-  const { data: solBalance = 0 } = useBalance(
-    connection,
-    multisigVault?.toBase58() || ""
-  );
+  const { data: solBalance = 0 } = useBalance(connection, multisigVault?.toBase58() || '');
 
-  const { data: tokensInWallet = null } = useGetTokens(
-    connection,
-    multisigVault?.toBase58() || ""
-  );
+  const { data: tokensInWallet = null } = useGetTokens(connection, multisigVault?.toBase58() || '');
 
   return (
     <main>
@@ -35,6 +26,7 @@ export default function Home() {
             programId={programId.toBase58()}
           />
         )}
+        {multisigAddress && <ChangeMultisig />}
         {multisigAddress && (
           <TokenList
             solBalance={solBalance || 0}

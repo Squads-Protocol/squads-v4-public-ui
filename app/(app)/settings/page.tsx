@@ -1,12 +1,7 @@
-import SetProgramIdInput from "@/components/SetProgramIdInput";
-import SetRpcUrlInput from "@/components/SetRpcUrlnput";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+'use client';
+import SetProgramIdInput from '@/components/SetProgramIdInput';
+import SetRpcUrlInput from '@/components/SetRpcUrlnput';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 const SettingsPage = () => {
   return (
@@ -16,9 +11,7 @@ const SettingsPage = () => {
         <Card>
           <CardHeader>
             <CardTitle>RPC Url</CardTitle>
-            <CardDescription>
-              Change the default RPC Url for this app.
-            </CardDescription>
+            <CardDescription>Change the default RPC Url for this app.</CardDescription>
           </CardHeader>
           <CardContent>
             <SetRpcUrlInput />

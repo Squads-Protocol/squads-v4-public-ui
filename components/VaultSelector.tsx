@@ -1,39 +1,35 @@
-"use client";
-import * as React from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
+'use client';
 
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import * as React from 'react';
+import { Check, ChevronsUpDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import {
   Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { useRouter } from "next/navigation";
+} from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { useVaultIndex } from '@/hooks/useVaultIndex';
 
-// Generate vault indices from 0 to 255
+// Generate vault indices from 0 to 15
 const vaultIndices = Array.from({ length: 16 }, (_, index) => ({
   value: index.toString(),
   label: `Vault ${index}`,
 }));
 
 export function VaultSelector() {
+  const { vaultIndex, setVaultIndex } = useVaultIndex(); // Use React Query hook
   const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState("");
+  const selectedValue = vaultIndex.toString(); // Ensure string comparison
 
-  const router = useRouter();
-
-  React.useEffect(() => {
-    document.cookie = `x-vault-index=${value}; path=/`;
-    router.refresh();
-  }, [value]);
+  const handleSelect = (currentValue: string) => {
+    const newValue = currentValue === selectedValue ? '0' : currentValue;
+    setVaultIndex.mutate(parseInt(newValue, 10)); // Ensure numeric storage
+    setOpen(false);
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -44,7 +40,7 @@ export function VaultSelector() {
           aria-expanded={open}
           className="w-[200px] justify-between"
         >
-          {value ? `Vault ${value}` : "Select Vault Index..."}
+          {selectedValue ? `Vault ${selectedValue}` : 'Select Vault Index...'}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -54,18 +50,11 @@ export function VaultSelector() {
           <CommandEmpty>No vault index found.</CommandEmpty>
           <CommandGroup>
             {vaultIndices.map((vaultIndex) => (
-              <CommandItem
-                key={vaultIndex.value}
-                value={vaultIndex.value}
-                onSelect={(currentValue) => {
-                  setValue(currentValue === value ? "" : currentValue);
-                  setOpen(false);
-                }}
-              >
+              <CommandItem key={vaultIndex.value} value={vaultIndex.value} onSelect={handleSelect}>
                 <Check
                   className={cn(
-                    "mr-2 h-4 w-4",
-                    value === vaultIndex.value ? "opacity-100" : "opacity-0"
+                    'mr-2 h-4 w-4',
+                    selectedValue === vaultIndex.value ? 'opacity-100' : 'opacity-0'
                   )}
                 />
                 {vaultIndex.label}

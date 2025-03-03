@@ -1,25 +1,18 @@
-"use client"
-import * as multisig from "@sqds/multisig";
-import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
-import {
-  Table,
-  TableCaption,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+'use client';
+import { PublicKey } from '@solana/web3.js';
+import { Table, TableCaption, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import {
   Pagination,
   PaginationContent,
   PaginationItem,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination";
-import { Suspense } from "react";
-import CreateTransaction from "@/components/CreateTransactionButton";
-import TransactionTable from "@/components/TransactionTable";
-import { useCookie } from '@/app/(app)/cookies';
-import { useMultisig, useTransactions } from '@/app/(app)/services';
+} from '@/components/ui/pagination';
+import { Suspense } from 'react';
+import CreateTransaction from '@/components/CreateTransactionButton';
+import TransactionTable from '@/components/TransactionTable';
+import { useMultisig, useTransactions } from '@/hooks/useServices';
+import { useMultisigData } from '@/hooks/useMultisigData';
 
 const TRANSACTIONS_PER_PAGE = 20;
 
@@ -38,21 +31,11 @@ export default function TransactionsPage({
   params: {};
   searchParams: { page: string };
 }) {
-  console.log("useCookie", useCookie);
   const page = searchParams.page ? parseInt(searchParams.page) : 1;
-  const rpcUrl = useCookie("x-rpc-url");
-  const connection = new Connection(
-    rpcUrl || clusterApiUrl("mainnet-beta"),
-    "confirmed"
-  );
-  const multisigAddress = useCookie("x-multisig");
-  const vaultIndex = Number(useCookie("x-vault-index"));
-  let programIdCookie = useCookie("x-program-id");
-  if (!programIdCookie || programIdCookie.length < 40){ // need proper try/catch
-    programIdCookie = multisig.PROGRAM_ID.toString();
-  }
+  const { rpcUrl, connection, multisigAddress, vaultIndex, programId, multisigVault } =
+    useMultisigData();
 
-  const {data} = useMultisig(connection, multisigAddress!)
+  const { data } = useMultisig();
 
   const totalTransactions = Number(data ? data.transactionIndex : 0);
   const totalPages = Math.ceil(totalTransactions / TRANSACTIONS_PER_PAGE);
@@ -66,7 +49,7 @@ export default function TransactionsPage({
   const startIndex = totalTransactions - (page - 1) * TRANSACTIONS_PER_PAGE;
   const endIndex = Math.max(startIndex - TRANSACTIONS_PER_PAGE + 1, 1);
 
-  const {data: latestTransactions} = useTransactions(connection, startIndex, endIndex, multisigAddress!, programIdCookie!);
+  const { data: latestTransactions } = useTransactions(startIndex, endIndex);
 
   const transactions = (latestTransactions || []).map((transaction) => {
     return {
@@ -83,7 +66,7 @@ export default function TransactionsPage({
           rpcUrl={rpcUrl!}
           multisigPda={multisigAddress!}
           vaultIndex={vaultIndex}
-          programId={programIdCookie}
+          programId={programId.toBase58()}
         />
       </div>
 
@@ -107,7 +90,7 @@ export default function TransactionsPage({
               multisigPda={multisigAddress!}
               rpcUrl={rpcUrl!}
               transactions={transactions}
-              programId={programIdCookie!}
+              programId={programId!.toBase58()}
             />
           </Suspense>
         </Table>
