@@ -1,3 +1,6 @@
+### This repo has been deprecated ###
+Please use https://github.com/Squads-Protocol/public-v4-client for the simplified repo
+
 # Squads V4 public UI
 
 This repository contains the code for a source available Squads V4 user interface.
